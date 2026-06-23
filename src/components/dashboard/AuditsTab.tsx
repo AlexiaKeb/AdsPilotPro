@@ -468,6 +468,90 @@ function VisionPanel({ inputs, r }: { inputs: AuditInputs; r: Record<string, num
   );
 }
 
+/* ============ AI Recommendations ============ */
+function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnostic: AuditDiagnostic | null }) {
+  if (!loading && !diagnostic) return null;
+
+  return (
+    <div className="card-cockpit p-6 space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
+          <Brain className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <div className="font-display font-bold uppercase tracking-widest text-sm">Recommandations IA</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {loading ? "Analyse en cours par Claude Sonnet 4…" : "Diagnostic généré par Claude Sonnet 4"}
+          </div>
+        </div>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center gap-3 py-10 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <span className="text-sm font-mono uppercase tracking-widest">Génération du diagnostic…</span>
+        </div>
+      )}
+
+      {diagnostic && !loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DiagCard
+            icon={<Brain className="h-4 w-4" />}
+            title="Diagnostic principal"
+            body={diagnostic.diagnostic_principal}
+            tone="primary"
+            wide
+          />
+          <DiagCard
+            icon={<AlertTriangle className="h-4 w-4" />}
+            title="Problème critique"
+            body={diagnostic.probleme_critique}
+            tone="danger"
+          />
+          <DiagCard
+            icon={<Zap className="h-4 w-4" />}
+            title="Action immédiate · cette semaine"
+            body={diagnostic.action_immediate}
+            tone="warning"
+          />
+          <DiagCard
+            icon={<Target className="h-4 w-4" />}
+            title="Objectif 30 jours"
+            body={diagnostic.action_30_jours}
+            tone="success"
+          />
+          <DiagCard
+            icon={<Calendar className="h-4 w-4" />}
+            title="Alerte si statu quo"
+            body={diagnostic.alerte}
+            tone="danger"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DiagCard({
+  icon, title, body, tone, wide = false,
+}: { icon: React.ReactNode; title: string; body: string; tone: Tone; wide?: boolean }) {
+  const color = toneColor(tone);
+  return (
+    <div
+      className={`rounded-xl p-5 border ${wide ? "md:col-span-2" : ""}`}
+      style={{ borderColor: color, background: "var(--color-surface-2)" }}
+    >
+      <div className="flex items-center gap-2 mb-2" style={{ color }}>
+        {icon}
+        <div className="text-[10px] uppercase tracking-widest font-display font-bold">{title}</div>
+      </div>
+      <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{body}</div>
+    </div>
+  );
+}
+
+
+
 /* ============ Atoms ============ */
 function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
