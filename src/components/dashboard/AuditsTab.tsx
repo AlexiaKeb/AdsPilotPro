@@ -669,20 +669,35 @@ function ProgressBar({ value, max, tone }: { value: number; max: number; tone: T
 function NumField({
   label, value, unit, step, decimals = 0, onChange,
 }: { label: string; value: number; unit: string; step: number; decimals?: number; onChange: (v: number) => void }) {
+  const [text, setText] = useState<string>(() => (Number.isFinite(value) ? String(value) : "0"));
+  // Sync from parent when value changes externally (sector reset, etc.)
+  useEffect(() => {
+    const parsed = parseFloat(text.replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed !== value) {
+      setText(Number.isFinite(value) ? String(value) : "0");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   return (
     <label className="block">
       <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-1.5">{label}</div>
       <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-border bg-input/40 focus-within:border-primary transition">
         <input
-          type="number"
-          step={step}
-          value={Number.isFinite(value) ? value : 0}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          type="text"
+          inputMode="decimal"
+          value={text}
+          onChange={(e) => {
+            const raw = e.target.value;
+            setText(raw);
+            const parsed = parseFloat(raw.replace(",", "."));
+            onChange(Number.isFinite(parsed) ? parsed : 0);
+          }}
           className="w-full bg-transparent outline-none text-sm font-mono-data"
         />
         {unit && <span className="text-xs text-muted-foreground font-mono">{unit}</span>}
       </div>
-      <div className="sr-only">{decimals}</div>
+      <div className="sr-only">{decimals} step={step}</div>
     </label>
   );
 }
