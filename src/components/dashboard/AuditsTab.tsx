@@ -321,7 +321,7 @@ export function AuditsTab() {
               {active === "oracle" && <OraclePanel r={results} />}
               {active === "mercury" && <MercuryPanel inputs={inputs} r={results} />}
               {active === "atlas" && <AtlasPanel inputs={inputs} r={results} />}
-              {active === "vision" && <VisionPanel inputs={inputs} r={results} />}
+              
             </div>
           </motion.div>
 
