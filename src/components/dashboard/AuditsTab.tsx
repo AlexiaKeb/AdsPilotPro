@@ -1,8 +1,10 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Trash2, Activity, Eye, Rocket, BarChart3, Sparkles } from "lucide-react";
+import { Save, Loader2, Trash2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
 type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision";
@@ -12,6 +14,7 @@ interface AuditInputs {
   // Andromeda
   roas_actual: number;
   cpa_actual: number;
+  daily_budget: number;
   // Oracle (LTV)
   avg_cart: number;
   purchase_freq: number;
@@ -33,7 +36,7 @@ interface AuditInputs {
 const DEFAULTS: Record<Sector, AuditInputs> = {
   ecommerce: {
     sector: "ecommerce",
-    roas_actual: 2.5, cpa_actual: 28,
+    roas_actual: 2.5, cpa_actual: 28, daily_budget: 200,
     avg_cart: 65, purchase_freq: 1.8, retention: 35,
     add_to_cart_rate: 6, abandon_rate: 70, page_speed: 2.4,
     stock_coverage_days: 30, supplier_count: 1,
@@ -41,7 +44,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   },
   infoproduit: {
     sector: "infoproduit",
-    roas_actual: 3.2, cpa_actual: 45,
+    roas_actual: 3.2, cpa_actual: 45, daily_budget: 300,
     avg_cart: 120, purchase_freq: 1.2, retention: 22,
     add_to_cart_rate: 4, abandon_rate: 60, page_speed: 1.8,
     stock_coverage_days: 365, supplier_count: 1,
@@ -49,7 +52,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   },
   service: {
     sector: "service",
-    roas_actual: 4.0, cpa_actual: 60,
+    roas_actual: 4.0, cpa_actual: 60, daily_budget: 500,
     avg_cart: 350, purchase_freq: 1.4, retention: 55,
     add_to_cart_rate: 8, abandon_rate: 50, page_speed: 2.0,
     stock_coverage_days: 365, supplier_count: 1,
@@ -77,6 +80,9 @@ export function AuditsTab() {
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<AuditRecord[]>([]);
+  const [aiDiagnostic, setAiDiagnostic] = useState<AuditDiagnostic | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const analyze = useServerFn(analyzeAudit);
 
   // Compute results in real time
   const results = useMemo(() => {
@@ -149,12 +155,36 @@ export function AuditsTab() {
 
   const onSave = async () => {
     setSaving(true);
+    setAiLoading(true);
+    setAiDiagnostic(null);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
       toast.error("Session expirée");
       setSaving(false);
+      setAiLoading(false);
       return;
     }
+
+    const globalScore = Math.round(
+      (results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5,
+    );
+
+    // Lance l'analyse IA en parallèle de la sauvegarde
+    const aiPromise = analyze({
+      data: {
+        sector: sectorLabel(inputs.sector),
+        roas: inputs.roas_actual,
+        roas_threshold: results.roasThreshold,
+        cpa: inputs.cpa_actual,
+        max_cpa: inputs.avg_cart * 0.35,
+        budget: inputs.daily_budget,
+        score: globalScore,
+      },
+    }).catch((err: Error) => {
+      toast.error(`Analyse IA: ${err.message}`);
+      return null;
+    });
+
     const { error } = await supabase.from("audits").insert({
       user_id: u.user.id,
       sector: inputs.sector,
@@ -170,6 +200,10 @@ export function AuditsTab() {
       loadHistory();
     }
     setSaving(false);
+
+    const diag = await aiPromise;
+    if (diag) setAiDiagnostic(diag);
+    setAiLoading(false);
   };
 
   const onDelete = async (id: string) => {
@@ -245,6 +279,7 @@ export function AuditsTab() {
             <>
               <NumField label="ROAS actuel" value={inputs.roas_actual} unit="×" step={0.1} decimals={2} onChange={(v) => upd("roas_actual", v)} />
               <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
+              <NumField label="Budget journalier" value={inputs.daily_budget} unit="€" step={10} onChange={(v) => upd("daily_budget", v)} />
             </>
           )}
           {active === "oracle" && (
@@ -302,6 +337,11 @@ export function AuditsTab() {
           Sauvegarder l'audit
         </button>
       </div>
+
+      {/* IA — Recommandations Claude */}
+      <AiRecommendations loading={aiLoading} diagnostic={aiDiagnostic} />
+
+
 
       {/* History */}
       <div className="card-cockpit p-6">
@@ -427,6 +467,90 @@ function VisionPanel({ inputs, r }: { inputs: AuditInputs; r: Record<string, num
     </>
   );
 }
+
+/* ============ AI Recommendations ============ */
+function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnostic: AuditDiagnostic | null }) {
+  if (!loading && !diagnostic) return null;
+
+  return (
+    <div className="card-cockpit p-6 space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
+          <Brain className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <div className="font-display font-bold uppercase tracking-widest text-sm">Recommandations IA</div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {loading ? "Analyse en cours par Claude Sonnet 4…" : "Diagnostic généré par Claude Sonnet 4"}
+          </div>
+        </div>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center gap-3 py-10 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <span className="text-sm font-mono uppercase tracking-widest">Génération du diagnostic…</span>
+        </div>
+      )}
+
+      {diagnostic && !loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DiagCard
+            icon={<Brain className="h-4 w-4" />}
+            title="Diagnostic principal"
+            body={diagnostic.diagnostic_principal}
+            tone="primary"
+            wide
+          />
+          <DiagCard
+            icon={<AlertTriangle className="h-4 w-4" />}
+            title="Problème critique"
+            body={diagnostic.probleme_critique}
+            tone="danger"
+          />
+          <DiagCard
+            icon={<Zap className="h-4 w-4" />}
+            title="Action immédiate · cette semaine"
+            body={diagnostic.action_immediate}
+            tone="warning"
+          />
+          <DiagCard
+            icon={<Target className="h-4 w-4" />}
+            title="Objectif 30 jours"
+            body={diagnostic.action_30_jours}
+            tone="success"
+          />
+          <DiagCard
+            icon={<Calendar className="h-4 w-4" />}
+            title="Alerte si statu quo"
+            body={diagnostic.alerte}
+            tone="danger"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DiagCard({
+  icon, title, body, tone, wide = false,
+}: { icon: ReactNode; title: string; body: string; tone: Tone; wide?: boolean }) {
+  const color = toneColor(tone);
+  return (
+    <div
+      className={`rounded-xl p-5 border ${wide ? "md:col-span-2" : ""}`}
+      style={{ borderColor: color, background: "var(--color-surface-2)" }}
+    >
+      <div className="flex items-center gap-2 mb-2" style={{ color }}>
+        {icon}
+        <div className="text-[10px] uppercase tracking-widest font-display font-bold">{title}</div>
+      </div>
+      <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">{body}</div>
+    </div>
+  );
+}
+
+
 
 /* ============ Atoms ============ */
 function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
