@@ -163,36 +163,12 @@ export function AuditsTab() {
 
   const onSave = async () => {
     setSaving(true);
-    setAiLoading(true);
-    setAiDiagnostic(null);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
       toast.error("Session expirée");
       setSaving(false);
-      setAiLoading(false);
       return;
     }
-
-    const globalScore = Math.round(
-      (results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5,
-    );
-
-    // Lance l'analyse IA en parallèle de la sauvegarde
-    const aiPromise = analyze({
-      data: {
-        sector: sectorLabel(inputs.sector),
-        roas: inputs.roas_actual,
-        roas_threshold: results.roasThreshold,
-        cpa: inputs.cpa_actual,
-        max_cpa: inputs.avg_cart * 0.35,
-        budget: inputs.daily_budget,
-        score: globalScore,
-      },
-    }).catch((err: Error) => {
-      toast.error(`Analyse IA: ${err.message}`);
-      return null;
-    });
-
     const { error } = await supabase.from("audits").insert({
       user_id: u.user.id,
       sector: inputs.sector,
@@ -208,11 +184,59 @@ export function AuditsTab() {
       loadHistory();
     }
     setSaving(false);
-
-    const diag = await aiPromise;
-    if (diag) setAiDiagnostic(diag);
-    setAiLoading(false);
   };
+
+  // Build per-module signature so we only re-trigger when relevant fields change
+  const moduleSignature: Record<ScoredModuleId, string> = {
+    andromeda: `${inputs.sector}|${inputs.roas_actual}|${inputs.cpa_actual}|${inputs.daily_budget}|${inputs.avg_cart}`,
+    oracle: `${inputs.sector}|${inputs.avg_cart}|${inputs.purchase_freq}|${inputs.retention}`,
+    mercury: `${inputs.sector}|${inputs.add_to_cart_rate}|${inputs.abandon_rate}|${inputs.page_speed}`,
+    atlas: `${inputs.sector}|${inputs.stock_coverage_days}|${inputs.supplier_count}`,
+  };
+
+  // Debounced auto-trigger of AI diagnostic for the active scored module
+  const activeScored = SCORED_MODULES.includes(active as ScoredModuleId) ? (active as ScoredModuleId) : null;
+  const activeSig = activeScored ? moduleSignature[activeScored] : "";
+  useEffect(() => {
+    if (!activeScored) return;
+    const mod = activeScored;
+    const timer = setTimeout(() => {
+      const reqId = ++reqIdRef.current[mod];
+      setLoadingByModule((prev) => ({ ...prev, [mod]: true }));
+      const moduleScore = Math.round(
+        mod === "andromeda" ? results.andromedaScore
+          : mod === "oracle" ? results.oracleScore
+          : mod === "mercury" ? results.mercuryScore
+          : results.atlasScore,
+      );
+      analyze({
+        data: {
+          sector: sectorLabel(inputs.sector),
+          roas: inputs.roas_actual,
+          roas_threshold: results.roasThreshold,
+          cpa: inputs.cpa_actual,
+          max_cpa: inputs.avg_cart * 0.35,
+          budget: inputs.daily_budget,
+          score: moduleScore,
+        },
+      })
+        .then((diag) => {
+          if (reqId !== reqIdRef.current[mod]) return; // stale
+          setAiByModule((prev) => ({ ...prev, [mod]: diag }));
+        })
+        .catch((err: Error) => {
+          if (reqId !== reqIdRef.current[mod]) return;
+          toast.error(`Analyse IA: ${err.message}`);
+        })
+        .finally(() => {
+          if (reqId !== reqIdRef.current[mod]) return;
+          setLoadingByModule((prev) => ({ ...prev, [mod]: false }));
+        });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScored, activeSig]);
+
 
   const onDelete = async (id: string) => {
     const { error } = await supabase.from("audits").delete().eq("id", id);
