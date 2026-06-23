@@ -76,13 +76,20 @@ type AuditRecord = {
   results: Record<string, number>;
 };
 
+type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
+const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
+type AiMap<T> = Partial<Record<ScoredModuleId, T>>;
+
 export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<AuditRecord[]>([]);
-  const [aiDiagnostic, setAiDiagnostic] = useState<AuditDiagnostic | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
+  const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
+  const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
+  const reqIdRef = useRef<Record<ScoredModuleId, number>>({
+    andromeda: 0, oracle: 0, mercury: 0, atlas: 0,
+  });
   const analyze = useServerFn(analyzeAudit);
 
   // Compute results in real time
