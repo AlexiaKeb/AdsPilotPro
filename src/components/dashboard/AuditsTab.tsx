@@ -534,7 +534,7 @@ function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnost
 
 function DiagCard({
   icon, title, body, tone, wide = false,
-}: { icon: React.ReactNode; title: string; body: string; tone: Tone; wide?: boolean }) {
+}: { icon: ReactNode; title: string; body: string; tone: Tone; wide?: boolean }) {
   const color = toneColor(tone);
   return (
     <div
