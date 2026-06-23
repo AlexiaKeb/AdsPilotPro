@@ -14,6 +14,7 @@ interface AuditInputs {
   // Andromeda
   roas_actual: number;
   cpa_actual: number;
+  daily_budget: number;
   // Oracle (LTV)
   avg_cart: number;
   purchase_freq: number;
