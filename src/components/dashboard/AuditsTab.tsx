@@ -338,6 +338,11 @@ export function AuditsTab() {
         </button>
       </div>
 
+      {/* IA — Recommandations Claude */}
+      <AiRecommendations loading={aiLoading} diagnostic={aiDiagnostic} />
+
+
+
       {/* History */}
       <div className="card-cockpit p-6">
         <SectionTitle title="Historique" subtitle="Vos derniers audits" />
