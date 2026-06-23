@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket } from "lucide-react";
+import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
