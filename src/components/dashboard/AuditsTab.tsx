@@ -67,6 +67,7 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
   { id: "mercury", label: "Mercury CRO", icon: Rocket },
   { id: "atlas", label: "Atlas Scaling", icon: BarChart3 },
   { id: "vision", label: "Vision Créa", icon: Sparkles },
+  { id: "vision_creative", label: "Vision Créative", icon: Sparkles },
 ];
 
 type AuditRecord = {
