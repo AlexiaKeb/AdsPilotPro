@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket } from "lucide-react";
+import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
@@ -23,6 +23,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabId>("cockpit");
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -31,17 +32,21 @@ function Dashboard() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, email, full_name, has_andromeda_access")
-        .eq("id", uid)
-        .maybeSingle();
+      const [{ data, error }, roleRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, email, full_name, has_andromeda_access")
+          .eq("id", uid)
+          .maybeSingle(),
+        supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
+      ]);
       if (!mounted) return;
       if (error) {
         console.error(error);
         return;
       }
       if (data) setProfile(data as Profile);
+      if (roleRes.data) setIsAdmin(true);
     };
     load();
 
@@ -71,7 +76,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <DashHeader profile={profile} onSignOut={onSignOut} />
+      <DashHeader profile={profile} onSignOut={onSignOut} isAdmin={isAdmin} />
       <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10">
         {tab === "cockpit" && <CockpitTab />}
@@ -82,7 +87,7 @@ function Dashboard() {
   );
 }
 
-function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut: () => void }) {
+function DashHeader({ profile, onSignOut, isAdmin }: { profile: Profile | null; onSignOut: () => void; isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -100,6 +105,15 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
               {profile?.has_andromeda_access ? "ACADÉMIE · DÉBLOQUÉE" : "ACADÉMIE · VERROUILLÉE"}
             </div>
           </div>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
+              style={{ background: "var(--grad-primary)", color: "white", borderColor: "transparent" }}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
           <button
             onClick={onSignOut}
             className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
