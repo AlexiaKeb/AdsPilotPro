@@ -80,6 +80,9 @@ export function AuditsTab() {
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<AuditRecord[]>([]);
+  const [aiDiagnostic, setAiDiagnostic] = useState<AuditDiagnostic | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const analyze = useServerFn(analyzeAudit);
 
   // Compute results in real time
   const results = useMemo(() => {
