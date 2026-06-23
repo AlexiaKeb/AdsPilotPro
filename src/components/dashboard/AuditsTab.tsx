@@ -268,80 +268,93 @@ export function AuditsTab() {
       </div>
 
       {/* Active module panel */}
-      <motion.div
-        key={active}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="grid grid-cols-1 lg:grid-cols-5 gap-6"
-      >
-        <div className="lg:col-span-2 card-cockpit p-6 space-y-5">
-          <SectionTitle title={MODULES.find((m) => m.id === active)!.label} subtitle="Paramètres" />
-          {active === "andromeda" && (
-            <>
-              <NumField label="ROAS actuel" value={inputs.roas_actual} unit="×" step={0.1} decimals={2} onChange={(v) => upd("roas_actual", v)} />
-              <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
-              <NumField label="Budget journalier" value={inputs.daily_budget} unit="€" step={10} onChange={(v) => upd("daily_budget", v)} />
-            </>
-          )}
-          {active === "oracle" && (
-            <>
-              <NumField label="Panier moyen" value={inputs.avg_cart} unit="€" step={1} onChange={(v) => upd("avg_cart", v)} />
-              <NumField label="Fréquence achat / an" value={inputs.purchase_freq} unit="×" step={0.1} decimals={1} onChange={(v) => upd("purchase_freq", v)} />
-              <NumField label="Taux de rétention" value={inputs.retention} unit="%" step={1} onChange={(v) => upd("retention", v)} />
-            </>
-          )}
-          {active === "mercury" && (
-            <>
-              <NumField label="Taux ajout panier" value={inputs.add_to_cart_rate} unit="%" step={0.1} decimals={1} onChange={(v) => upd("add_to_cart_rate", v)} />
-              <NumField label="Taux d'abandon" value={inputs.abandon_rate} unit="%" step={1} onChange={(v) => upd("abandon_rate", v)} />
-              <NumField label="Vitesse de chargement" value={inputs.page_speed} unit="s" step={0.1} decimals={1} onChange={(v) => upd("page_speed", v)} />
-            </>
-          )}
-          {active === "atlas" && (
-            <>
-              <NumField label="Couverture stock" value={inputs.stock_coverage_days} unit="j" step={1} onChange={(v) => upd("stock_coverage_days", v)} />
-              <NumField label="Nombre fournisseurs" value={inputs.supplier_count} unit="" step={1} onChange={(v) => upd("supplier_count", v)} />
-            </>
-          )}
-          {active === "vision" && (
-            <>
-              <NumField label="Hook Rate (3s)" value={inputs.hook_rate} unit="%" step={1} onChange={(v) => upd("hook_rate", v)} />
-              <NumField label="Hold Rate" value={inputs.hold_rate} unit="%" step={1} onChange={(v) => upd("hold_rate", v)} />
-              <NumField label="Nombre créas actives" value={inputs.creative_count} unit="" step={1} onChange={(v) => upd("creative_count", v)} />
-              <NumField label="CTR" value={inputs.ctr} unit="%" step={0.1} decimals={1} onChange={(v) => upd("ctr", v)} />
-            </>
-          )}
-        </div>
-
-        <div className="lg:col-span-3 space-y-5">
-          {active === "andromeda" && <AndromedaPanel inputs={inputs} r={results} />}
-          {active === "oracle" && <OraclePanel r={results} />}
-          {active === "mercury" && <MercuryPanel inputs={inputs} r={results} />}
-          {active === "atlas" && <AtlasPanel inputs={inputs} r={results} />}
-          {active === "vision" && <VisionPanel inputs={inputs} r={results} />}
-        </div>
-      </motion.div>
-
-      {/* Save bar */}
-      <div className="card-cockpit p-5 flex items-center justify-between flex-wrap gap-4">
-        <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest">
-          Score global · <span className="text-foreground font-bold">
-            {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
-          </span>
-        </div>
-        <button
-          onClick={onSave}
-          disabled={saving}
-          className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
+      {active === "vision_creative" ? (
+        <motion.div
+          key="vision_creative"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Sauvegarder l'audit
-        </button>
-      </div>
+          <VisionCreativeTab />
+        </motion.div>
+      ) : (
+        <>
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="grid grid-cols-1 lg:grid-cols-5 gap-6"
+          >
+            <div className="lg:col-span-2 card-cockpit p-6 space-y-5">
+              <SectionTitle title={MODULES.find((m) => m.id === active)!.label} subtitle="Paramètres" />
+              {active === "andromeda" && (
+                <>
+                  <NumField label="ROAS actuel" value={inputs.roas_actual} unit="×" step={0.1} decimals={2} onChange={(v) => upd("roas_actual", v)} />
+                  <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
+                  <NumField label="Budget journalier" value={inputs.daily_budget} unit="€" step={10} onChange={(v) => upd("daily_budget", v)} />
+                </>
+              )}
+              {active === "oracle" && (
+                <>
+                  <NumField label="Panier moyen" value={inputs.avg_cart} unit="€" step={1} onChange={(v) => upd("avg_cart", v)} />
+                  <NumField label="Fréquence achat / an" value={inputs.purchase_freq} unit="×" step={0.1} decimals={1} onChange={(v) => upd("purchase_freq", v)} />
+                  <NumField label="Taux de rétention" value={inputs.retention} unit="%" step={1} onChange={(v) => upd("retention", v)} />
+                </>
+              )}
+              {active === "mercury" && (
+                <>
+                  <NumField label="Taux ajout panier" value={inputs.add_to_cart_rate} unit="%" step={0.1} decimals={1} onChange={(v) => upd("add_to_cart_rate", v)} />
+                  <NumField label="Taux d'abandon" value={inputs.abandon_rate} unit="%" step={1} onChange={(v) => upd("abandon_rate", v)} />
+                  <NumField label="Vitesse de chargement" value={inputs.page_speed} unit="s" step={0.1} decimals={1} onChange={(v) => upd("page_speed", v)} />
+                </>
+              )}
+              {active === "atlas" && (
+                <>
+                  <NumField label="Couverture stock" value={inputs.stock_coverage_days} unit="j" step={1} onChange={(v) => upd("stock_coverage_days", v)} />
+                  <NumField label="Nombre fournisseurs" value={inputs.supplier_count} unit="" step={1} onChange={(v) => upd("supplier_count", v)} />
+                </>
+              )}
+              {active === "vision" && (
+                <>
+                  <NumField label="Hook Rate (3s)" value={inputs.hook_rate} unit="%" step={1} onChange={(v) => upd("hook_rate", v)} />
+                  <NumField label="Hold Rate" value={inputs.hold_rate} unit="%" step={1} onChange={(v) => upd("hold_rate", v)} />
+                  <NumField label="Nombre créas actives" value={inputs.creative_count} unit="" step={1} onChange={(v) => upd("creative_count", v)} />
+                  <NumField label="CTR" value={inputs.ctr} unit="%" step={0.1} decimals={1} onChange={(v) => upd("ctr", v)} />
+                </>
+              )}
+            </div>
 
-      {/* IA — Recommandations Claude */}
-      <AiRecommendations loading={aiLoading} diagnostic={aiDiagnostic} />
+            <div className="lg:col-span-3 space-y-5">
+              {active === "andromeda" && <AndromedaPanel inputs={inputs} r={results} />}
+              {active === "oracle" && <OraclePanel r={results} />}
+              {active === "mercury" && <MercuryPanel inputs={inputs} r={results} />}
+              {active === "atlas" && <AtlasPanel inputs={inputs} r={results} />}
+              {active === "vision" && <VisionPanel inputs={inputs} r={results} />}
+            </div>
+          </motion.div>
+
+          {/* Save bar */}
+          <div className="card-cockpit p-5 flex items-center justify-between flex-wrap gap-4">
+            <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest">
+              Score global · <span className="text-foreground font-bold">
+                {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
+              </span>
+            </div>
+            <button
+              onClick={onSave}
+              disabled={saving}
+              className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Sauvegarder l'audit
+            </button>
+          </div>
+
+          {/* IA — Recommandations Claude */}
+          <AiRecommendations loading={aiLoading} diagnostic={aiDiagnostic} />
+        </>
+      )}
 
 
 
