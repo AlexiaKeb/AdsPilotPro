@@ -87,7 +87,7 @@ function Dashboard() {
   );
 }
 
-function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut: () => void }) {
+function DashHeader({ profile, onSignOut, isAdmin }: { profile: Profile | null; onSignOut: () => void; isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -105,6 +105,15 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
               {profile?.has_andromeda_access ? "ACADÉMIE · DÉBLOQUÉE" : "ACADÉMIE · VERROUILLÉE"}
             </div>
           </div>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
+              style={{ background: "var(--grad-primary)", color: "white", borderColor: "transparent" }}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
           <button
             onClick={onSignOut}
             className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
