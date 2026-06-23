@@ -1,8 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Trash2, Activity, Eye, Rocket, BarChart3, Sparkles } from "lucide-react";
+import { Save, Loader2, Trash2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
 type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision";
