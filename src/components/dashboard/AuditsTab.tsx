@@ -158,8 +158,10 @@ export function AuditsTab() {
     const { error } = await supabase.from("audits").insert({
       user_id: u.user.id,
       sector: inputs.sector,
-      inputs: inputs as unknown as Record<string, unknown>,
-      results: results as unknown as Record<string, unknown>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inputs: inputs as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      results: results as any,
     });
     if (error) {
       toast.error(error.message);
