@@ -37,14 +37,14 @@ function AdminPage() {
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  // Verify admin role on mount
+  // Verify admin role on mount (the _authenticated gate already validated the session)
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
       if (!uid) {
-        navigate({ to: "/auth", replace: true });
+        // Session not yet hydrated — don't redirect, just wait for onAuthStateChange
         return;
       }
       const { data, error } = await supabase.rpc("has_role", {
@@ -52,7 +52,12 @@ function AdminPage() {
         _role: "admin",
       });
       if (!mounted) return;
-      if (error || !data) {
+      if (error) {
+        console.error("[admin] has_role error", error);
+        toast.error("Vérification du rôle impossible");
+        return;
+      }
+      if (!data) {
         toast.error("Accès refusé — réservé aux administrateurs");
         navigate({ to: "/dashboard", replace: true });
         return;
