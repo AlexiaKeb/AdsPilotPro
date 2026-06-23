@@ -8,7 +8,7 @@ import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 import { VisionCreativeTab } from "./VisionCreativeTab";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
-type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision" | "vision_creative";
+type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
 
 interface AuditInputs {
   sector: Sector;
