@@ -5,9 +5,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
+import { VisionCreativeTab } from "./VisionCreativeTab";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
-type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision";
+type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision" | "vision_creative";
 
 interface AuditInputs {
   sector: Sector;
