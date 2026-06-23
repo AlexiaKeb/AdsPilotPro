@@ -548,7 +548,7 @@ function Reco({ items }: { items: (string | false | null | undefined)[] }) {
 }
 
 /* ============ Helpers ============ */
-type Tone = "success" | "warning" | "danger";
+type Tone = "success" | "warning" | "danger" | "primary";
 
 function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
 function scoreTone(score: number): Tone {
