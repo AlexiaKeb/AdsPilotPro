@@ -8,7 +8,7 @@ import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 import { VisionCreativeTab } from "./VisionCreativeTab";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
-type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision" | "vision_creative";
+type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
 
 interface AuditInputs {
   sector: Sector;
@@ -66,7 +66,6 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
   { id: "oracle", label: "Oracle LTV", icon: Eye },
   { id: "mercury", label: "Mercury CRO", icon: Rocket },
   { id: "atlas", label: "Atlas Scaling", icon: BarChart3 },
-  { id: "vision", label: "Vision Créa", icon: Sparkles },
   { id: "vision_creative", label: "Vision Créative", icon: Sparkles },
 ];
 
@@ -315,14 +314,6 @@ export function AuditsTab() {
                   <NumField label="Nombre fournisseurs" value={inputs.supplier_count} unit="" step={1} onChange={(v) => upd("supplier_count", v)} />
                 </>
               )}
-              {active === "vision" && (
-                <>
-                  <NumField label="Hook Rate (3s)" value={inputs.hook_rate} unit="%" step={1} onChange={(v) => upd("hook_rate", v)} />
-                  <NumField label="Hold Rate" value={inputs.hold_rate} unit="%" step={1} onChange={(v) => upd("hold_rate", v)} />
-                  <NumField label="Nombre créas actives" value={inputs.creative_count} unit="" step={1} onChange={(v) => upd("creative_count", v)} />
-                  <NumField label="CTR" value={inputs.ctr} unit="%" step={0.1} decimals={1} onChange={(v) => upd("ctr", v)} />
-                </>
-              )}
             </div>
 
             <div className="lg:col-span-3 space-y-5">
@@ -330,7 +321,7 @@ export function AuditsTab() {
               {active === "oracle" && <OraclePanel r={results} />}
               {active === "mercury" && <MercuryPanel inputs={inputs} r={results} />}
               {active === "atlas" && <AtlasPanel inputs={inputs} r={results} />}
-              {active === "vision" && <VisionPanel inputs={inputs} r={results} />}
+              
             </div>
           </motion.div>
 
