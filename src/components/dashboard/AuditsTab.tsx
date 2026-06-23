@@ -314,14 +314,6 @@ export function AuditsTab() {
                   <NumField label="Nombre fournisseurs" value={inputs.supplier_count} unit="" step={1} onChange={(v) => upd("supplier_count", v)} />
                 </>
               )}
-              {active === "vision" && (
-                <>
-                  <NumField label="Hook Rate (3s)" value={inputs.hook_rate} unit="%" step={1} onChange={(v) => upd("hook_rate", v)} />
-                  <NumField label="Hold Rate" value={inputs.hold_rate} unit="%" step={1} onChange={(v) => upd("hold_rate", v)} />
-                  <NumField label="Nombre créas actives" value={inputs.creative_count} unit="" step={1} onChange={(v) => upd("creative_count", v)} />
-                  <NumField label="CTR" value={inputs.ctr} unit="%" step={0.1} decimals={1} onChange={(v) => upd("ctr", v)} />
-                </>
-              )}
             </div>
 
             <div className="lg:col-span-3 space-y-5">
