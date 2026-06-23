@@ -279,6 +279,7 @@ export function AuditsTab() {
             <>
               <NumField label="ROAS actuel" value={inputs.roas_actual} unit="×" step={0.1} decimals={2} onChange={(v) => upd("roas_actual", v)} />
               <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
+              <NumField label="Budget journalier" value={inputs.daily_budget} unit="€" step={10} onChange={(v) => upd("daily_budget", v)} />
             </>
           )}
           {active === "oracle" && (
