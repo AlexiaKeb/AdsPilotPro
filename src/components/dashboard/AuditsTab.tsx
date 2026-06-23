@@ -155,12 +155,36 @@ export function AuditsTab() {
 
   const onSave = async () => {
     setSaving(true);
+    setAiLoading(true);
+    setAiDiagnostic(null);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
       toast.error("Session expirée");
       setSaving(false);
+      setAiLoading(false);
       return;
     }
+
+    const globalScore = Math.round(
+      (results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5,
+    );
+
+    // Lance l'analyse IA en parallèle de la sauvegarde
+    const aiPromise = analyze({
+      data: {
+        sector: sectorLabel(inputs.sector),
+        roas: inputs.roas_actual,
+        roas_threshold: results.roasThreshold,
+        cpa: inputs.cpa_actual,
+        max_cpa: inputs.avg_cart * 0.35,
+        budget: inputs.daily_budget,
+        score: globalScore,
+      },
+    }).catch((err: Error) => {
+      toast.error(`Analyse IA: ${err.message}`);
+      return null;
+    });
+
     const { error } = await supabase.from("audits").insert({
       user_id: u.user.id,
       sector: inputs.sector,
@@ -176,6 +200,10 @@ export function AuditsTab() {
       loadHistory();
     }
     setSaving(false);
+
+    const diag = await aiPromise;
+    if (diag) setAiDiagnostic(diag);
+    setAiLoading(false);
   };
 
   const onDelete = async (id: string) => {
