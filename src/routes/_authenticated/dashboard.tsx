@@ -32,17 +32,21 @@ function Dashboard() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, email, full_name, has_andromeda_access")
-        .eq("id", uid)
-        .maybeSingle();
+      const [{ data, error }, roleRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, email, full_name, has_andromeda_access")
+          .eq("id", uid)
+          .maybeSingle(),
+        supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
+      ]);
       if (!mounted) return;
       if (error) {
         console.error(error);
         return;
       }
       if (data) setProfile(data as Profile);
+      if (roleRes.data) setIsAdmin(true);
     };
     load();
 
