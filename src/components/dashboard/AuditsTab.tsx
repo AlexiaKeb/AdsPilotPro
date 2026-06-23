@@ -36,7 +36,7 @@ interface AuditInputs {
 const DEFAULTS: Record<Sector, AuditInputs> = {
   ecommerce: {
     sector: "ecommerce",
-    roas_actual: 2.5, cpa_actual: 28,
+    roas_actual: 2.5, cpa_actual: 28, daily_budget: 200,
     avg_cart: 65, purchase_freq: 1.8, retention: 35,
     add_to_cart_rate: 6, abandon_rate: 70, page_speed: 2.4,
     stock_coverage_days: 30, supplier_count: 1,
@@ -44,7 +44,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   },
   infoproduit: {
     sector: "infoproduit",
-    roas_actual: 3.2, cpa_actual: 45,
+    roas_actual: 3.2, cpa_actual: 45, daily_budget: 300,
     avg_cart: 120, purchase_freq: 1.2, retention: 22,
     add_to_cart_rate: 4, abandon_rate: 60, page_speed: 1.8,
     stock_coverage_days: 365, supplier_count: 1,
@@ -52,7 +52,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   },
   service: {
     sector: "service",
-    roas_actual: 4.0, cpa_actual: 60,
+    roas_actual: 4.0, cpa_actual: 60, daily_budget: 500,
     avg_cart: 350, purchase_freq: 1.4, retention: 55,
     add_to_cart_rate: 8, abandon_rate: 50, page_speed: 2.0,
     stock_coverage_days: 365, supplier_count: 1,
