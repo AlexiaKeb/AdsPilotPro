@@ -76,7 +76,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <DashHeader profile={profile} onSignOut={onSignOut} />
+      <DashHeader profile={profile} onSignOut={onSignOut} isAdmin={isAdmin} />
       <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10">
         {tab === "cockpit" && <CockpitTab />}
