@@ -445,11 +445,11 @@ function InputField({
       <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground mb-1.5">{label}</div>
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border bg-input/40 focus-within:border-primary transition">
         <input
-          type="number"
-          step="0.1"
+          type="text"
+          inputMode="decimal"
           value={value}
           placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value.replace(",", "."))}
           className="w-full bg-transparent outline-none text-sm font-mono-data"
         />
         {unit && <span className="text-xs text-muted-foreground font-mono">{unit}</span>}
