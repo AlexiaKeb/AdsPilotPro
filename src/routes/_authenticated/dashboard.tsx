@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Sparkles, Rocket } from "lucide-react";
+import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AuditsTab } from "@/components/dashboard/AuditsTab";
 
 type TabId = "cockpit" | "audits" | "academy";
 
@@ -306,45 +307,7 @@ function Card({ big, label, value, tone }: { big?: boolean; label: string; value
   );
 }
 
-/* ============ AUDITS (squelette) ============ */
-function AuditsTab() {
-  const modules = ["ANDROMEDA", "ORACLE", "MERCURY", "ATLAS", "VISION"];
-  const [active, setActive] = useState(modules[0]);
-  return (
-    <div className="space-y-6">
-      <div className="card-cockpit p-6">
-        <SectionTitle title="Moteur de diagnostics" subtitle="Sélectionnez votre secteur" />
-        <div className="mt-4 flex flex-wrap gap-2">
-          {["E-commerce", "Infoproduit", "Service"].map((s) => (
-            <button key={s} className="chip-tag hover:bg-surface-2 transition cursor-pointer">{s}</button>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {modules.map((m) => (
-          <button
-            key={m}
-            onClick={() => setActive(m)}
-            className={`px-4 py-2 rounded-lg text-xs uppercase tracking-widest font-display font-bold transition ${
-              active === m ? "btn-hero" : "bg-surface text-muted-foreground hover:text-foreground border border-border"
-            }`}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
-
-      <div className="card-cockpit p-8 text-center">
-        <Sparkles className="mx-auto h-10 w-10 text-primary mb-4" />
-        <div className="font-display font-bold uppercase text-xl">Module {active}</div>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-          Formulaire d'audit adaptatif, métriques colorées et sauvegarde Supabase arrivent dans l'étape suivante.
-        </p>
-      </div>
-    </div>
-  );
-}
+/* AuditsTab now imported from dedicated module */
 
 /* ============ ACADÉMIE ============ */
 function AcademyTab({ unlocked }: { unlocked: boolean }) {
