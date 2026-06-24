@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 
 type TabId = "audits" | "academy" | "admin";
 
@@ -15,6 +16,7 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   has_andromeda_access: boolean;
+  onboarding_completed: boolean;
 }
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -37,7 +39,7 @@ function Dashboard() {
       const [{ data, error }, roleRes] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, avatar_url, has_andromeda_access")
+          .select("id, email, full_name, avatar_url, has_andromeda_access, onboarding_completed")
           .eq("id", uid)
           .maybeSingle(),
         supabase
@@ -88,6 +90,8 @@ function Dashboard() {
     setTab(id);
   };
 
+  const showOnboarding = !!profile && !profile.onboarding_completed;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} onSignOut={onSignOut} />
@@ -97,6 +101,15 @@ function Dashboard() {
         {tab === "academy" && <AcademyTab unlocked={profile?.has_andromeda_access ?? false} />}
       </main>
       <AuditHistory onView={() => setTab("audits")} />
+      {showOnboarding && profile && (
+        <OnboardingFlow
+          userId={profile.id}
+          hasAndromedaAccess={profile.has_andromeda_access}
+          onComplete={() =>
+            setProfile((prev) => (prev ? { ...prev, onboarding_completed: true } : prev))
+          }
+        />
+      )}
     </div>
   );
 }
