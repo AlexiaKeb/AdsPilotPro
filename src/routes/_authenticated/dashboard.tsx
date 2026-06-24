@@ -40,7 +40,12 @@ function Dashboard() {
           .select("id, email, full_name, avatar_url, has_andromeda_access")
           .eq("id", uid)
           .maybeSingle(),
-        supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid)
+          .eq("role", "admin")
+          .maybeSingle(),
       ]);
       if (!mounted) return;
       if (error) {

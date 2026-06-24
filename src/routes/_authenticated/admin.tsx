@@ -47,13 +47,15 @@ function AdminPage() {
         // Session not yet hydrated — don't redirect, just wait for onAuthStateChange
         return;
       }
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: uid,
-        _role: "admin",
-      });
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .maybeSingle();
       if (!mounted) return;
       if (error) {
-        console.error("[admin] has_role error", error);
+        console.error("[admin] role lookup error", error);
         toast.error("Vérification du rôle impossible");
         return;
       }
