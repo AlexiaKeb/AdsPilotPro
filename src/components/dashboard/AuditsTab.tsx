@@ -85,7 +85,6 @@ export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
-  const [history, setHistory] = useState<AuditRecord[]>([]);
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
