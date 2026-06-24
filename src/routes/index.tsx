@@ -190,8 +190,8 @@ function NavBar() {
         <Logo />
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#arsenal" className="hover:text-foreground transition">Arsenal</a>
-          <a href="#rapports" className="hover:text-foreground transition">Rapports</a>
-          <a href="#cockpit" className="hover:text-foreground transition">Cockpit</a>
+          <a href="#how" className="hover:text-foreground transition">Comment ça marche</a>
+          <Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link>
         </nav>
         <Link
           to="/auth"
@@ -203,6 +203,7 @@ function NavBar() {
     </header>
   );
 }
+
 
 function Logo() {
   return (
