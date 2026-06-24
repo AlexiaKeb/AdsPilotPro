@@ -373,42 +373,6 @@ export function AuditsTab() {
 
 
 
-      {/* History */}
-      <div className="card-cockpit p-6">
-        <SectionTitle title="Historique" subtitle="Vos derniers audits" />
-        {history.length === 0 ? (
-          <div className="mt-6 text-sm text-muted-foreground">Aucun audit sauvegardé pour l'instant.</div>
-        ) : (
-          <div className="mt-5 divide-y divide-border">
-            {history.map((h) => {
-              const scores = [h.results?.andromedaScore, h.results?.oracleScore, h.results?.mercuryScore, h.results?.atlasScore, h.results?.visionScore].filter(Boolean) as number[];
-              const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-              return (
-                <div key={h.id} className="py-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="chip-tag">{sectorLabel(h.sector as Sector)}</div>
-                    <div className="text-xs text-muted-foreground font-mono">
-                      {new Date(h.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="font-mono-data text-sm font-bold" style={{ color: toneColor(scoreTone(avg)) }}>
-                      {avg}/100
-                    </div>
-                    <button
-                      onClick={() => onDelete(h.id)}
-                      className="text-muted-foreground hover:text-danger transition"
-                      aria-label="Supprimer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
