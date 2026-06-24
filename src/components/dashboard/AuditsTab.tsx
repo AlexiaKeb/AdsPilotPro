@@ -79,11 +79,30 @@ export type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
 export const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
 type AiMap<T> = Partial<Record<ScoredModuleId, T>>;
 
+export const AUDIT_TAGS = [
+  "Campagne active",
+  "Test A/B",
+  "Scaling",
+  "Diagnostic problème",
+  "Archive",
+] as const;
+export type AuditTag = (typeof AUDIT_TAGS)[number];
+
+export const TAG_COLORS: Record<AuditTag, string> = {
+  "Campagne active": "var(--color-success)",
+  "Test A/B": "var(--color-primary)",
+  "Scaling": "var(--color-warning)",
+  "Diagnostic problème": "var(--color-danger)",
+  "Archive": "var(--color-muted-foreground)",
+};
+
 export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
   const [clientName, setClientName] = useState<string>("");
+  const [auditName, setAuditName] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<AuditTag[]>([]);
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
