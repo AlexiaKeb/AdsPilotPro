@@ -278,21 +278,23 @@ function AuthPage() {
           </form>
 
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? (
-              <>Pas encore de compte ?{" "}
-                <button onClick={() => setMode("signup")} className="text-foreground font-semibold hover:text-primary">
-                  Créer un compte
-                </button>
-              </>
-            ) : (
-              <>Déjà inscrit ?{" "}
-                <button onClick={() => setMode("signin")} className="text-foreground font-semibold hover:text-primary">
-                  Se connecter
-                </button>
-              </>
-            )}
-          </div>
+          {!adminMode && (
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              {mode === "signin" ? (
+                <>Pas encore de compte ?{" "}
+                  <button onClick={() => setMode("signup")} className="text-foreground font-semibold hover:text-primary">
+                    Créer un compte
+                  </button>
+                </>
+              ) : (
+                <>Déjà inscrit ?{" "}
+                  <button onClick={() => setMode("signin")} className="text-foreground font-semibold hover:text-primary">
+                    Se connecter
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
