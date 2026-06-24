@@ -72,20 +72,12 @@ function Dashboard() {
     navigate({ to: "/auth", replace: true });
   };
 
-  const onTabChange = (id: TabId) => {
-    if (id === "admin") {
-      navigate({ to: "/admin" });
-      return;
-    }
-    setTab(id);
-  };
-
   const showOnboarding = !!profile && !profile.onboarding_completed;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} onSignOut={onSignOut} />
-      <TabBar tab={tab} setTab={onTabChange} isAdmin={isAdmin} />
+      <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
         {tab === "audits" && <AuditsTab />}
         <CoachingCTA />
