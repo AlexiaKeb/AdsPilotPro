@@ -176,6 +176,11 @@ function Landing() {
       <HowItWorks />
       <BattleReports />
       <PricingSection />
+      <section className="py-20 md:py-24 border-t border-border">
+        <div className="mx-auto max-w-6xl px-6">
+          <CoachingCTA />
+        </div>
+      </section>
       <FinalCta />
       <Footer />
     </div>
