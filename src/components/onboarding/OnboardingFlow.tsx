@@ -85,7 +85,11 @@ export function OnboardingFlow({ userId, hasAndromedaAccess, onComplete }: Onboa
     return () => clearInterval(t);
   }, [analyzing]);
 
-  const persist = async (patch: Record<string, unknown>) => {
+  const persist = async (patch: Parameters<typeof supabase.from<"profiles">>[0] extends never ? never : {
+    onboarding_completed?: boolean;
+    onboarding_answers?: OnboardingAnswers;
+    sector?: string;
+  }) => {
     const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
     if (error) console.error("[onboarding] persist", error);
   };
