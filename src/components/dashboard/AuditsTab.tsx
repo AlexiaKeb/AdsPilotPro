@@ -10,10 +10,10 @@ import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/
 import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
 
-type Sector = "ecommerce" | "infoproduit" | "service";
-type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
+export type Sector = "ecommerce" | "infoproduit" | "service";
+export type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
 
-interface AuditInputs {
+export interface AuditInputs {
   sector: Sector;
   // Andromeda
   roas_actual: number;
@@ -75,15 +75,34 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
 
 
 
-type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
-const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
+export type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
+export const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
 type AiMap<T> = Partial<Record<ScoredModuleId, T>>;
+
+export const AUDIT_TAGS = [
+  "Campagne active",
+  "Test A/B",
+  "Scaling",
+  "Diagnostic problème",
+  "Archive",
+] as const;
+export type AuditTag = (typeof AUDIT_TAGS)[number];
+
+export const TAG_COLORS: Record<AuditTag, string> = {
+  "Campagne active": "var(--color-success)",
+  "Test A/B": "var(--color-primary)",
+  "Scaling": "var(--color-warning)",
+  "Diagnostic problème": "var(--color-danger)",
+  "Archive": "var(--color-muted-foreground)",
+};
 
 export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
   const [clientName, setClientName] = useState<string>("");
+  const [auditName, setAuditName] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<AuditTag[]>([]);
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
@@ -178,18 +197,22 @@ export function AuditsTab() {
       setSaving(false);
       return;
     }
-    const { error } = await supabase.from("audits").insert({
+    const insertPayload: Record<string, unknown> = {
       user_id: u.user.id,
       sector: inputs.sector,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inputs: inputs as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      results: { ...results, ai_recommendations: aiByModule } as any,
-    });
+      name: auditName.trim() || null,
+      tags: selectedTags,
+      inputs: inputs as unknown as Record<string, unknown>,
+      results: { ...results, ai_recommendations: aiByModule } as unknown as Record<string, unknown>,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("audits").insert(insertPayload as any);
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Audit sauvegardé");
+      setAuditName("");
+      setSelectedTags([]);
       emitAudit("audit:saved");
     }
     setSaving(false);
@@ -398,22 +421,73 @@ export function AuditsTab() {
             </div>
           </motion.div>
 
-          {/* Save bar */}
-          <div className="card-cockpit p-5 flex items-center justify-between flex-wrap gap-4">
-            <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest">
-              Score global · <span className="text-foreground font-bold">
-                {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
-              </span>
+          {/* Save bar with name + tags */}
+          <div className="card-cockpit p-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-start">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
+                  Nom de l'audit
+                </label>
+                <input
+                  type="text"
+                  value={auditName}
+                  onChange={(e) => setAuditName(e.target.value)}
+                  placeholder="ex: Campagne Noel 2025 — Shopping"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-border bg-input/40 text-sm font-mono-data outline-none focus:border-primary transition"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest md:pt-7">
+                Score global · <span className="text-foreground font-bold">
+                  {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
+                </span>
+              </div>
             </div>
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Sauvegarder l'audit
-            </button>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
+                Tags (multi-sélection)
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {AUDIT_TAGS.map((t) => {
+                  const isOn = selectedTags.includes(t);
+                  const color = TAG_COLORS[t];
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() =>
+                        setSelectedTags((prev) =>
+                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                        )
+                      }
+                      className="px-3 py-1.5 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition"
+                      style={{
+                        borderWidth: 1,
+                        borderStyle: "solid",
+                        borderColor: color,
+                        color: isOn ? "#fff" : color,
+                        background: isOn ? color : "transparent",
+                      }}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Sauvegarder l'audit
+              </button>
+            </div>
           </div>
+
 
         </>
       )}
@@ -817,7 +891,7 @@ function metricBar(value: number, target: number, inverse = false): { pct: numbe
   return { pct, tone };
 }
 
-function buildAndDownloadPdf(args: {
+export function buildAndDownloadPdf(args: {
   clientName: string;
   sector: Sector;
   inputs: AuditInputs;
