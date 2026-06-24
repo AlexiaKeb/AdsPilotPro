@@ -326,7 +326,25 @@ export function AuditsTab() {
                   <NumField label="Nombre fournisseurs" value={inputs.supplier_count} unit="" step={1} onChange={(v) => upd("supplier_count", v)} />
                 </>
               )}
+              {activeScored && (
+                <button
+                  onClick={() => runDiagnostic(activeScored)}
+                  disabled={!moduleReady[activeScored] || !!loadingByModule[activeScored]}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50 disabled:cursor-not-allowed transition hover:opacity-90"
+                  style={{ background: "var(--grad-primary)" }}
+                >
+                  {loadingByModule[activeScored] ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyse en cours par Claude…
+                    </>
+                  ) : (
+                    <>⚡ Générer mon diagnostic IA</>
+                  )}
+                </button>
+              )}
             </div>
+
 
             <div className="lg:col-span-3 space-y-5">
               {active === "andromeda" && <AndromedaPanel inputs={inputs} r={results} />}
