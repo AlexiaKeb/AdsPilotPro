@@ -190,21 +190,19 @@ function AdminPage() {
                   <th className="px-4 py-3">Utilisateur</th>
                   <th className="px-4 py-3">Inscription</th>
                   <th className="px-4 py-3 text-center">Audits</th>
-                  <th className="px-4 py-3 text-center">Académie</th>
-                  <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                    <td colSpan={3} className="px-4 py-10 text-center text-muted-foreground">
                       <Loader2 className="inline h-4 w-4 animate-spin mr-2" /> Chargement…
                     </td>
                   </tr>
                 )}
                 {!loading && filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                    <td colSpan={3} className="px-4 py-10 text-center text-muted-foreground">
                       Aucun utilisateur
                     </td>
                   </tr>
@@ -225,36 +223,6 @@ function AdminPage() {
                         {new Date(p.created_at).toLocaleDateString("fr-FR")}
                       </td>
                       <td className="px-4 py-3 text-center font-mono">{auditCounts[p.id] ?? 0}</td>
-                      <td className="px-4 py-3 text-center">
-                        {p.has_andromeda_access ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[oklch(0.78_0.18_150)]">
-                            <Unlock className="h-3.5 w-3.5" /> Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                            <Lock className="h-3.5 w-3.5" /> Verrouillée
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => toggleAccess(p)}
-                          disabled={busyId === p.id}
-                          className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold hover:bg-surface transition disabled:opacity-50"
-                        >
-                          {busyId === p.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : p.has_andromeda_access ? (
-                            <>
-                              <Lock className="h-3 w-3" /> Révoquer
-                            </>
-                          ) : (
-                            <>
-                              <Unlock className="h-3 w-3" /> Débloquer
-                            </>
-                          )}
-                        </button>
-                      </td>
                     </motion.tr>
                   ))}
               </tbody>
