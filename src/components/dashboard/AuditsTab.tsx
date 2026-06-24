@@ -1,11 +1,12 @@
 import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
+import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
+import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/audit-pdf";
 import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
 
