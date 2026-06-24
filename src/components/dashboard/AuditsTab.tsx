@@ -83,12 +83,38 @@ export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
+  const [clientName, setClientName] = useState<string>("");
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
     andromeda: 0, oracle: 0, mercury: 0, atlas: 0,
   });
   const analyze = useServerFn(analyzeAudit);
+
+  // Load client name once
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, first_name, last_name, email")
+        .eq("id", uid)
+        .maybeSingle();
+      if (!mounted || !data) return;
+      const name =
+        data.full_name ||
+        [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+        data.email ||
+        "";
+      setClientName(name);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Compute results in real time
   const results = useMemo(() => {
