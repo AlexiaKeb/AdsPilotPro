@@ -1,11 +1,12 @@
 import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Trash2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
+import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 import { VisionCreativeTab } from "./VisionCreativeTab";
+import { emitAudit, onAudit } from "./auditHistoryBus";
 
 type Sector = "ecommerce" | "infoproduit" | "service";
 type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
@@ -69,12 +70,8 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
   { id: "vision_creative", label: "Vision Créative", icon: Sparkles },
 ];
 
-type AuditRecord = {
-  id: string;
-  sector: string;
-  created_at: string;
-  results: Record<string, number>;
-};
+
+
 
 type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
 const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
@@ -84,7 +81,6 @@ export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
-  const [history, setHistory] = useState<AuditRecord[]>([]);
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
@@ -146,21 +142,6 @@ export function AuditsTab() {
     };
   }, [inputs]);
 
-  const loadHistory = async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
-    const { data } = await supabase
-      .from("audits")
-      .select("id, sector, created_at, results")
-      .order("created_at", { ascending: false })
-      .limit(8);
-    if (data) setHistory(data as unknown as AuditRecord[]);
-  };
-
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
   const onSave = async () => {
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
@@ -175,16 +156,28 @@ export function AuditsTab() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inputs: inputs as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      results: results as any,
+      results: { ...results, ai_recommendations: aiByModule } as any,
     });
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Audit sauvegardé");
-      loadHistory();
+      emitAudit("audit:saved");
     }
     setSaving(false);
   };
+
+  // Reopen a saved audit when user clicks "VOIR" in the history section
+  useEffect(() => {
+    return onAudit("audit:open", (rec) => {
+      if (!rec) return;
+      const merged = { ...DEFAULTS[(rec.sector as Sector) ?? "ecommerce"], ...(rec.inputs ?? {}) } as AuditInputs;
+      setInputs(merged);
+      const ai = (rec.results?.ai_recommendations ?? {}) as AiMap<AuditDiagnostic>;
+      setAiByModule(ai);
+      setActive("andromeda");
+    });
+  }, []);
 
   // Build per-module signature so we only re-trigger when relevant fields change
   const moduleSignature: Record<ScoredModuleId, string> = {
@@ -238,14 +231,7 @@ export function AuditsTab() {
   }, [activeScored, activeSig]);
 
 
-  const onDelete = async (id: string) => {
-    const { error } = await supabase.from("audits").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Audit supprimé");
-      loadHistory();
-    }
-  };
+
 
   const setSector = (s: Sector) => setInputs({ ...DEFAULTS[s] });
   const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
@@ -383,42 +369,6 @@ export function AuditsTab() {
 
 
 
-      {/* History */}
-      <div className="card-cockpit p-6">
-        <SectionTitle title="Historique" subtitle="Vos derniers audits" />
-        {history.length === 0 ? (
-          <div className="mt-6 text-sm text-muted-foreground">Aucun audit sauvegardé pour l'instant.</div>
-        ) : (
-          <div className="mt-5 divide-y divide-border">
-            {history.map((h) => {
-              const scores = [h.results?.andromedaScore, h.results?.oracleScore, h.results?.mercuryScore, h.results?.atlasScore, h.results?.visionScore].filter(Boolean) as number[];
-              const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-              return (
-                <div key={h.id} className="py-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="chip-tag">{sectorLabel(h.sector as Sector)}</div>
-                    <div className="text-xs text-muted-foreground font-mono">
-                      {new Date(h.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="font-mono-data text-sm font-bold" style={{ color: toneColor(scoreTone(avg)) }}>
-                      {avg}/100
-                    </div>
-                    <button
-                      onClick={() => onDelete(h.id)}
-                      className="text-muted-foreground hover:text-danger transition"
-                      aria-label="Supprimer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

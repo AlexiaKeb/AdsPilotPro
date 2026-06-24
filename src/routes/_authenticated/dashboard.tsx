@@ -5,6 +5,7 @@ import { LogOut, Activity, ClipboardList, GraduationCap, Lock, Rocket, ShieldChe
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
+import { AuditHistory } from "@/components/dashboard/AuditHistory";
 
 type TabId = "cockpit" | "audits" | "academy";
 
@@ -83,6 +84,7 @@ function Dashboard() {
         {tab === "audits" && <AuditsTab />}
         {tab === "academy" && <AcademyTab unlocked={profile?.has_andromeda_access ?? false} />}
       </main>
+      <AuditHistory onView={() => setTab("audits")} />
     </div>
   );
 }
