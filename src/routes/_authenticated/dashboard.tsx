@@ -139,6 +139,15 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
   );
 }
 
+function initialsOf(profile: Profile | null): string {
+  if (!profile) return "?";
+  const name = (profile.full_name || profile.email || "?").trim();
+  const parts = name.split(/\s+/);
+  const a = parts[0]?.[0] ?? "?";
+  const b = parts[1]?.[0] ?? "";
+  return (a + b).toUpperCase();
+}
+
 function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => void; isAdmin: boolean }) {
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: "audits", label: "Audits", icon: ClipboardList },
