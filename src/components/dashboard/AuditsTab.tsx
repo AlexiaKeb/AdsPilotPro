@@ -197,18 +197,22 @@ export function AuditsTab() {
       setSaving(false);
       return;
     }
-    const { error } = await supabase.from("audits").insert({
+    const insertPayload: Record<string, unknown> = {
       user_id: u.user.id,
       sector: inputs.sector,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inputs: inputs as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      results: { ...results, ai_recommendations: aiByModule } as any,
-    });
+      name: auditName.trim() || null,
+      tags: selectedTags,
+      inputs: inputs as unknown as Record<string, unknown>,
+      results: { ...results, ai_recommendations: aiByModule } as unknown as Record<string, unknown>,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("audits").insert(insertPayload as any);
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Audit sauvegardé");
+      setAuditName("");
+      setSelectedTags([]);
       emitAudit("audit:saved");
     }
     setSaving(false);
