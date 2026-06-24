@@ -31,7 +31,7 @@ function AdminPage() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [auditCounts, setAuditCounts] = useState<Record<string, number>>({});
   const [query, setQuery] = useState("");
-  const [busyId, setBusyId] = useState<string | null>(null);
+  
 
   // Verify admin role on mount (the _authenticated gate already validated the session)
   useEffect(() => {
