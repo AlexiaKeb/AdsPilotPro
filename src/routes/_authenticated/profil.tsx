@@ -54,37 +54,87 @@ const TIMEZONES = [
   "Africa/Casablanca", "Africa/Abidjan", "Asia/Dubai", "Asia/Tokyo",
 ];
 
+function makeFallbackProfile(user: { id: string; email?: string | null }): ProfileRow {
+  return {
+    id: user.id,
+    email: user.email ?? "",
+    full_name: null,
+    first_name: null,
+    last_name: null,
+    sector: null,
+    country: null,
+    timezone: null,
+    avatar_url: null,
+    has_andromeda_access: false,
+    created_at: new Date().toISOString(),
+  };
+}
+
 function ProfilePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [audits, setAudits] = useState<AuditRow[]>([]);
   const [avatarSignedUrl, setAvatarSignedUrl] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     (async () => {
+      setLoading(true);
+      setFetchError(null);
+
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) {
         navigate({ to: "/auth", replace: true });
         return;
       }
-      const [{ data: p }, { data: a }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
-        supabase
-          .from("audits")
-          .select("id, sector, created_at, inputs, results")
-          .eq("user_id", u.user.id)
-          .order("created_at", { ascending: true })
-          .limit(500),
-      ]);
-      if (!mounted) return;
-      if (p) setProfile(p as unknown as ProfileRow);
-      if (a) setAudits(a as unknown as AuditRow[]);
-      setLoading(false);
+      const fallback = makeFallbackProfile(u.user);
+
+      // 5s timeout — show page with fallback values rather than spin forever
+      timeoutId = setTimeout(() => {
+        if (!mounted) return;
+        setProfile((prev) => prev ?? fallback);
+        setLoading(false);
+      }, 5000);
+
+      try {
+        const [pRes, aRes] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
+          supabase
+            .from("audits")
+            .select("id, sector, created_at, inputs, results")
+            .eq("user_id", u.user.id)
+            .order("created_at", { ascending: true })
+            .limit(500),
+        ]);
+        if (!mounted) return;
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (pRes.error && !pRes.data) {
+          setFetchError(pRes.error.message);
+          setLoading(false);
+          return;
+        }
+        setProfile((pRes.data as unknown as ProfileRow | null) ?? fallback);
+        setAudits((aRes.data as unknown as AuditRow[] | null) ?? []);
+        setLoading(false);
+      } catch (e) {
+        if (!mounted) return;
+        if (timeoutId) clearTimeout(timeoutId);
+        setFetchError(e instanceof Error ? e.message : "Erreur inconnue");
+        setLoading(false);
+      }
     })();
-    return () => { mounted = false; };
-  }, [navigate]);
+
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [navigate, reloadKey]);
 
   // Sign URL for avatar (private bucket)
   useEffect(() => {
@@ -96,10 +146,39 @@ function ProfilePage() {
     return () => { cancelled = true; };
   }, [profile?.avatar_url]);
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="min-h-screen grid place-items-center bg-background text-foreground">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (fetchError || !profile) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background text-foreground px-6">
+        <div className="card-cockpit p-6 max-w-md w-full text-center space-y-4">
+          <div className="font-display font-bold uppercase tracking-widest text-sm">
+            Impossible de charger le profil. Réessayez.
+          </div>
+          {fetchError && (
+            <div className="text-xs text-muted-foreground break-words">{fetchError}</div>
+          )}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="btn-hero inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest"
+            >
+              Réessayer
+            </button>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Retour
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
