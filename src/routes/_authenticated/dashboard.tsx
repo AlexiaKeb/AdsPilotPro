@@ -84,6 +84,7 @@ function Dashboard() {
         {tab === "audits" && <AuditsTab />}
         {tab === "academy" && <AcademyTab unlocked={profile?.has_andromeda_access ?? false} />}
       </main>
+      <AuditHistory onView={() => setTab("audits")} />
     </div>
   );
 }
