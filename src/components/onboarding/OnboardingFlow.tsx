@@ -57,7 +57,7 @@ const LOADING_MESSAGES = [
   "Génération de votre diagnostic personnalisé…",
 ];
 
-export function OnboardingFlow({ userId, hasAndromedaAccess, onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
   const navigate = useNavigate();
   const analyze = useServerFn(analyzeAudit);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
