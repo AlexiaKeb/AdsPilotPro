@@ -235,14 +235,7 @@ export function AuditsTab() {
   }, [activeScored, activeSig]);
 
 
-  const onDelete = async (id: string) => {
-    const { error } = await supabase.from("audits").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Audit supprimé");
-      loadHistory();
-    }
-  };
+
 
   const setSector = (s: Sector) => setInputs({ ...DEFAULTS[s] });
   const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
