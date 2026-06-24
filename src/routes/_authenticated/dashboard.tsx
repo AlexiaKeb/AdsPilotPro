@@ -1,14 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, ClipboardList, Rocket, ShieldCheck } from "lucide-react";
+import { LogOut, ClipboardList, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { CoachingCTA } from "@/components/CoachingCTA";
 
-type TabId = "audits" | "admin";
+type TabId = "audits";
 
 interface Profile {
   id: string;
@@ -26,7 +26,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabId>("audits");
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  
 
   useEffect(() => {
     let mounted = true;
@@ -35,26 +35,17 @@ function Dashboard() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return;
-      const [{ data, error }, roleRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, email, full_name, avatar_url, onboarding_completed")
-          .eq("id", uid)
-          .maybeSingle(),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid)
-          .eq("role", "admin")
-          .maybeSingle(),
-      ]);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url, onboarding_completed")
+        .eq("id", uid)
+        .maybeSingle();
       if (!mounted) return;
       if (error) {
         console.error(error);
         return;
       }
       if (data) setProfile(data as Profile);
-      if (roleRes.data) setIsAdmin(true);
     };
     load();
 
@@ -81,20 +72,12 @@ function Dashboard() {
     navigate({ to: "/auth", replace: true });
   };
 
-  const onTabChange = (id: TabId) => {
-    if (id === "admin") {
-      navigate({ to: "/admin" });
-      return;
-    }
-    setTab(id);
-  };
-
   const showOnboarding = !!profile && !profile.onboarding_completed;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} onSignOut={onSignOut} />
-      <TabBar tab={tab} setTab={onTabChange} isAdmin={isAdmin} />
+      <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
         {tab === "audits" && <AuditsTab />}
         <CoachingCTA />
@@ -170,10 +153,9 @@ function initialsOf(profile: Profile | null): string {
   return ((a + b) || src[0]).toUpperCase();
 }
 
-function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => void; isAdmin: boolean }) {
+function TabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void }) {
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: "audits", label: "Audits", icon: ClipboardList },
-    ...(isAdmin ? [{ id: "admin" as const, label: "Admin", icon: ShieldCheck }] : []),
   ];
   return (
     <div className="border-b border-border">

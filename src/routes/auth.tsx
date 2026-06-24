@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Loader2, Mail, Lock, User } from "lucide-react";
+import { ArrowRight, Loader2, Mail, Lock, User, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
@@ -31,6 +31,8 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
+  const [adminMode, setAdminMode] = useState(false);
+  const [adminCreds, setAdminCreds] = useState({ email: "", code: "" });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,10 +40,30 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  // Hidden admin trigger
+  useEffect(() => {
+    if (form.email.trim().toUpperCase() === "ADSPILOT-ADMIN") {
+      setAdminMode(true);
+    }
+  }, [form.email]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (adminMode) {
+        const parsed = signInSchema.parse({
+          email: adminCreds.email,
+          password: adminCreds.code,
+        });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: parsed.email,
+          password: parsed.password,
+        });
+        if (error) throw error;
+        navigate({ to: "/admin-command", replace: true });
+        return;
+      }
       if (mode === "signup") {
         const parsed = signUpSchema.parse(form);
         const { error } = await supabase.auth.signUp({
@@ -86,6 +108,13 @@ function AuthPage() {
     navigate({ to: "/dashboard", replace: true });
   };
 
+  const exitAdminMode = () => {
+    setAdminMode(false);
+    setAdminCreds({ email: "", code: "" });
+    setForm({ email: "", password: "", full_name: "" });
+  };
+
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background text-foreground">
       {/* Left brand panel */}
@@ -119,88 +148,153 @@ function AuthPage() {
             ← ADSPILOT PRO
           </Link>
           <h2 className="mt-2 font-display font-bold uppercase text-2xl tracking-wide">
-            {mode === "signin" ? "Connexion" : "Création de compte"}
+            {adminMode ? "Accès administrateur" : mode === "signin" ? "Connexion" : "Création de compte"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "signin" ? "Accédez à votre cockpit." : "Déployez votre command center."}
+            {adminMode
+              ? "Authentification restreinte."
+              : mode === "signin"
+              ? "Accédez à votre cockpit."
+              : "Déployez votre command center."}
           </p>
 
-          <button
-            type="button"
-            onClick={onGoogle}
-            disabled={loading}
-            className="mt-6 w-full inline-flex items-center justify-center gap-3 rounded-lg border border-border-strong bg-surface px-4 py-3 text-sm font-semibold hover:bg-surface-2 transition disabled:opacity-60"
-          >
-            <GoogleIcon /> Continuer avec Google
-          </button>
+          {!adminMode && (
+            <>
+              <button
+                type="button"
+                onClick={onGoogle}
+                disabled={loading}
+                className="mt-6 w-full inline-flex items-center justify-center gap-3 rounded-lg border border-border-strong bg-surface px-4 py-3 text-sm font-semibold hover:bg-surface-2 transition disabled:opacity-60"
+              >
+                <GoogleIcon /> Continuer avec Google
+              </button>
 
-          <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
-            <div className="h-px flex-1 bg-border" /> OU <div className="h-px flex-1 bg-border" />
-          </div>
+              <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
+                <div className="h-px flex-1 bg-border" /> OU <div className="h-px flex-1 bg-border" />
+              </div>
+            </>
+          )}
+
+          {adminMode && (
+            <div
+              className="mt-6 mb-4 flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] font-mono uppercase tracking-widest"
+              style={{
+                background: "rgba(255, 59, 92, 0.10)",
+                color: "#FF3B5C",
+                border: "1px solid rgba(255, 59, 92, 0.35)",
+              }}
+            >
+              <ShieldAlert className="h-3.5 w-3.5" /> Mode admin détecté
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <Field icon={User} label="Nom complet">
-                <input
-                  type="text"
-                  autoComplete="name"
-                  value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                  className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-                  placeholder="Jean Dupont"
-                  required
-                />
-              </Field>
+            {adminMode ? (
+              <>
+                <Field icon={Mail} label="Email administrateur">
+                  <input
+                    type="email"
+                    autoComplete="off"
+                    value={adminCreds.email}
+                    onChange={(e) => setAdminCreds({ ...adminCreds, email: e.target.value })}
+                    className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                    placeholder="admin@adspilot.com"
+                    required
+                  />
+                </Field>
+                <Field icon={Lock} label="Code administrateur">
+                  <input
+                    type="password"
+                    autoComplete="off"
+                    value={adminCreds.code}
+                    onChange={(e) => setAdminCreds({ ...adminCreds, code: e.target.value })}
+                    className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                    placeholder="••••••••"
+                    required
+                  />
+                </Field>
+              </>
+            ) : (
+              <>
+                {mode === "signup" && (
+                  <Field icon={User} label="Nom complet">
+                    <input
+                      type="text"
+                      autoComplete="name"
+                      value={form.full_name}
+                      onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                      className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                      placeholder="Jean Dupont"
+                      required
+                    />
+                  </Field>
+                )}
+                <Field icon={Mail} label="Email">
+                  <input
+                    type="text"
+                    autoComplete="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                    placeholder="vous@empire.com"
+                    required
+                  />
+                </Field>
+                <Field icon={Lock} label="Mot de passe">
+                  <input
+                    type="password"
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                    placeholder="••••••••"
+                    required
+                  />
+                </Field>
+              </>
             )}
-            <Field icon={Mail} label="Email">
-              <input
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-                placeholder="vous@empire.com"
-                required
-              />
-            </Field>
-            <Field icon={Lock} label="Mot de passe">
-              <input
-                type="password"
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-                placeholder="••••••••"
-                required
-              />
-            </Field>
 
             <button
               type="submit"
               disabled={loading}
               className="btn-hero w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-bold font-display uppercase tracking-widest disabled:opacity-60"
+              style={adminMode ? { background: "#FF3B5C", color: "#000" } : undefined}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>
-                {mode === "signin" ? "Activer le cockpit" : "Déployer"} <ArrowRight className="h-4 w-4" />
+                {adminMode ? "Accéder à la console" : mode === "signin" ? "Activer le cockpit" : "Déployer"}{" "}
+                <ArrowRight className="h-4 w-4" />
               </>}
             </button>
+
+            {adminMode && (
+              <button
+                type="button"
+                onClick={exitAdminMode}
+                className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition"
+              >
+                ← Retour à la connexion standard
+              </button>
+            )}
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? (
-              <>Pas encore de compte ?{" "}
-                <button onClick={() => setMode("signup")} className="text-foreground font-semibold hover:text-primary">
-                  Créer un compte
-                </button>
-              </>
-            ) : (
-              <>Déjà inscrit ?{" "}
-                <button onClick={() => setMode("signin")} className="text-foreground font-semibold hover:text-primary">
-                  Se connecter
-                </button>
-              </>
-            )}
-          </div>
+
+          {!adminMode && (
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              {mode === "signin" ? (
+                <>Pas encore de compte ?{" "}
+                  <button onClick={() => setMode("signup")} className="text-foreground font-semibold hover:text-primary">
+                    Créer un compte
+                  </button>
+                </>
+              ) : (
+                <>Déjà inscrit ?{" "}
+                  <button onClick={() => setMode("signin")} className="text-foreground font-semibold hover:text-primary">
+                    Se connecter
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
