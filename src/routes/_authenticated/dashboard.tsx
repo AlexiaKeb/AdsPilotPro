@@ -106,13 +106,26 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
           <div className="font-display font-bold tracking-wider">ADSPILOT</div>
           <span className="chip-tag !py-0.5">PRO</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden md:block text-right">
             <div className="text-sm font-medium">{profile?.full_name || profile?.email || "—"}</div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
               {profile?.has_andromeda_access ? "ACADÉMIE · DÉBLOQUÉE" : "ACADÉMIE · VERROUILLÉE"}
             </div>
           </div>
+          <Link
+            to="/profile"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
+            aria-label="Mon profil"
+          >
+            <span
+              className="h-6 w-6 rounded-full grid place-items-center text-[10px] font-display font-bold text-white"
+              style={{ background: "var(--grad-primary)" }}
+            >
+              {initialsOf(profile)}
+            </span>
+            <span className="hidden sm:inline">Mon profil</span>
+          </Link>
           <button
             onClick={onSignOut}
             className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
@@ -120,6 +133,7 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
             <LogOut className="h-3.5 w-3.5" /> Sortie
           </button>
         </div>
+
       </div>
     </header>
   );
