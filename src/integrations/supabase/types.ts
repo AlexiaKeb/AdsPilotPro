@@ -43,6 +43,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          audits_this_month: number
           avatar_url: string | null
           country: string | null
           created_at: string
@@ -54,11 +55,14 @@ export type Database = {
           last_name: string | null
           onboarding_answers: Json | null
           onboarding_completed: boolean
+          plan: string
+          plan_expires_at: string | null
           sector: string | null
           timezone: string | null
           updated_at: string
         }
         Insert: {
+          audits_this_month?: number
           avatar_url?: string | null
           country?: string | null
           created_at?: string
@@ -70,11 +74,14 @@ export type Database = {
           last_name?: string | null
           onboarding_answers?: Json | null
           onboarding_completed?: boolean
+          plan?: string
+          plan_expires_at?: string | null
           sector?: string | null
           timezone?: string | null
           updated_at?: string
         }
         Update: {
+          audits_this_month?: number
           avatar_url?: string | null
           country?: string | null
           created_at?: string
@@ -86,6 +93,8 @@ export type Database = {
           last_name?: string | null
           onboarding_answers?: Json | null
           onboarding_completed?: boolean
+          plan?: string
+          plan_expires_at?: string | null
           sector?: string | null
           timezone?: string | null
           updated_at?: string
