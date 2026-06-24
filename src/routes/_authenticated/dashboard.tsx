@@ -153,10 +153,9 @@ function initialsOf(profile: Profile | null): string {
   return ((a + b) || src[0]).toUpperCase();
 }
 
-function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => void; isAdmin: boolean }) {
+function TabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void }) {
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: "audits", label: "Audits", icon: ClipboardList },
-    ...(isAdmin ? [{ id: "admin" as const, label: "Admin", icon: ShieldCheck }] : []),
   ];
   return (
     <div className="border-b border-border">
