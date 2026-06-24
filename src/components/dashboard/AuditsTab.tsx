@@ -817,7 +817,7 @@ function metricBar(value: number, target: number, inverse = false): { pct: numbe
   return { pct, tone };
 }
 
-function buildAndDownloadPdf(args: {
+export function buildAndDownloadPdf(args: {
   clientName: string;
   sector: Sector;
   inputs: AuditInputs;
