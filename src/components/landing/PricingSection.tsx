@@ -63,7 +63,7 @@ const plans = [
       { text: "Tous les modules dont Vision Créative", included: true },
       { text: "Diagnostic IA Claude illimité", included: true },
       { text: "Export PDF brandé illimité", included: true },
-      { text: "Accès Masterclass complet", included: true },
+      { text: "Accès accompagnement prioritaire", included: true },
       { text: "Simulateur P&L illimité", included: true },
       { text: "Historique illimité + progression", included: true },
       { text: "Support prioritaire", included: true },
