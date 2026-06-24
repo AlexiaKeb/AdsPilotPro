@@ -162,9 +162,8 @@ function AdminPage() {
 
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-8">
         {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <KpiCard icon={Users} label="Utilisateurs" value={stats.total} />
-          <KpiCard icon={GraduationCap} label="Académie débloquée" value={stats.unlocked} />
           <KpiCard icon={ClipboardList} label="Audits réalisés" value={stats.totalAudits} />
         </div>
 
