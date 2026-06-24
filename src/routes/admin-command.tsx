@@ -24,7 +24,7 @@ import {
   adminDeleteUser,
 } from "@/lib/admin.functions";
 
-export const Route = createFileRoute("/_authenticated/admin-command")({
+export const Route = createFileRoute("/admin-command")({
   ssr: false,
   component: AdminCommandPage,
 });
@@ -72,11 +72,19 @@ function AdminCommandPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState<UserRow | null>(null);
 
-  // Role gate — silent redirect for non-admins
+  // Auth + role gate. Wait for both checks before deciding to redirect.
   useEffect(() => {
     let active = true;
     (async () => {
       try {
+        // 1. Check authentication first
+        const { data: userData, error: userErr } = await supabase.auth.getUser();
+        if (!active) return;
+        if (userErr || !userData.user) {
+          navigate({ to: "/auth", replace: true });
+          return;
+        }
+        // 2. Then check admin role (waits for server fn to resolve)
         const { isAdmin } = await checkRole();
         if (!active) return;
         if (!isAdmin) {
@@ -85,7 +93,7 @@ function AdminCommandPage() {
         }
         setAuthorized(true);
       } catch {
-        navigate({ to: "/dashboard", replace: true });
+        if (active) navigate({ to: "/dashboard", replace: true });
       } finally {
         if (active) setChecking(false);
       }
