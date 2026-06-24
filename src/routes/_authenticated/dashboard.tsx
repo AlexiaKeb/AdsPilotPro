@@ -1,21 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, ClipboardList, GraduationCap, Lock, Rocket, ShieldCheck } from "lucide-react";
+import { LogOut, ClipboardList, Rocket, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { CoachingCTA } from "@/components/CoachingCTA";
 
-type TabId = "audits" | "academy" | "admin";
+type TabId = "audits" | "admin";
 
 interface Profile {
   id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
-  has_andromeda_access: boolean;
   onboarding_completed: boolean;
 }
 
@@ -39,7 +38,7 @@ function Dashboard() {
       const [{ data, error }, roleRes] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, avatar_url, has_andromeda_access, onboarding_completed")
+          .select("id, email, full_name, avatar_url, onboarding_completed")
           .eq("id", uid)
           .maybeSingle(),
         supabase
@@ -96,15 +95,14 @@ function Dashboard() {
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} onSignOut={onSignOut} />
       <TabBar tab={tab} setTab={onTabChange} isAdmin={isAdmin} />
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
         {tab === "audits" && <AuditsTab />}
-        {tab === "academy" && <AcademyTab unlocked={profile?.has_andromeda_access ?? false} />}
+        <CoachingCTA />
       </main>
       <AuditHistory onView={() => setTab("audits")} />
       {showOnboarding && profile && (
         <OnboardingFlow
           userId={profile.id}
-          hasAndromedaAccess={profile.has_andromeda_access}
           onComplete={() =>
             setProfile((prev) => (prev ? { ...prev, onboarding_completed: true } : prev))
           }
@@ -128,9 +126,6 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
         <div className="flex items-center gap-3">
           <div className="hidden md:block text-right">
             <div className="text-sm font-medium">{profile?.full_name || profile?.email || "—"}</div>
-            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              {profile?.has_andromeda_access ? "ACADÉMIE · DÉBLOQUÉE" : "ACADÉMIE · VERROUILLÉE"}
-            </div>
           </div>
           <Link
             to="/profil"
@@ -178,7 +173,6 @@ function initialsOf(profile: Profile | null): string {
 function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => void; isAdmin: boolean }) {
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
     { id: "audits", label: "Audits", icon: ClipboardList },
-    { id: "academy", label: "Académie", icon: GraduationCap },
     ...(isAdmin ? [{ id: "admin" as const, label: "Admin", icon: ShieldCheck }] : []),
   ];
   return (
@@ -206,65 +200,6 @@ function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => vo
             </button>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div>
-      <div className="font-display font-bold uppercase tracking-widest text-sm">{title}</div>
-      {subtitle && <div className="text-xs text-muted-foreground mt-0.5">{subtitle}</div>}
-    </div>
-  );
-}
-
-/* ============ ACADÉMIE ============ */
-function AcademyTab({ unlocked }: { unlocked: boolean }) {
-  const modules = [
-    { n: "01", title: "Fondations Meta Ads", locked: false },
-    { n: "02", title: "Architecture des campagnes", locked: false },
-    { n: "03", title: "Hook Rate Mastery", locked: !unlocked },
-    { n: "04", title: "Scaling sans casser l'algo", locked: !unlocked },
-    { n: "05", title: "P&L réel & marge nette", locked: !unlocked },
-    { n: "06", title: "Empire Operating System", locked: !unlocked },
-  ];
-  return (
-    <div className="space-y-6">
-      <div className="card-cockpit p-6 flex items-center justify-between">
-        <div>
-          <SectionTitle title="Masterclass" subtitle="Programme cockpit AdsPilot" />
-        </div>
-        <div className={`chip-tag ${unlocked ? "" : ""}`}>
-          {unlocked ? "ACCÈS COMPLET" : "ACCÈS LIMITÉ"}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {modules.map((m) => (
-          <div key={m.n} className="card-cockpit p-6 relative">
-            <div className="flex items-start justify-between">
-              <div className="font-mono-data text-xs text-muted-foreground">MODULE {m.n}</div>
-              {m.locked && <Lock className="h-4 w-4 text-muted-foreground" />}
-            </div>
-            <div className="mt-3 font-display font-bold uppercase tracking-wide">{m.title}</div>
-            <div className="mt-5">
-              {m.locked ? (
-                <button
-                  onClick={() => toast.info("Cette section sera débloquée par votre admin.")}
-                  className="text-xs uppercase tracking-widest font-display font-bold text-primary"
-                >
-                  Demander l'accès →
-                </button>
-              ) : (
-                <button className="text-xs uppercase tracking-widest font-display font-bold text-success">
-                  Lancer le module →
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -38,8 +38,8 @@ const faq = [
     a: "Oui, vos données sont chiffrées et ne sont jamais partagées avec des tiers. Vous restez seul propriétaire de vos métriques.",
   },
   {
-    q: "La Masterclass est-elle incluse dans le Pro ?",
-    a: "Oui, accès complet immédiat à toute la Masterclass dès l'activation de votre plan Pro.",
+    q: "Puis-je travailler avec un expert Meta Ads ?",
+    a: "Oui — l'accompagnement personnalisé 1-to-1 avec notre expert Meta Ads est disponible en option depuis votre dashboard, quel que soit votre plan.",
   },
 ];
 

@@ -34,7 +34,6 @@ interface OnboardingAnswers {
 
 interface OnboardingFlowProps {
   userId: string;
-  hasAndromedaAccess: boolean;
   onComplete: () => void;
 }
 
@@ -58,7 +57,7 @@ const LOADING_MESSAGES = [
   "Génération de votre diagnostic personnalisé…",
 ];
 
-export function OnboardingFlow({ userId, hasAndromedaAccess, onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
   const navigate = useNavigate();
   const analyze = useServerFn(analyzeAudit);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -205,7 +204,6 @@ export function OnboardingFlow({ userId, hasAndromedaAccess, onComplete }: Onboa
               <Step4
                 key="s4"
                 diagnostic={diagnostic}
-                hasAndromedaAccess={hasAndromedaAccess}
                 finishing={finishing}
                 onAudits={async () => {
                   await finish();
@@ -214,7 +212,7 @@ export function OnboardingFlow({ userId, hasAndromedaAccess, onComplete }: Onboa
                   await finish();
                   navigate({ to: "/simulateur" });
                 }}
-                onAcademy={async () => {
+                onCoaching={async () => {
                   await finish();
                 }}
                 onDashboard={finish}
@@ -458,19 +456,17 @@ function Step3({
 
 function Step4({
   diagnostic,
-  hasAndromedaAccess,
   finishing,
   onAudits,
   onSimulator,
-  onAcademy,
+  onCoaching,
   onDashboard,
 }: {
   diagnostic: AuditDiagnostic | null;
-  hasAndromedaAccess: boolean;
   finishing: boolean;
   onAudits: () => void;
   onSimulator: () => void;
-  onAcademy: () => void;
+  onCoaching: () => void;
   onDashboard: () => void;
 }) {
   return (
@@ -528,12 +524,11 @@ function Step4({
             />
             <ActionCard
               icon={Sparkles}
-              title="Académie"
-              desc="Accédez aux stratégies des top 1% annonceurs."
-              cta="Découvrir l'académie"
-              onClick={onAcademy}
+              title="Accompagnement"
+              desc="Travaillez 1-to-1 avec notre expert Meta Ads."
+              cta="Réserver une session"
+              onClick={onCoaching}
               disabled={finishing}
-              badge={!hasAndromedaAccess ? "🔒 Accès Pro" : undefined}
             />
           </div>
         </div>

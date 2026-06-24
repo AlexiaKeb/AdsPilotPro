@@ -5,11 +5,8 @@ import {
   ArrowLeft,
   ShieldCheck,
   Users,
-  GraduationCap,
   ClipboardList,
   Search,
-  Lock,
-  Unlock,
   Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +20,6 @@ interface ProfileRow {
   id: string;
   email: string;
   full_name: string | null;
-  has_andromeda_access: boolean;
   created_at: string;
 }
 
@@ -35,7 +31,7 @@ function AdminPage() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [auditCounts, setAuditCounts] = useState<Record<string, number>>({});
   const [query, setQuery] = useState("");
-  const [busyId, setBusyId] = useState<string | null>(null);
+  
 
   // Verify admin role on mount (the _authenticated gate already validated the session)
   useEffect(() => {
@@ -81,7 +77,7 @@ function AdminPage() {
       const [{ data: profs, error: pErr }, { data: audits, error: aErr }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, has_andromeda_access, created_at")
+          .select("id, email, full_name, created_at")
           .order("created_at", { ascending: false }),
         supabase.from("audits").select("user_id"),
       ]);
@@ -127,26 +123,10 @@ function AdminPage() {
 
   const stats = useMemo(() => {
     const total = profiles.length;
-    const unlocked = profiles.filter((p) => p.has_andromeda_access).length;
     const totalAudits = Object.values(auditCounts).reduce((s, n) => s + n, 0);
-    return { total, unlocked, totalAudits };
+    return { total, totalAudits };
   }, [profiles, auditCounts]);
 
-  const toggleAccess = async (p: ProfileRow) => {
-    setBusyId(p.id);
-    const next = !p.has_andromeda_access;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ has_andromeda_access: next })
-      .eq("id", p.id);
-    if (error) {
-      toast.error("Mise à jour impossible");
-    } else {
-      setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, has_andromeda_access: next } : x)));
-      toast.success(next ? "Académie débloquée" : "Accès révoqué");
-    }
-    setBusyId(null);
-  };
 
   if (checking) {
     return (
@@ -182,9 +162,8 @@ function AdminPage() {
 
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-8">
         {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <KpiCard icon={Users} label="Utilisateurs" value={stats.total} />
-          <KpiCard icon={GraduationCap} label="Académie débloquée" value={stats.unlocked} />
           <KpiCard icon={ClipboardList} label="Audits réalisés" value={stats.totalAudits} />
         </div>
 
@@ -211,21 +190,19 @@ function AdminPage() {
                   <th className="px-4 py-3">Utilisateur</th>
                   <th className="px-4 py-3">Inscription</th>
                   <th className="px-4 py-3 text-center">Audits</th>
-                  <th className="px-4 py-3 text-center">Académie</th>
-                  <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                    <td colSpan={3} className="px-4 py-10 text-center text-muted-foreground">
                       <Loader2 className="inline h-4 w-4 animate-spin mr-2" /> Chargement…
                     </td>
                   </tr>
                 )}
                 {!loading && filtered.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                    <td colSpan={3} className="px-4 py-10 text-center text-muted-foreground">
                       Aucun utilisateur
                     </td>
                   </tr>
@@ -246,36 +223,6 @@ function AdminPage() {
                         {new Date(p.created_at).toLocaleDateString("fr-FR")}
                       </td>
                       <td className="px-4 py-3 text-center font-mono">{auditCounts[p.id] ?? 0}</td>
-                      <td className="px-4 py-3 text-center">
-                        {p.has_andromeda_access ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[oklch(0.78_0.18_150)]">
-                            <Unlock className="h-3.5 w-3.5" /> Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                            <Lock className="h-3.5 w-3.5" /> Verrouillée
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => toggleAccess(p)}
-                          disabled={busyId === p.id}
-                          className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold hover:bg-surface transition disabled:opacity-50"
-                        >
-                          {busyId === p.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : p.has_andromeda_access ? (
-                            <>
-                              <Lock className="h-3 w-3" /> Révoquer
-                            </>
-                          ) : (
-                            <>
-                              <Unlock className="h-3 w-3" /> Débloquer
-                            </>
-                          )}
-                        </button>
-                      </td>
                     </motion.tr>
                   ))}
               </tbody>

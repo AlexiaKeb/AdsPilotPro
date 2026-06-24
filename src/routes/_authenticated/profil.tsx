@@ -472,12 +472,12 @@ function SubscriptionSection({ profile }: { profile: ProfileRow }) {
           </div>
         </div>
         <div className="card-cockpit p-5">
-          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Masterclass</div>
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Accompagnement</div>
           <div className="mt-2 flex items-center gap-2">
             {pro ? (
-              <><CheckCircle2 className="h-4 w-4 text-success" /> <span className="font-display font-bold">Activé</span></>
+              <><CheckCircle2 className="h-4 w-4 text-success" /> <span className="font-display font-bold">Prioritaire</span></>
             ) : (
-              <><XCircle className="h-4 w-4 text-muted-foreground" /> <span className="font-display font-bold text-muted-foreground">Non activé</span></>
+              <><XCircle className="h-4 w-4 text-muted-foreground" /> <span className="font-display font-bold text-muted-foreground">Non inclus</span></>
             )}
           </div>
         </div>

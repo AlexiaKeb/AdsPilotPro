@@ -18,6 +18,7 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { CoachingCTA } from "@/components/CoachingCTA";
 
 
 export const Route = createFileRoute("/")({
@@ -176,6 +177,11 @@ function Landing() {
       <HowItWorks />
       <BattleReports />
       <PricingSection />
+      <section className="py-20 md:py-24 border-t border-border">
+        <div className="mx-auto max-w-6xl px-6">
+          <CoachingCTA />
+        </div>
+      </section>
       <FinalCta />
       <Footer />
     </div>
@@ -509,7 +515,7 @@ function Footer() {
               Ressources
             </div>
             <ul className="space-y-2 text-xs text-muted-foreground">
-              <li><span className="opacity-60">Masterclass</span></li>
+              <li><span className="opacity-60">Accompagnement</span></li>
               <li><span className="opacity-60">Blog</span></li>
             </ul>
           </div>
