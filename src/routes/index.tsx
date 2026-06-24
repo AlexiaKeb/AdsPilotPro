@@ -272,6 +272,73 @@ function Hero() {
   );
 }
 
+const steps = [
+  {
+    n: "01",
+    icon: ClipboardList,
+    title: "Entrez vos métriques",
+    desc: "ROAS, CPA, budget, créatives — 2 minutes de saisie maximum.",
+  },
+  {
+    n: "02",
+    icon: Brain,
+    title: "L'IA analyse",
+    desc: "Claude identifie vos fuites et compare aux benchmarks du secteur.",
+  },
+  {
+    n: "03",
+    icon: PlayCircle,
+    title: "Agissez",
+    desc: "Plan d'action précis, chiffré, applicable cette semaine.",
+  },
+];
+
+function HowItWorks() {
+  return (
+    <section id="how" className="py-24 md:py-32 border-t border-border">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="chip-tag mb-4">PROCESSUS</span>
+          <h2 className="font-display font-bold uppercase text-4xl md:text-5xl">
+            3 étapes. <span className="text-gradient-primary">Un diagnostic complet.</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s.n}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+              className="card-cockpit p-7 relative"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-mono-data text-4xl font-bold text-gradient-primary">{s.n}</span>
+                <s.icon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="font-display font-bold uppercase text-xl tracking-wide">{s.title}</div>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              {i < steps.length - 1 && (
+                <ArrowRight className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary/50" />
+              )}
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            to="/auth"
+            className="btn-hero inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold font-display uppercase tracking-widest"
+          >
+            Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function Ticker({ label, value, accent }: { label: string; value: React.ReactNode; accent: string }) {
   return (
@@ -283,6 +350,7 @@ function Ticker({ label, value, accent }: { label: string; value: React.ReactNod
     </div>
   );
 }
+
 
 function Arsenal() {
   return (
