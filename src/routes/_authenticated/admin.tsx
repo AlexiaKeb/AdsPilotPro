@@ -123,26 +123,10 @@ function AdminPage() {
 
   const stats = useMemo(() => {
     const total = profiles.length;
-    const unlocked = profiles.filter((p) => p.has_andromeda_access).length;
     const totalAudits = Object.values(auditCounts).reduce((s, n) => s + n, 0);
-    return { total, unlocked, totalAudits };
+    return { total, totalAudits };
   }, [profiles, auditCounts]);
 
-  const toggleAccess = async (p: ProfileRow) => {
-    setBusyId(p.id);
-    const next = !p.has_andromeda_access;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ has_andromeda_access: next })
-      .eq("id", p.id);
-    if (error) {
-      toast.error("Mise à jour impossible");
-    } else {
-      setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, has_andromeda_access: next } : x)));
-      toast.success(next ? "Académie débloquée" : "Accès révoqué");
-    }
-    setBusyId(null);
-  };
 
   if (checking) {
     return (
