@@ -18,6 +18,7 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { CoachingCTA } from "@/components/CoachingCTA";
 
 
 export const Route = createFileRoute("/")({
