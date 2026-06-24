@@ -808,3 +808,73 @@ function sectorLabel(s: Sector | string) {
   if (s === "infoproduit") return "Infoproduit";
   return "Service";
 }
+
+/* ============ PDF builder ============ */
+function metricBar(value: number, target: number, inverse = false): { pct: number; tone: "green" | "orange" | "red" } {
+  const ratio = inverse ? target / Math.max(value, 0.01) : value / Math.max(target, 0.01);
+  const pct = Math.max(0, Math.min(1, ratio)) * 100;
+  const tone = pct >= 70 ? "green" : pct >= 45 ? "orange" : "red";
+  return { pct, tone };
+}
+
+function buildAndDownloadPdf(args: {
+  clientName: string;
+  sector: Sector;
+  inputs: AuditInputs;
+  results: Record<string, number>;
+  aiByModule: AiMap<AuditDiagnostic>;
+  activeModuleId: ScoredModuleId;
+}) {
+  const { clientName, sector, inputs, results, aiByModule, activeModuleId } = args;
+
+  const moduleScores: Record<ScoredModuleId, number> = {
+    andromeda: results.andromedaScore,
+    oracle: results.oracleScore,
+    mercury: results.mercuryScore,
+    atlas: results.atlasScore,
+  };
+  const moduleLabels: Record<ScoredModuleId, string> = {
+    andromeda: "Andromeda",
+    oracle: "Oracle LTV",
+    mercury: "Mercury CRO",
+    atlas: "Atlas Scaling",
+  };
+
+  const modules = SCORED_MODULES.map((id) => ({
+    id,
+    label: moduleLabels[id],
+    score: moduleScores[id],
+    diagnostic: aiByModule[id] ?? null,
+  }));
+
+  const currentModule = modules.find((m) => m.id === activeModuleId)!;
+
+  const globalScore = Math.round(
+    (results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5,
+  );
+
+  const metrics: AuditPdfMetric[] = [
+    { label: "ROAS actuel", value: `${inputs.roas_actual.toFixed(2)}×`, bar: metricBar(inputs.roas_actual, results.roasThreshold * 1.3) },
+    { label: "CPA actuel", value: `${inputs.cpa_actual.toFixed(0)} €`, bar: metricBar(inputs.cpa_actual, inputs.avg_cart * 0.35, true) },
+    { label: "Budget journalier", value: `${inputs.daily_budget.toFixed(0)} €` },
+    { label: "Panier moyen", value: `${inputs.avg_cart.toFixed(0)} €` },
+    { label: "Rétention", value: `${inputs.retention.toFixed(0)} %`, bar: metricBar(inputs.retention, 60) },
+    { label: "LTV 12 mois", value: `${results.ltv12.toFixed(0)} €` },
+    { label: "Taux ajout panier", value: `${inputs.add_to_cart_rate.toFixed(1)} %`, bar: metricBar(inputs.add_to_cart_rate, 8) },
+    { label: "Taux d'abandon", value: `${inputs.abandon_rate.toFixed(0)} %`, bar: metricBar(inputs.abandon_rate, 40, true) },
+    { label: "Vitesse page", value: `${inputs.page_speed.toFixed(1)} s`, bar: metricBar(inputs.page_speed, 2, true) },
+    { label: "Hook Rate", value: `${inputs.hook_rate.toFixed(0)} %`, bar: metricBar(inputs.hook_rate, 35) },
+    { label: "CTR", value: `${inputs.ctr.toFixed(2)} %`, bar: metricBar(inputs.ctr, 2.5) },
+  ];
+
+  const data: AuditPdfData = {
+    clientName: clientName || "Client AdsPilot",
+    sectorLabel: sectorLabel(sector),
+    globalScore,
+    metrics,
+    modules,
+    currentModule,
+  };
+
+  downloadAuditPdf(data);
+}
