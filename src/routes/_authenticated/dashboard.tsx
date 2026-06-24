@@ -26,7 +26,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabId>("audits");
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  
 
   useEffect(() => {
     let mounted = true;
