@@ -75,8 +75,8 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
 
 
 
-type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
-const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
+export type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
+export const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
 type AiMap<T> = Partial<Record<ScoredModuleId, T>>;
 
 export function AuditsTab() {
