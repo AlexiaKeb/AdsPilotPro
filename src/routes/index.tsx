@@ -124,15 +124,16 @@ const arsenal = [
     accent: "var(--color-success)",
   },
   {
-    code: "PILOTAGE D'EMPIRE",
+    code: "VISION CRÉATIVE",
     sub: "",
-    cat: "SYSTÈME",
-    icon: Globe2,
-    title: "Infrastructure de scale",
+    cat: "IA",
+    icon: Sparkles,
+    title: "Notation créative IA en 30 secondes",
     desc:
-      "Déployez l'infrastructure globale qui soutient le scaling massif du top 1% annonceurs.",
+      "Uploadez votre photo ou vidéo — l'IA la note instantanément et pointe les frictions qui tuent vos conversions.",
     accent: "var(--color-warning)",
   },
+
 ];
 
 const battleReports = [
