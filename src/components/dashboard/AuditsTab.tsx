@@ -146,21 +146,6 @@ export function AuditsTab() {
     };
   }, [inputs]);
 
-  const loadHistory = async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
-    const { data } = await supabase
-      .from("audits")
-      .select("id, sector, created_at, results")
-      .order("created_at", { ascending: false })
-      .limit(8);
-    if (data) setHistory(data as unknown as AuditRecord[]);
-  };
-
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
   const onSave = async () => {
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
@@ -175,16 +160,28 @@ export function AuditsTab() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inputs: inputs as any,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      results: results as any,
+      results: { ...results, ai_recommendations: aiByModule } as any,
     });
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Audit sauvegardé");
-      loadHistory();
+      emitAudit("audit:saved");
     }
     setSaving(false);
   };
+
+  // Reopen a saved audit when user clicks "VOIR" in the history section
+  useEffect(() => {
+    return onAudit("audit:open", (rec) => {
+      if (!rec) return;
+      const merged = { ...DEFAULTS[(rec.sector as Sector) ?? "ecommerce"], ...(rec.inputs ?? {}) } as AuditInputs;
+      setInputs(merged);
+      const ai = (rec.results?.ai_recommendations ?? {}) as AiMap<AuditDiagnostic>;
+      setAiByModule(ai);
+      setActive("andromeda");
+    });
+  }, []);
 
   // Build per-module signature so we only re-trigger when relevant fields change
   const moduleSignature: Record<ScoredModuleId, string> = {
