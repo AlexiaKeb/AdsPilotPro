@@ -179,56 +179,51 @@ export function AuditsTab() {
     });
   }, []);
 
-  // Build per-module signature so we only re-trigger when relevant fields change
-  const moduleSignature: Record<ScoredModuleId, string> = {
-    andromeda: `${inputs.sector}|${inputs.roas_actual}|${inputs.cpa_actual}|${inputs.daily_budget}|${inputs.avg_cart}`,
-    oracle: `${inputs.sector}|${inputs.avg_cart}|${inputs.purchase_freq}|${inputs.retention}`,
-    mercury: `${inputs.sector}|${inputs.add_to_cart_rate}|${inputs.abandon_rate}|${inputs.page_speed}`,
-    atlas: `${inputs.sector}|${inputs.stock_coverage_days}|${inputs.supplier_count}`,
+  const activeScored = SCORED_MODULES.includes(active as ScoredModuleId) ? (active as ScoredModuleId) : null;
+
+  // Explicit trigger — only fires on button click
+  const runDiagnostic = (mod: ScoredModuleId) => {
+    const reqId = ++reqIdRef.current[mod];
+    setLoadingByModule((prev) => ({ ...prev, [mod]: true }));
+    const moduleScore = Math.round(
+      mod === "andromeda" ? results.andromedaScore
+        : mod === "oracle" ? results.oracleScore
+        : mod === "mercury" ? results.mercuryScore
+        : results.atlasScore,
+    );
+    analyze({
+      data: {
+        sector: sectorLabel(inputs.sector),
+        roas: inputs.roas_actual,
+        roas_threshold: results.roasThreshold,
+        cpa: inputs.cpa_actual,
+        max_cpa: inputs.avg_cart * 0.35,
+        budget: inputs.daily_budget,
+        score: moduleScore,
+      },
+    })
+      .then((diag) => {
+        if (reqId !== reqIdRef.current[mod]) return;
+        setAiByModule((prev) => ({ ...prev, [mod]: diag }));
+      })
+      .catch((err: Error) => {
+        if (reqId !== reqIdRef.current[mod]) return;
+        toast.error(`Analyse IA: ${err.message}`);
+      })
+      .finally(() => {
+        if (reqId !== reqIdRef.current[mod]) return;
+        setLoadingByModule((prev) => ({ ...prev, [mod]: false }));
+      });
   };
 
-  // Debounced auto-trigger of AI diagnostic for the active scored module
-  const activeScored = SCORED_MODULES.includes(active as ScoredModuleId) ? (active as ScoredModuleId) : null;
-  const activeSig = activeScored ? moduleSignature[activeScored] : "";
-  useEffect(() => {
-    if (!activeScored) return;
-    const mod = activeScored;
-    const timer = setTimeout(() => {
-      const reqId = ++reqIdRef.current[mod];
-      setLoadingByModule((prev) => ({ ...prev, [mod]: true }));
-      const moduleScore = Math.round(
-        mod === "andromeda" ? results.andromedaScore
-          : mod === "oracle" ? results.oracleScore
-          : mod === "mercury" ? results.mercuryScore
-          : results.atlasScore,
-      );
-      analyze({
-        data: {
-          sector: sectorLabel(inputs.sector),
-          roas: inputs.roas_actual,
-          roas_threshold: results.roasThreshold,
-          cpa: inputs.cpa_actual,
-          max_cpa: inputs.avg_cart * 0.35,
-          budget: inputs.daily_budget,
-          score: moduleScore,
-        },
-      })
-        .then((diag) => {
-          if (reqId !== reqIdRef.current[mod]) return; // stale
-          setAiByModule((prev) => ({ ...prev, [mod]: diag }));
-        })
-        .catch((err: Error) => {
-          if (reqId !== reqIdRef.current[mod]) return;
-          toast.error(`Analyse IA: ${err.message}`);
-        })
-        .finally(() => {
-          if (reqId !== reqIdRef.current[mod]) return;
-          setLoadingByModule((prev) => ({ ...prev, [mod]: false }));
-        });
-    }, 800);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeScored, activeSig]);
+  const moduleReady: Record<ScoredModuleId, boolean> = {
+    andromeda: inputs.roas_actual > 0 && inputs.cpa_actual > 0 && inputs.daily_budget > 0,
+    oracle: inputs.avg_cart > 0 && inputs.purchase_freq > 0 && inputs.retention > 0,
+    mercury: inputs.add_to_cart_rate > 0 && inputs.abandon_rate > 0 && inputs.page_speed > 0,
+    atlas: inputs.stock_coverage_days > 0 && inputs.supplier_count > 0,
+  };
+
+
 
 
 
