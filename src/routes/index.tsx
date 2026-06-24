@@ -231,13 +231,13 @@ function Hero() {
           className="max-w-4xl"
         >
           <span className="chip-tag mb-6">COCKPIT META ADS · ÉDITION 2026</span>
-          <h1 className="font-display font-bold uppercase text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight">
-            L'ARSENAL
-            <br />
-            <span className="text-gradient-primary">DÉCISIONNEL.</span>
+          <h1 className="font-display font-bold uppercase text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
+            Arrêtez de piloter vos pubs{" "}
+            <span className="text-gradient-primary">à l'aveugle.</span>
           </h1>
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            Six piliers technologiques conçus pour réconcilier vos données, valider vos actifs et simuler votre scale avec une précision chirurgicale.
+            AdsPilot Pro diagnostique vos campagnes Meta Ads avec l'IA, identifie vos fuites de
+            budget et vous dit exactement quoi faire — en moins de 3 minutes.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -245,33 +245,33 @@ function Hero() {
               to="/auth"
               className="btn-hero inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold font-display uppercase tracking-widest"
             >
-              Accéder au cockpit <ArrowRight className="h-4 w-4" />
+              Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#arsenal"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold font-display uppercase tracking-widest text-foreground border border-border-strong hover:bg-surface transition"
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold font-display uppercase tracking-widest text-foreground hover:text-primary transition"
             >
-              Voir l'arsenal
-            </a>
+              Voir les tarifs →
+            </Link>
           </div>
         </motion.div>
 
-        {/* KPI tickers */}
+        {/* 3 hero stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
-          <Ticker label="ROAS moyen scalé" value={<Counter to={4.48} decimals={2} suffix="×" />} accent="var(--color-success)" />
-          <Ticker label="Profit récupéré" value={<Counter to={4150} prefix="+" suffix=" €" />} accent="var(--color-warning)" />
-          <Ticker label="CTR débloqué" value={<Counter to={3.2} decimals={2} suffix="%" />} accent="var(--color-primary)" />
-          <Ticker label="Précision modèle" value={<Counter to={98} suffix="%" />} accent="var(--color-success)" />
+          <Ticker label="Pour obtenir votre premier diagnostic" value="< 3 MIN" accent="var(--color-success)" />
+          <Ticker label="D'analyse couvrant 100% de votre funnel" value="5 MODULES" accent="var(--color-primary)" />
+          <Ticker label="Le même moteur IA qu'utilisent les pros" value="IA CLAUDE" accent="var(--color-warning)" />
         </motion.div>
       </div>
     </section>
   );
 }
+
 
 function Ticker({ label, value, accent }: { label: string; value: React.ReactNode; accent: string }) {
   return (
