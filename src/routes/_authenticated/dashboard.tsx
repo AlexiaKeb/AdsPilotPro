@@ -90,6 +90,8 @@ function Dashboard() {
     setTab(id);
   };
 
+  const showOnboarding = !!profile && !profile.onboarding_completed;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} onSignOut={onSignOut} />
@@ -99,6 +101,15 @@ function Dashboard() {
         {tab === "academy" && <AcademyTab unlocked={profile?.has_andromeda_access ?? false} />}
       </main>
       <AuditHistory onView={() => setTab("audits")} />
+      {showOnboarding && profile && (
+        <OnboardingFlow
+          userId={profile.id}
+          hasAndromedaAccess={profile.has_andromeda_access}
+          onComplete={() =>
+            setProfile((prev) => (prev ? { ...prev, onboarding_completed: true } : prev))
+          }
+        />
+      )}
     </div>
   );
 }
