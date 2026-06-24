@@ -457,19 +457,17 @@ function Step3({
 
 function Step4({
   diagnostic,
-  hasAndromedaAccess,
   finishing,
   onAudits,
   onSimulator,
-  onAcademy,
+  onCoaching,
   onDashboard,
 }: {
   diagnostic: AuditDiagnostic | null;
-  hasAndromedaAccess: boolean;
   finishing: boolean;
   onAudits: () => void;
   onSimulator: () => void;
-  onAcademy: () => void;
+  onCoaching: () => void;
   onDashboard: () => void;
 }) {
   return (
