@@ -173,12 +173,15 @@ function Landing() {
       <NavBar />
       <Hero />
       <Arsenal />
+      <HowItWorks />
       <BattleReports />
+      <PricingSection />
       <FinalCta />
       <Footer />
     </div>
   );
 }
+
 
 function NavBar() {
   return (
