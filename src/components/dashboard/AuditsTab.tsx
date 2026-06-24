@@ -13,7 +13,7 @@ import { emitAudit, onAudit } from "./auditHistoryBus";
 export type Sector = "ecommerce" | "infoproduit" | "service";
 export type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
 
-interface AuditInputs {
+export interface AuditInputs {
   sector: Sector;
   // Andromeda
   roas_actual: number;
