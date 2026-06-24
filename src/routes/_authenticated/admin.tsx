@@ -77,7 +77,7 @@ function AdminPage() {
       const [{ data: profs, error: pErr }, { data: audits, error: aErr }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, has_andromeda_access, created_at")
+          .select("id, email, full_name, created_at")
           .order("created_at", { ascending: false }),
         supabase.from("audits").select("user_id"),
       ]);
