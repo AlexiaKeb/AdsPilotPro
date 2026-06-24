@@ -17,7 +17,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  adminCheckRole,
   adminListUsers,
   adminListAudits,
   adminUpdatePlan,
@@ -55,9 +54,47 @@ type AuditRow = {
   created_at: string;
 };
 
+async function waitForAuthenticatedUser() {
+  const sessionResult = await supabase.auth.getSession();
+  if (sessionResult.data.session?.user) {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data.user) return data.user;
+  }
+
+  return new Promise<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>(
+    (resolve) => {
+      let settled = false;
+      let unsubscribe: (() => void) | undefined;
+
+      const finish = (
+        user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]
+      ) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        unsubscribe?.();
+        resolve(user);
+      };
+
+      const timeoutId = window.setTimeout(async () => {
+        const { data, error } = await supabase.auth.getUser();
+        finish(error ? null : data.user);
+      }, 2500);
+
+      const listener = supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          finish(session.user);
+          return;
+        }
+        if (event === "INITIAL_SESSION") finish(null);
+      });
+      unsubscribe = () => listener.data.subscription.unsubscribe();
+    }
+  );
+}
+
 function AdminCommandPage() {
   const navigate = useNavigate();
-  const checkRole = useServerFn(adminCheckRole);
   const listUsers = useServerFn(adminListUsers);
   const listAudits = useServerFn(adminListAudits);
   const updatePlan = useServerFn(adminUpdatePlan);
@@ -77,17 +114,32 @@ function AdminCommandPage() {
     let active = true;
     (async () => {
       try {
-        // 1. Check authentication first
-        const { data: userData, error: userErr } = await supabase.auth.getUser();
+        // 1. Wait for the browser auth session to be restored before deciding.
+        const user = await waitForAuthenticatedUser();
         if (!active) return;
-        if (userErr || !userData.user) {
+        if (!user) {
           navigate({ to: "/auth", replace: true });
           return;
         }
-        // 2. Then check admin role (waits for server fn to resolve)
-        const { isAdmin } = await checkRole();
+
+        // 2. Wait for the profile fetch, then verify the admin role server-side via RLS-safe RPC.
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", user.id)
+          .maybeSingle();
         if (!active) return;
-        if (!isAdmin) {
+        if (profileError || !profile) {
+          navigate({ to: "/dashboard", replace: true });
+          return;
+        }
+
+        const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+          _user_id: user.id,
+          _role: "admin",
+        });
+        if (!active) return;
+        if (roleError || !isAdmin) {
           navigate({ to: "/dashboard", replace: true });
           return;
         }
@@ -101,7 +153,7 @@ function AdminCommandPage() {
     return () => {
       active = false;
     };
-  }, [checkRole, navigate]);
+  }, [navigate]);
 
   // Load data once authorized
   useEffect(() => {
