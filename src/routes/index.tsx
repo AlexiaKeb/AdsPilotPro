@@ -12,7 +12,13 @@ import {
   TrendingUp,
   Zap,
   Target,
+  Sparkles,
+  ClipboardList,
+  Brain,
+  PlayCircle,
 } from "lucide-react";
+import { PricingSection } from "@/components/landing/PricingSection";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -118,15 +124,16 @@ const arsenal = [
     accent: "var(--color-success)",
   },
   {
-    code: "PILOTAGE D'EMPIRE",
+    code: "VISION CRÉATIVE",
     sub: "",
-    cat: "SYSTÈME",
-    icon: Globe2,
-    title: "Infrastructure de scale",
+    cat: "IA",
+    icon: Sparkles,
+    title: "Notation créative IA en 30 secondes",
     desc:
-      "Déployez l'infrastructure globale qui soutient le scaling massif du top 1% annonceurs.",
+      "Uploadez votre photo ou vidéo — l'IA la note instantanément et pointe les frictions qui tuent vos conversions.",
     accent: "var(--color-warning)",
   },
+
 ];
 
 const battleReports = [
@@ -166,12 +173,15 @@ function Landing() {
       <NavBar />
       <Hero />
       <Arsenal />
+      <HowItWorks />
       <BattleReports />
+      <PricingSection />
       <FinalCta />
       <Footer />
     </div>
   );
 }
+
 
 function NavBar() {
   return (
@@ -180,8 +190,8 @@ function NavBar() {
         <Logo />
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
           <a href="#arsenal" className="hover:text-foreground transition">Arsenal</a>
-          <a href="#rapports" className="hover:text-foreground transition">Rapports</a>
-          <a href="#cockpit" className="hover:text-foreground transition">Cockpit</a>
+          <a href="#how" className="hover:text-foreground transition">Comment ça marche</a>
+          <Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link>
         </nav>
         <Link
           to="/auth"
@@ -193,6 +203,7 @@ function NavBar() {
     </header>
   );
 }
+
 
 function Logo() {
   return (
@@ -220,13 +231,13 @@ function Hero() {
           className="max-w-4xl"
         >
           <span className="chip-tag mb-6">COCKPIT META ADS · ÉDITION 2026</span>
-          <h1 className="font-display font-bold uppercase text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight">
-            L'ARSENAL
-            <br />
-            <span className="text-gradient-primary">DÉCISIONNEL.</span>
+          <h1 className="font-display font-bold uppercase text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
+            Arrêtez de piloter vos pubs{" "}
+            <span className="text-gradient-primary">à l'aveugle.</span>
           </h1>
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            Six piliers technologiques conçus pour réconcilier vos données, valider vos actifs et simuler votre scale avec une précision chirurgicale.
+            AdsPilot Pro diagnostique vos campagnes Meta Ads avec l'IA, identifie vos fuites de
+            budget et vous dit exactement quoi faire — en moins de 3 minutes.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -234,29 +245,96 @@ function Hero() {
               to="/auth"
               className="btn-hero inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold font-display uppercase tracking-widest"
             >
-              Accéder au cockpit <ArrowRight className="h-4 w-4" />
+              Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#arsenal"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold font-display uppercase tracking-widest text-foreground border border-border-strong hover:bg-surface transition"
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold font-display uppercase tracking-widest text-foreground hover:text-primary transition"
             >
-              Voir l'arsenal
-            </a>
+              Voir les tarifs →
+            </Link>
           </div>
         </motion.div>
 
-        {/* KPI tickers */}
+        {/* 3 hero stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
-          <Ticker label="ROAS moyen scalé" value={<Counter to={4.48} decimals={2} suffix="×" />} accent="var(--color-success)" />
-          <Ticker label="Profit récupéré" value={<Counter to={4150} prefix="+" suffix=" €" />} accent="var(--color-warning)" />
-          <Ticker label="CTR débloqué" value={<Counter to={3.2} decimals={2} suffix="%" />} accent="var(--color-primary)" />
-          <Ticker label="Précision modèle" value={<Counter to={98} suffix="%" />} accent="var(--color-success)" />
+          <Ticker label="Pour obtenir votre premier diagnostic" value="< 3 MIN" accent="var(--color-success)" />
+          <Ticker label="D'analyse couvrant 100% de votre funnel" value="5 MODULES" accent="var(--color-primary)" />
+          <Ticker label="Le même moteur IA qu'utilisent les pros" value="IA CLAUDE" accent="var(--color-warning)" />
         </motion.div>
+      </div>
+    </section>
+  );
+}
+
+const steps = [
+  {
+    n: "01",
+    icon: ClipboardList,
+    title: "Entrez vos métriques",
+    desc: "ROAS, CPA, budget, créatives — 2 minutes de saisie maximum.",
+  },
+  {
+    n: "02",
+    icon: Brain,
+    title: "L'IA analyse",
+    desc: "Claude identifie vos fuites et compare aux benchmarks du secteur.",
+  },
+  {
+    n: "03",
+    icon: PlayCircle,
+    title: "Agissez",
+    desc: "Plan d'action précis, chiffré, applicable cette semaine.",
+  },
+];
+
+function HowItWorks() {
+  return (
+    <section id="how" className="py-24 md:py-32 border-t border-border">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="chip-tag mb-4">PROCESSUS</span>
+          <h2 className="font-display font-bold uppercase text-4xl md:text-5xl">
+            3 étapes. <span className="text-gradient-primary">Un diagnostic complet.</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 relative">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s.n}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+              className="card-cockpit p-7 relative"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-mono-data text-4xl font-bold text-gradient-primary">{s.n}</span>
+                <s.icon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="font-display font-bold uppercase text-xl tracking-wide">{s.title}</div>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              {i < steps.length - 1 && (
+                <ArrowRight className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 h-6 w-6 text-primary/50" />
+              )}
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            to="/auth"
+            className="btn-hero inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold font-display uppercase tracking-widest"
+          >
+            Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );
@@ -272,6 +350,7 @@ function Ticker({ label, value, accent }: { label: string; value: React.ReactNod
     </div>
   );
 }
+
 
 function Arsenal() {
   return (
@@ -388,7 +467,7 @@ function FinalCta() {
               to="/auth"
               className="btn-hero mt-10 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold font-display uppercase tracking-widest"
             >
-              Accéder au cockpit <ArrowRight className="h-4 w-4" />
+              Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -399,11 +478,57 @@ function FinalCta() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border py-10">
-      <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-        <Logo />
-        <div className="font-mono uppercase tracking-widest">© 2026 ADSPILOT PRO — ALL SYSTEMS NOMINAL</div>
+    <footer className="border-t border-border py-16">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div>
+            <Logo />
+            <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
+              © 2026 AdsPilot Pro<br />Tous droits réservés.
+            </p>
+            <a
+              href="mailto:contact@adspilotpro.com"
+              className="mt-3 inline-block text-xs text-muted-foreground hover:text-foreground transition"
+            >
+              contact@adspilotpro.com
+            </a>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Produit
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><a href="#arsenal" className="hover:text-foreground transition">Fonctionnalités</a></li>
+              <li><Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link></li>
+              <li><a href="#how" className="hover:text-foreground transition">Comment ça marche</a></li>
+              <li><Link to="/auth" className="hover:text-foreground transition">Se connecter</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Ressources
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><span className="opacity-60">Masterclass</span></li>
+              <li><span className="opacity-60">Blog</span></li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Légal
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><span className="opacity-60">Mentions légales</span></li>
+              <li><span className="opacity-60">Politique de confidentialité</span></li>
+              <li><span className="opacity-60">CGU</span></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-10 pt-6 border-t border-border text-center font-mono uppercase tracking-widest text-[10px] text-muted-foreground">
+          ALL SYSTEMS NOMINAL
+        </div>
       </div>
     </footer>
   );
 }
+
