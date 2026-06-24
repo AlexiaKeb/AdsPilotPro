@@ -13,6 +13,7 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  avatar_url: string | null;
   has_andromeda_access: boolean;
 }
 
