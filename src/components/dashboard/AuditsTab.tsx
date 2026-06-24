@@ -383,6 +383,16 @@ export function AuditsTab() {
                 <AiRecommendations
                   loading={!!loadingByModule[activeScored]}
                   diagnostic={aiByModule[activeScored] ?? null}
+                  onDownloadPdf={() =>
+                    buildAndDownloadPdf({
+                      clientName,
+                      sector: inputs.sector,
+                      inputs,
+                      results,
+                      aiByModule,
+                      activeModuleId: activeScored,
+                    })
+                  }
                 />
               )}
             </div>
