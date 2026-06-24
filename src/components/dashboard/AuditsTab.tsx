@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
@@ -381,7 +382,27 @@ export function AuditsTab() {
       )}
 
 
-
+      {/* Standalone simulator CTA */}
+      <div className="card-cockpit p-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
+            <Activity className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase tracking-widest text-sm">Simulateur P&amp;L</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Projetez budget, marge, ROAS de sécurité et LTV en temps réel.
+            </div>
+          </div>
+        </div>
+        <Link
+          to="/simulateur"
+          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white transition hover:opacity-90"
+          style={{ background: "var(--grad-primary)" }}
+        >
+          Ouvrir le simulateur →
+        </Link>
+      </div>
     </div>
   );
 }
