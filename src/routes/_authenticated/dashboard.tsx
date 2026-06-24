@@ -39,7 +39,7 @@ function Dashboard() {
       const [{ data, error }, roleRes] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, avatar_url, has_andromeda_access")
+          .select("id, email, full_name, avatar_url, has_andromeda_access, onboarding_completed")
           .eq("id", uid)
           .maybeSingle(),
         supabase
