@@ -1,11 +1,12 @@
 import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap } from "lucide-react";
+import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
+import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/audit-pdf";
 import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
 
@@ -82,12 +83,38 @@ export function AuditsTab() {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
+  const [clientName, setClientName] = useState<string>("");
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
     andromeda: 0, oracle: 0, mercury: 0, atlas: 0,
   });
   const analyze = useServerFn(analyzeAudit);
+
+  // Load client name once
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, first_name, last_name, email")
+        .eq("id", uid)
+        .maybeSingle();
+      if (!mounted || !data) return;
+      const name =
+        data.full_name ||
+        [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+        data.email ||
+        "";
+      setClientName(name);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Compute results in real time
   const results = useMemo(() => {
@@ -356,6 +383,16 @@ export function AuditsTab() {
                 <AiRecommendations
                   loading={!!loadingByModule[activeScored]}
                   diagnostic={aiByModule[activeScored] ?? null}
+                  onDownloadPdf={() =>
+                    buildAndDownloadPdf({
+                      clientName,
+                      sector: inputs.sector,
+                      inputs,
+                      results,
+                      aiByModule,
+                      activeModuleId: activeScored,
+                    })
+                  }
                 />
               )}
             </div>
@@ -493,8 +530,31 @@ function VisionPanel({ inputs, r }: { inputs: AuditInputs; r: Record<string, num
 }
 
 /* ============ AI Recommendations ============ */
-function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnostic: AuditDiagnostic | null }) {
+function AiRecommendations({
+  loading,
+  diagnostic,
+  onDownloadPdf,
+}: {
+  loading: boolean;
+  diagnostic: AuditDiagnostic | null;
+  onDownloadPdf?: () => void;
+}) {
+  const [generating, setGenerating] = useState(false);
   if (!loading && !diagnostic) return null;
+
+  const handleDownload = async () => {
+    if (!onDownloadPdf || generating) return;
+    setGenerating(true);
+    try {
+      // Defer so the spinner can paint before the synchronous PDF build runs.
+      await new Promise((r) => setTimeout(r, 30));
+      onDownloadPdf();
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur de génération PDF");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="card-cockpit p-6 space-y-5">
@@ -518,39 +578,61 @@ function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnost
       )}
 
       {diagnostic && !loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DiagCard
-            icon={<Brain className="h-4 w-4" />}
-            title="Diagnostic principal"
-            body={diagnostic.diagnostic_principal}
-            tone="primary"
-            wide
-          />
-          <DiagCard
-            icon={<AlertTriangle className="h-4 w-4" />}
-            title="Problème critique"
-            body={diagnostic.probleme_critique}
-            tone="danger"
-          />
-          <DiagCard
-            icon={<Zap className="h-4 w-4" />}
-            title="Action immédiate · cette semaine"
-            body={diagnostic.action_immediate}
-            tone="warning"
-          />
-          <DiagCard
-            icon={<Target className="h-4 w-4" />}
-            title="Objectif 30 jours"
-            body={diagnostic.action_30_jours}
-            tone="success"
-          />
-          <DiagCard
-            icon={<Calendar className="h-4 w-4" />}
-            title="Alerte si statu quo"
-            body={diagnostic.alerte}
-            tone="danger"
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DiagCard
+              icon={<Brain className="h-4 w-4" />}
+              title="Diagnostic principal"
+              body={diagnostic.diagnostic_principal}
+              tone="primary"
+              wide
+            />
+            <DiagCard
+              icon={<AlertTriangle className="h-4 w-4" />}
+              title="Problème critique"
+              body={diagnostic.probleme_critique}
+              tone="danger"
+            />
+            <DiagCard
+              icon={<Zap className="h-4 w-4" />}
+              title="Action immédiate · cette semaine"
+              body={diagnostic.action_immediate}
+              tone="warning"
+            />
+            <DiagCard
+              icon={<Target className="h-4 w-4" />}
+              title="Objectif 30 jours"
+              body={diagnostic.action_30_jours}
+              tone="success"
+            />
+            <DiagCard
+              icon={<Calendar className="h-4 w-4" />}
+              title="Alerte si statu quo"
+              body={diagnostic.alerte}
+              tone="danger"
+            />
+          </div>
+          {onDownloadPdf && (
+            <button
+              onClick={handleDownload}
+              disabled={generating}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 transition hover:opacity-90"
+              style={{ background: "var(--grad-primary)" }}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Génération du rapport…
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4" />
+                  Télécharger le rapport PDF
+                </>
+              )}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
@@ -725,4 +807,74 @@ function sectorLabel(s: Sector | string) {
   if (s === "ecommerce") return "E-commerce";
   if (s === "infoproduit") return "Infoproduit";
   return "Service";
+}
+
+/* ============ PDF builder ============ */
+function metricBar(value: number, target: number, inverse = false): { pct: number; tone: "green" | "orange" | "red" } {
+  const ratio = inverse ? target / Math.max(value, 0.01) : value / Math.max(target, 0.01);
+  const pct = Math.max(0, Math.min(1, ratio)) * 100;
+  const tone = pct >= 70 ? "green" : pct >= 45 ? "orange" : "red";
+  return { pct, tone };
+}
+
+function buildAndDownloadPdf(args: {
+  clientName: string;
+  sector: Sector;
+  inputs: AuditInputs;
+  results: Record<string, number>;
+  aiByModule: AiMap<AuditDiagnostic>;
+  activeModuleId: ScoredModuleId;
+}) {
+  const { clientName, sector, inputs, results, aiByModule, activeModuleId } = args;
+
+  const moduleScores: Record<ScoredModuleId, number> = {
+    andromeda: results.andromedaScore,
+    oracle: results.oracleScore,
+    mercury: results.mercuryScore,
+    atlas: results.atlasScore,
+  };
+  const moduleLabels: Record<ScoredModuleId, string> = {
+    andromeda: "Andromeda",
+    oracle: "Oracle LTV",
+    mercury: "Mercury CRO",
+    atlas: "Atlas Scaling",
+  };
+
+  const modules = SCORED_MODULES.map((id) => ({
+    id,
+    label: moduleLabels[id],
+    score: moduleScores[id],
+    diagnostic: aiByModule[id] ?? null,
+  }));
+
+  const currentModule = modules.find((m) => m.id === activeModuleId)!;
+
+  const globalScore = Math.round(
+    (results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5,
+  );
+
+  const metrics: AuditPdfMetric[] = [
+    { label: "ROAS actuel", value: `${inputs.roas_actual.toFixed(2)}×`, bar: metricBar(inputs.roas_actual, results.roasThreshold * 1.3) },
+    { label: "CPA actuel", value: `${inputs.cpa_actual.toFixed(0)} €`, bar: metricBar(inputs.cpa_actual, inputs.avg_cart * 0.35, true) },
+    { label: "Budget journalier", value: `${inputs.daily_budget.toFixed(0)} €` },
+    { label: "Panier moyen", value: `${inputs.avg_cart.toFixed(0)} €` },
+    { label: "Rétention", value: `${inputs.retention.toFixed(0)} %`, bar: metricBar(inputs.retention, 60) },
+    { label: "LTV 12 mois", value: `${results.ltv12.toFixed(0)} €` },
+    { label: "Taux ajout panier", value: `${inputs.add_to_cart_rate.toFixed(1)} %`, bar: metricBar(inputs.add_to_cart_rate, 8) },
+    { label: "Taux d'abandon", value: `${inputs.abandon_rate.toFixed(0)} %`, bar: metricBar(inputs.abandon_rate, 40, true) },
+    { label: "Vitesse page", value: `${inputs.page_speed.toFixed(1)} s`, bar: metricBar(inputs.page_speed, 2, true) },
+    { label: "Hook Rate", value: `${inputs.hook_rate.toFixed(0)} %`, bar: metricBar(inputs.hook_rate, 35) },
+    { label: "CTR", value: `${inputs.ctr.toFixed(2)} %`, bar: metricBar(inputs.ctr, 2.5) },
+  ];
+
+  const data: AuditPdfData = {
+    clientName: clientName || "Client AdsPilot",
+    sectorLabel: sectorLabel(sector),
+    globalScore,
+    metrics,
+    modules,
+    currentModule,
+  };
+
+  downloadAuditPdf(data);
 }
