@@ -12,7 +12,13 @@ import {
   TrendingUp,
   Zap,
   Target,
+  Sparkles,
+  ClipboardList,
+  Brain,
+  PlayCircle,
 } from "lucide-react";
+import { PricingSection } from "@/components/landing/PricingSection";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
