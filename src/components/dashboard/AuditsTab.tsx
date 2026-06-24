@@ -70,12 +70,8 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
   { id: "vision_creative", label: "Vision Créative", icon: Sparkles },
 ];
 
-type AuditRecord = {
-  id: string;
-  sector: string;
-  created_at: string;
-  results: Record<string, number>;
-};
+
+
 
 type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
 const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
