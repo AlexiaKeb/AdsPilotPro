@@ -52,15 +52,15 @@ function drawLogo(doc: jsPDF, x: number, y: number) {
   setFill(doc, PURPLE);
   doc.roundedRect(x, y - 5, 7, 7, 1.5, 1.5, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(10);
   setText(doc, [255, 255, 255]);
-  doc.text("A", x + 3.5, y + 0.2, { align: "center", baseline: "middle" });
+  doc.text("A", x + 3.5, y - 0.3, { align: "center" });
   setText(doc, DARK);
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text("ADSPILOT", x + 10, y - 1.5);
+  doc.text("ADSPILOT", x + 11, y - 0.5);
   setText(doc, PURPLE);
-  doc.text("PRO", x + 10 + doc.getTextWidth("ADSPILOT "), y - 1.5);
+  doc.text("PRO", x + 11 + doc.getTextWidth("ADSPILOT "), y - 0.5);
 }
 
 function drawHeader(doc: jsPDF) {
