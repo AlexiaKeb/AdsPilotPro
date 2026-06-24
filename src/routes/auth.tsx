@@ -31,6 +31,8 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
+  const [adminMode, setAdminMode] = useState(false);
+  const [adminCreds, setAdminCreds] = useState({ email: "", code: "" });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,10 +40,30 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  // Hidden admin trigger
+  useEffect(() => {
+    if (form.email.trim().toUpperCase() === "ADSPILOT-ADMIN") {
+      setAdminMode(true);
+    }
+  }, [form.email]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (adminMode) {
+        const parsed = signInSchema.parse({
+          email: adminCreds.email,
+          password: adminCreds.code,
+        });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: parsed.email,
+          password: parsed.password,
+        });
+        if (error) throw error;
+        navigate({ to: "/admin-command", replace: true });
+        return;
+      }
       if (mode === "signup") {
         const parsed = signUpSchema.parse(form);
         const { error } = await supabase.auth.signUp({
@@ -85,6 +107,13 @@ function AuthPage() {
     if (res.redirected) return;
     navigate({ to: "/dashboard", replace: true });
   };
+
+  const exitAdminMode = () => {
+    setAdminMode(false);
+    setAdminCreds({ email: "", code: "" });
+    setForm({ email: "", password: "", full_name: "" });
+  };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background text-foreground">

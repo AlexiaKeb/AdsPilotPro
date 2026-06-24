@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulateurRouteImport } from './routes/_authenticated/simulateur'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdminCommandRouteImport } from './routes/_authenticated/admin-command'
 
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
@@ -51,11 +52,18 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminCommandRoute =
+  AuthenticatedAdminCommandRouteImport.update({
+    id: '/admin-command',
+    path: '/admin-command',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/admin-command': typeof AuthenticatedAdminCommandRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
@@ -64,6 +72,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/admin-command': typeof AuthenticatedAdminCommandRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
@@ -74,6 +83,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/_authenticated/admin-command': typeof AuthenticatedAdminCommandRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/simulateur': typeof AuthenticatedSimulateurRoute
@@ -84,17 +94,26 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pricing'
+    | '/admin-command'
     | '/dashboard'
     | '/profil'
     | '/simulateur'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/pricing' | '/dashboard' | '/profil' | '/simulateur'
+  to:
+    | '/'
+    | '/auth'
+    | '/pricing'
+    | '/admin-command'
+    | '/dashboard'
+    | '/profil'
+    | '/simulateur'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/pricing'
+    | '/_authenticated/admin-command'
     | '/_authenticated/dashboard'
     | '/_authenticated/profil'
     | '/_authenticated/simulateur'
@@ -158,16 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin-command': {
+      id: '/_authenticated/admin-command'
+      path: '/admin-command'
+      fullPath: '/admin-command'
+      preLoaderRoute: typeof AuthenticatedAdminCommandRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminCommandRoute: typeof AuthenticatedAdminCommandRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedSimulateurRoute: typeof AuthenticatedSimulateurRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminCommandRoute: AuthenticatedAdminCommandRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedSimulateurRoute: AuthenticatedSimulateurRoute,
