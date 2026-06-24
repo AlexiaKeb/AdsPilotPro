@@ -467,7 +467,7 @@ function FinalCta() {
               to="/auth"
               className="btn-hero mt-10 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold font-display uppercase tracking-widest"
             >
-              Accéder au cockpit <ArrowRight className="h-4 w-4" />
+              Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -478,11 +478,57 @@ function FinalCta() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border py-10">
-      <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-        <Logo />
-        <div className="font-mono uppercase tracking-widest">© 2026 ADSPILOT PRO — ALL SYSTEMS NOMINAL</div>
+    <footer className="border-t border-border py-16">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div>
+            <Logo />
+            <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
+              © 2026 AdsPilot Pro<br />Tous droits réservés.
+            </p>
+            <a
+              href="mailto:contact@adspilotpro.com"
+              className="mt-3 inline-block text-xs text-muted-foreground hover:text-foreground transition"
+            >
+              contact@adspilotpro.com
+            </a>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Produit
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><a href="#arsenal" className="hover:text-foreground transition">Fonctionnalités</a></li>
+              <li><Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link></li>
+              <li><a href="#how" className="hover:text-foreground transition">Comment ça marche</a></li>
+              <li><Link to="/auth" className="hover:text-foreground transition">Se connecter</Link></li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Ressources
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><span className="opacity-60">Masterclass</span></li>
+              <li><span className="opacity-60">Blog</span></li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-display font-bold uppercase text-xs tracking-widest text-foreground mb-4">
+              Légal
+            </div>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><span className="opacity-60">Mentions légales</span></li>
+              <li><span className="opacity-60">Politique de confidentialité</span></li>
+              <li><span className="opacity-60">CGU</span></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-10 pt-6 border-t border-border text-center font-mono uppercase tracking-widest text-[10px] text-muted-foreground">
+          ALL SYSTEMS NOMINAL
+        </div>
       </div>
     </footer>
   );
 }
+
