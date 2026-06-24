@@ -524,12 +524,11 @@ function Step4({
             />
             <ActionCard
               icon={Sparkles}
-              title="Académie"
-              desc="Accédez aux stratégies des top 1% annonceurs."
-              cta="Découvrir l'académie"
-              onClick={onAcademy}
+              title="Accompagnement"
+              desc="Travaillez 1-to-1 avec notre expert Meta Ads."
+              cta="Réserver une session"
+              onClick={onCoaching}
               disabled={finishing}
-              badge={!hasAndromedaAccess ? "🔒 Accès Pro" : undefined}
             />
           </div>
         </div>
