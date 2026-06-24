@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 
 type TabId = "audits" | "academy" | "admin";
 
@@ -15,6 +16,7 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   has_andromeda_access: boolean;
+  onboarding_completed: boolean;
 }
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
