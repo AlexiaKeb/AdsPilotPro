@@ -204,7 +204,6 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
               <Step4
                 key="s4"
                 diagnostic={diagnostic}
-                hasAndromedaAccess={hasAndromedaAccess}
                 finishing={finishing}
                 onAudits={async () => {
                   await finish();
@@ -213,7 +212,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
                   await finish();
                   navigate({ to: "/simulateur" });
                 }}
-                onAcademy={async () => {
+                onCoaching={async () => {
                   await finish();
                 }}
                 onDashboard={finish}
