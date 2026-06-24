@@ -421,22 +421,73 @@ export function AuditsTab() {
             </div>
           </motion.div>
 
-          {/* Save bar */}
-          <div className="card-cockpit p-5 flex items-center justify-between flex-wrap gap-4">
-            <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest">
-              Score global · <span className="text-foreground font-bold">
-                {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
-              </span>
+          {/* Save bar with name + tags */}
+          <div className="card-cockpit p-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-start">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
+                  Nom de l'audit
+                </label>
+                <input
+                  type="text"
+                  value={auditName}
+                  onChange={(e) => setAuditName(e.target.value)}
+                  placeholder="ex: Campagne Noel 2025 — Shopping"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-border bg-input/40 text-sm font-mono-data outline-none focus:border-primary transition"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground font-mono uppercase tracking-widest md:pt-7">
+                Score global · <span className="text-foreground font-bold">
+                  {Math.round((results.andromedaScore + results.oracleScore + results.mercuryScore + results.atlasScore + results.visionScore) / 5)}/100
+                </span>
+              </div>
             </div>
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Sauvegarder l'audit
-            </button>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">
+                Tags (multi-sélection)
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {AUDIT_TAGS.map((t) => {
+                  const isOn = selectedTags.includes(t);
+                  const color = TAG_COLORS[t];
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() =>
+                        setSelectedTags((prev) =>
+                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                        )
+                      }
+                      className="px-3 py-1.5 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition"
+                      style={{
+                        borderWidth: 1,
+                        borderStyle: "solid",
+                        borderColor: color,
+                        color: isOn ? "#fff" : color,
+                        background: isOn ? color : "transparent",
+                      }}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Sauvegarder l'audit
+              </button>
+            </div>
           </div>
+
 
         </>
       )}
