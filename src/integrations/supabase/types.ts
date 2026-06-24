@@ -52,6 +52,8 @@ export type Database = {
           has_andromeda_access: boolean
           id: string
           last_name: string | null
+          onboarding_answers: Json | null
+          onboarding_completed: boolean
           sector: string | null
           timezone: string | null
           updated_at: string
@@ -66,6 +68,8 @@ export type Database = {
           has_andromeda_access?: boolean
           id: string
           last_name?: string | null
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
           sector?: string | null
           timezone?: string | null
           updated_at?: string
@@ -80,6 +84,8 @@ export type Database = {
           has_andromeda_access?: boolean
           id?: string
           last_name?: string | null
+          onboarding_answers?: Json | null
+          onboarding_completed?: boolean
           sector?: string | null
           timezone?: string | null
           updated_at?: string
