@@ -44,7 +44,7 @@ const plans = [
       { text: "Historique 30 jours", included: true },
       { text: "Module Vision Créative", included: false },
       { text: "Export PDF brandé", included: false },
-      { text: "Accès Masterclass", included: false },
+      { text: "Accès accompagnement prioritaire", included: false },
       { text: "Simulateur P&L illimité", included: false },
     ],
   },
