@@ -20,7 +20,6 @@ interface ProfileRow {
   id: string;
   email: string;
   full_name: string | null;
-  has_andromeda_access: boolean;
   created_at: string;
 }
 
