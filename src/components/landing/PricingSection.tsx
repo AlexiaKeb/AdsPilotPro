@@ -20,37 +20,54 @@ const plans = [
     features: [
       { text: "3 audits par mois", included: true },
       { text: "Module Andromeda uniquement", included: true },
-      { text: "Score global + métriques de base", included: true },
+      { text: "Score global sans diagnostic IA", included: true },
       { text: "Diagnostic IA Claude", included: false },
-      { text: "Modules Atlas, Oracle, Mercury, Vision", included: false },
-      { text: "Analyse créative IA (photos/vidéos)", included: false },
+      { text: "Modules Atlas, Oracle, Vision Créative", included: false },
       { text: "Export PDF brandé", included: false },
-      { text: "Historique illimité", included: false },
+      { text: "Historique étendu", included: false },
+      { text: "Accès Masterclass", included: false },
+      { text: "Simulateur P&L illimité", included: false },
+    ],
+  },
+  {
+    name: "STARTER",
+    price: 47,
+    annualPrice: 470,
+    label: "Pour démarrer sérieusement",
+    cta: "CHOISIR STARTER",
+    ctaLink: "/auth?plan=starter",
+    highlighted: false,
+    features: [
+      { text: "Audits illimités", included: true },
+      { text: "Modules Andromeda + Atlas + Oracle", included: true },
+      { text: "Diagnostic IA Claude (5 / mois)", included: true },
+      { text: "Historique 30 jours", included: true },
+      { text: "Module Vision Créative", included: false },
+      { text: "Export PDF brandé", included: false },
       { text: "Accès Masterclass", included: false },
       { text: "Simulateur P&L illimité", included: false },
     ],
   },
   {
     name: "PRO",
-    price: 47,
-    annualPrice: 470,
-    label: "Pour performer",
-    badge: "LE PLUS POPULAIRE",
+    price: 97,
+    annualPrice: 970,
+    label: "Pour performer sans limite",
+    badge: "LE PLUS COMPLET",
     cta: "DÉMARRER MON ESSAI GRATUIT",
     ctaSubtext: "7 jours gratuits — sans carte bancaire",
     ctaLink: "/auth?plan=pro",
     highlighted: true,
     features: [
-      { text: "Audits illimités", included: true },
-      { text: "Tous les modules (Atlas, Oracle, Mercury, Vision)", included: true },
-      { text: "Diagnostic IA Claude sur chaque audit", included: true },
-      { text: "Analyse créative IA (photos/vidéos)", included: true },
-      { text: "Export PDF rapport brandé", included: true },
-      { text: "Historique complet + progression", included: true },
-      { text: "Simulateur P&L illimité", included: true },
+      { text: "Tout le plan Starter inclus", included: true },
+      { text: "Tous les modules dont Vision Créative", included: true },
+      { text: "Diagnostic IA Claude illimité", included: true },
+      { text: "Export PDF brandé illimité", included: true },
       { text: "Accès Masterclass complet", included: true },
-      { text: "Mises à jour en priorité", included: true },
+      { text: "Simulateur P&L illimité", included: true },
+      { text: "Historique illimité + progression", included: true },
       { text: "Support prioritaire", included: true },
+      { text: "Accès bêta nouvelles fonctionnalités", included: true },
     ],
   },
 ];
@@ -112,7 +129,7 @@ export function PricingSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan, i) => {
             const isPro = plan.highlighted;
             const displayPrice = annual && plan.annualPrice
