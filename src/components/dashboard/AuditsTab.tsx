@@ -530,8 +530,31 @@ function VisionPanel({ inputs, r }: { inputs: AuditInputs; r: Record<string, num
 }
 
 /* ============ AI Recommendations ============ */
-function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnostic: AuditDiagnostic | null }) {
+function AiRecommendations({
+  loading,
+  diagnostic,
+  onDownloadPdf,
+}: {
+  loading: boolean;
+  diagnostic: AuditDiagnostic | null;
+  onDownloadPdf?: () => void;
+}) {
+  const [generating, setGenerating] = useState(false);
   if (!loading && !diagnostic) return null;
+
+  const handleDownload = async () => {
+    if (!onDownloadPdf || generating) return;
+    setGenerating(true);
+    try {
+      // Defer so the spinner can paint before the synchronous PDF build runs.
+      await new Promise((r) => setTimeout(r, 30));
+      onDownloadPdf();
+    } catch (e) {
+      toast.error((e as Error).message || "Erreur de génération PDF");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="card-cockpit p-6 space-y-5">
@@ -555,39 +578,61 @@ function AiRecommendations({ loading, diagnostic }: { loading: boolean; diagnost
       )}
 
       {diagnostic && !loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DiagCard
-            icon={<Brain className="h-4 w-4" />}
-            title="Diagnostic principal"
-            body={diagnostic.diagnostic_principal}
-            tone="primary"
-            wide
-          />
-          <DiagCard
-            icon={<AlertTriangle className="h-4 w-4" />}
-            title="Problème critique"
-            body={diagnostic.probleme_critique}
-            tone="danger"
-          />
-          <DiagCard
-            icon={<Zap className="h-4 w-4" />}
-            title="Action immédiate · cette semaine"
-            body={diagnostic.action_immediate}
-            tone="warning"
-          />
-          <DiagCard
-            icon={<Target className="h-4 w-4" />}
-            title="Objectif 30 jours"
-            body={diagnostic.action_30_jours}
-            tone="success"
-          />
-          <DiagCard
-            icon={<Calendar className="h-4 w-4" />}
-            title="Alerte si statu quo"
-            body={diagnostic.alerte}
-            tone="danger"
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DiagCard
+              icon={<Brain className="h-4 w-4" />}
+              title="Diagnostic principal"
+              body={diagnostic.diagnostic_principal}
+              tone="primary"
+              wide
+            />
+            <DiagCard
+              icon={<AlertTriangle className="h-4 w-4" />}
+              title="Problème critique"
+              body={diagnostic.probleme_critique}
+              tone="danger"
+            />
+            <DiagCard
+              icon={<Zap className="h-4 w-4" />}
+              title="Action immédiate · cette semaine"
+              body={diagnostic.action_immediate}
+              tone="warning"
+            />
+            <DiagCard
+              icon={<Target className="h-4 w-4" />}
+              title="Objectif 30 jours"
+              body={diagnostic.action_30_jours}
+              tone="success"
+            />
+            <DiagCard
+              icon={<Calendar className="h-4 w-4" />}
+              title="Alerte si statu quo"
+              body={diagnostic.alerte}
+              tone="danger"
+            />
+          </div>
+          {onDownloadPdf && (
+            <button
+              onClick={handleDownload}
+              disabled={generating}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 transition hover:opacity-90"
+              style={{ background: "var(--grad-primary)" }}
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Génération du rapport…
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4" />
+                  Télécharger le rapport PDF
+                </>
+              )}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
