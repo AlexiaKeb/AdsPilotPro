@@ -509,7 +509,7 @@ function Footer() {
               Ressources
             </div>
             <ul className="space-y-2 text-xs text-muted-foreground">
-              <li><span className="opacity-60">Masterclass</span></li>
+              <li><span className="opacity-60">Accompagnement</span></li>
               <li><span className="opacity-60">Blog</span></li>
             </ul>
           </div>
