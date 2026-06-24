@@ -25,7 +25,7 @@ const plans = [
       { text: "Modules Atlas, Oracle, Vision Créative", included: false },
       { text: "Export PDF brandé", included: false },
       { text: "Historique étendu", included: false },
-      { text: "Accès Masterclass", included: false },
+      { text: "Accès accompagnement prioritaire", included: false },
       { text: "Simulateur P&L illimité", included: false },
     ],
   },
