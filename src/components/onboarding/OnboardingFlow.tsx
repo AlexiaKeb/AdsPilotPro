@@ -34,7 +34,6 @@ interface OnboardingAnswers {
 
 interface OnboardingFlowProps {
   userId: string;
-  hasAndromedaAccess: boolean;
   onComplete: () => void;
 }
 
