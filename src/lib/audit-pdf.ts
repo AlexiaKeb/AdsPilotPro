@@ -139,12 +139,12 @@ function drawCoverPage(doc: jsPDF, data: AuditPdfData) {
 
   // Score number
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(56);
+  doc.setFontSize(52);
   setText(doc, tone.color);
-  doc.text(`${Math.round(data.globalScore)}`, 105, cardY + 50, { align: "center" });
-  doc.setFontSize(16);
+  doc.text(`${Math.round(data.globalScore)}`, 95, cardY + 48, { align: "right" });
+  doc.setFontSize(14);
   setText(doc, GREY);
-  doc.text("/100", 105, cardY + 60, { align: "center" });
+  doc.text("/100", 98, cardY + 48);
 
   // Badge
   const badgeW = 50;
