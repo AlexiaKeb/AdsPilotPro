@@ -13,6 +13,7 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  avatar_url: string | null;
   has_andromeda_access: boolean;
 }
 
@@ -36,7 +37,7 @@ function Dashboard() {
       const [{ data, error }, roleRes] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, email, full_name, has_andromeda_access")
+          .select("id, email, full_name, avatar_url, has_andromeda_access")
           .eq("id", uid)
           .maybeSingle(),
         supabase.rpc("has_role", { _user_id: uid, _role: "admin" }),
@@ -114,16 +115,24 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
             </div>
           </div>
           <Link
-            to="/profile"
-            className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
+            to="/profil"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-2 py-1.5 text-xs uppercase tracking-widest font-semibold hover:bg-surface transition"
             aria-label="Mon profil"
           >
-            <span
-              className="h-6 w-6 rounded-full grid place-items-center text-[10px] font-display font-bold text-white"
-              style={{ background: "var(--grad-primary)" }}
-            >
-              {initialsOf(profile)}
-            </span>
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="h-7 w-7 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className="h-7 w-7 rounded-full grid place-items-center text-[11px] font-display font-bold text-white"
+                style={{ background: "var(--grad-primary)" }}
+              >
+                {initialsOf(profile)}
+              </span>
+            )}
             <span className="hidden sm:inline">Mon profil</span>
           </Link>
           <button
@@ -140,12 +149,12 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
 }
 
 function initialsOf(profile: Profile | null): string {
-  if (!profile) return "?";
-  const name = (profile.full_name || profile.email || "?").trim();
-  const parts = name.split(/\s+/);
-  const a = parts[0]?.[0] ?? "?";
+  const src = (profile?.full_name || profile?.email || "").trim();
+  if (!src) return "•";
+  const parts = src.split(/[\s@._-]+/).filter(Boolean);
+  const a = parts[0]?.[0] ?? "";
   const b = parts[1]?.[0] ?? "";
-  return (a + b).toUpperCase();
+  return ((a + b) || src[0]).toUpperCase();
 }
 
 function TabBar({ tab, setTab, isAdmin }: { tab: TabId; setTab: (t: TabId) => void; isAdmin: boolean }) {

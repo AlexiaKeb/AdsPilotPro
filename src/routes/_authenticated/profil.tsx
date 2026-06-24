@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { deleteAccount } from "@/lib/account.functions";
 import { emitAudit } from "@/components/dashboard/auditHistoryBus";
 
-export const Route = createFileRoute("/_authenticated/profile")({
+export const Route = createFileRoute("/_authenticated/profil")({
   component: ProfilePage,
 });
 

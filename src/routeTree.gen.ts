@@ -13,7 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulateurRouteImport } from './routes/_authenticated/simulateur'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -36,9 +36,9 @@ const AuthenticatedSimulateurRoute = AuthenticatedSimulateurRouteImport.update({
   path: '/simulateur',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -57,7 +57,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/profile': typeof AuthenticatedProfileRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
 }
 export interface FileRoutesByTo {
@@ -65,7 +65,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/profile': typeof AuthenticatedProfileRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
 }
 export interface FileRoutesById {
@@ -75,20 +75,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/simulateur': typeof AuthenticatedSimulateurRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/auth'
-    | '/admin'
-    | '/dashboard'
-    | '/profile'
-    | '/simulateur'
+  fullPaths: '/' | '/auth' | '/admin' | '/dashboard' | '/profil' | '/simulateur'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/dashboard' | '/profile' | '/simulateur'
+  to: '/' | '/auth' | '/admin' | '/dashboard' | '/profil' | '/simulateur'
   id:
     | '__root__'
     | '/'
@@ -96,7 +90,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
-    | '/_authenticated/profile'
+    | '/_authenticated/profil'
     | '/_authenticated/simulateur'
   fileRoutesById: FileRoutesById
 }
@@ -136,11 +130,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSimulateurRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -163,14 +157,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedSimulateurRoute: typeof AuthenticatedSimulateurRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedSimulateurRoute: AuthenticatedSimulateurRoute,
 }
 
