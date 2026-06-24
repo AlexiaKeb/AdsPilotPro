@@ -43,27 +43,45 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          country: string | null
           created_at: string
           email: string
+          first_name: string | null
           full_name: string | null
           has_andromeda_access: boolean
           id: string
+          last_name: string | null
+          sector: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
+          country?: string | null
           created_at?: string
           email: string
+          first_name?: string | null
           full_name?: string | null
           has_andromeda_access?: boolean
           id: string
+          last_name?: string | null
+          sector?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
+          country?: string | null
           created_at?: string
           email?: string
+          first_name?: string | null
           full_name?: string | null
           has_andromeda_access?: boolean
           id?: string
+          last_name?: string | null
+          sector?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []
