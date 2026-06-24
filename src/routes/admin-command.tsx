@@ -114,10 +114,13 @@ function AdminCommandPage() {
     let active = true;
     (async () => {
       try {
+        console.log("[admin-command] guard: waiting for auth session…");
         // 1. Wait for the browser auth session to be restored before deciding.
         const user = await waitForAuthenticatedUser();
         if (!active) return;
+        console.log("[admin-command] guard: user =", user?.email ?? null, "id =", user?.id ?? null);
         if (!user) {
+          console.warn("[admin-command] guard: no user → redirect /auth");
           navigate({ to: "/auth", replace: true });
           return;
         }
@@ -129,7 +132,9 @@ function AdminCommandPage() {
           .eq("id", user.id)
           .maybeSingle();
         if (!active) return;
+        console.log("[admin-command] guard: profile =", profile, "profileError =", profileError);
         if (profileError || !profile) {
+          console.warn("[admin-command] guard: missing profile → redirect /dashboard");
           navigate({ to: "/dashboard", replace: true });
           return;
         }
@@ -139,12 +144,16 @@ function AdminCommandPage() {
           _role: "admin",
         });
         if (!active) return;
+        console.log("[admin-command] guard: has_role(admin) =", isAdmin, "roleError =", roleError);
         if (roleError || !isAdmin) {
+          console.warn("[admin-command] guard: not admin → redirect /dashboard");
           navigate({ to: "/dashboard", replace: true });
           return;
         }
+        console.log("[admin-command] guard: ✅ access granted");
         setAuthorized(true);
-      } catch {
+      } catch (err) {
+        console.error("[admin-command] guard: unexpected error → redirect /dashboard", err);
         if (active) navigate({ to: "/dashboard", replace: true });
       } finally {
         if (active) setChecking(false);
@@ -154,6 +163,7 @@ function AdminCommandPage() {
       active = false;
     };
   }, [navigate]);
+
 
   // Load data once authorized
   useEffect(() => {
