@@ -35,26 +35,17 @@ function Dashboard() {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return;
-      const [{ data, error }, roleRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, email, full_name, avatar_url, onboarding_completed")
-          .eq("id", uid)
-          .maybeSingle(),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid)
-          .eq("role", "admin")
-          .maybeSingle(),
-      ]);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url, onboarding_completed")
+        .eq("id", uid)
+        .maybeSingle();
       if (!mounted) return;
       if (error) {
         console.error(error);
         return;
       }
       if (data) setProfile(data as Profile);
-      if (roleRes.data) setIsAdmin(true);
     };
     load();
 
