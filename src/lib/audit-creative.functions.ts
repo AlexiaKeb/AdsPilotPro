@@ -38,17 +38,26 @@ export const analyzeCreative = createServerFn({ method: "POST" })
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
 
-    const textPrompt = `Tu es un expert en créatives publicitaires Meta Ads avec 10 ans d'expérience en e-commerce francophone. Tu as audité des milliers de publicités et tu sais exactement ce qui stoppe le scroll et ce qui convertit.
+    const textPrompt = `Tu es un expert en créatives publicitaires Meta Ads avec 10 ans d'expérience. Tu audites des publicités dans toutes les langues et tous les marchés.
 
-Contexte de cette publicité :
+Contexte DÉCLARÉ par l'annonceur (fait établi, ne le remets jamais en question, ne le remplace pas par une supposition) :
 - Secteur : ${data.sector}
 - Objectif : ${data.objectif}
 ${data.hook_rate != null ? `- Hook Rate 3s déclaré : ${data.hook_rate}%` : ""}
 ${data.ctr != null ? `- CTR actuel : ${data.ctr}%` : ""}
 
-Analyse cette créative Meta Ads selon ces 5 axes. Pour chaque axe, donne un score de 0 à 10, identifie le problème précis si score < 7, et donne une correction concrète et actionnable.
+RÈGLES D'ANALYSE STRICTES :
+1. Le secteur est "${data.sector}" et l'objectif est "${data.objectif}". N'écris JAMAIS qu'il s'agit d'un autre secteur (ex : ne parle pas d'e-commerce si le secteur est Infoproduit ou Service). Adapte tes critères et ton vocabulaire à ce secteur précis.
+2. LANGUE : la créative peut être dans n'importe quelle langue (français, anglais, espagnol, arabe…). La langue de la créative n'est PAS un défaut en soi. Ne recommande une traduction QUE si un élément du contexte indique une audience d'une autre langue. Sinon, considère que l'audience parle la langue de la créative.
+3. Ne fais aucune supposition non vérifiable : pas d'hypothèse sur le pays, l'audience, le prix, la concurrence ou les performances si ce n'est pas visible dans l'image ou donné dans le contexte. Si une information manque, dis-le explicitement ("non visible sur la créative") plutôt que d'inventer.
+4. Base chaque analyse sur des éléments réellement observables dans l'image (texte lisible, composition, contraste, hiérarchie, CTA visible, format/ratio). Cite l'élément concret que tu observes.
+5. Reste factuel et nuancé : pas de conclusion hâtive, pas de score sévère sans justification observable.
+6. Réponds toujours en français, même si la créative est dans une autre langue.
+
+Analyse cette créative Meta Ads selon ces 5 axes. Pour chaque axe, donne un score de 0 à 10, identifie le problème précis si score < 7, et donne une correction concrète et actionnable, cohérente avec le secteur "${data.sector}" et l'objectif "${data.objectif}".
 
 Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, exactement dans ce format :
+
 {
   "verdict": "VERT" ou "ORANGE" ou "ROUGE",
   "verdict_phrase": "Une phrase de verdict global percutante",
