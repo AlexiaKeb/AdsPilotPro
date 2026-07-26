@@ -62,41 +62,42 @@
 :root {
   --radius: 0.75rem;
 
-  /* Base */
-  --background: oklch(0.13 0.03 270);          /* #0A0B14 */
-  --foreground: oklch(1 0 0);
-  --surface: oklch(0.18 0.05 275);             /* #12142A */
-  --surface-2: oklch(0.22 0.06 278);
+  /* Base — palette assombrie relevée pour la lisibilité des données */
+  --background: oklch(0.21 0.028 270);
+  --foreground: oklch(0.99 0 0);
+  --surface: oklch(0.28 0.042 275);
+  --surface-2: oklch(0.34 0.05 278);
 
-  --card: oklch(0.18 0.05 275);
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.18 0.05 275);
-  --popover-foreground: oklch(1 0 0);
+  --card: oklch(0.28 0.042 275);
+  --card-foreground: oklch(0.99 0 0);
+  --popover: oklch(0.3 0.045 275);
+  --popover-foreground: oklch(0.99 0 0);
 
   /* Brand */
-  --primary: oklch(0.62 0.22 280);             /* #6C63FF */
+  --primary: oklch(0.68 0.19 280);             /* #6C63FF éclairci */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.24 0.05 278);
-  --secondary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.36 0.045 278);
+  --secondary-foreground: oklch(0.99 0 0);
 
-  --muted: oklch(0.22 0.04 275);
-  --muted-foreground: oklch(0.66 0.03 270);    /* #8B8FA8 */
+  --muted: oklch(0.34 0.035 275);
+  --muted-foreground: oklch(0.82 0.02 270);
 
-  --accent: oklch(0.62 0.22 280);
+  --accent: oklch(0.68 0.19 280);
   --accent-foreground: oklch(1 0 0);
 
-  --success: oklch(0.78 0.18 165);             /* #00E5A0 */
-  --success-foreground: oklch(0.13 0.03 270);
-  --warning: oklch(0.78 0.16 60);              /* #FF9500 */
-  --warning-foreground: oklch(0.13 0.03 270);
-  --danger: oklch(0.66 0.24 18);               /* #FF3B5C */
+  --success: oklch(0.82 0.17 165);
+  --success-foreground: oklch(0.18 0.03 270);
+  --warning: oklch(0.83 0.15 70);
+  --warning-foreground: oklch(0.18 0.03 270);
+  --danger: oklch(0.7 0.22 18);
   --danger-foreground: oklch(1 0 0);
-  --destructive: oklch(0.66 0.24 18);
+  --destructive: oklch(0.7 0.22 18);
   --destructive-foreground: oklch(1 0 0);
 
-  --border: color-mix(in oklab, oklch(0.62 0.22 280) 20%, transparent);
-  --border-strong: color-mix(in oklab, oklch(0.62 0.22 280) 45%, transparent);
-  --input: oklch(0.22 0.05 278);
+  --border: color-mix(in oklab, oklch(0.72 0.15 280) 34%, transparent);
+  --border-strong: color-mix(in oklab, oklch(0.72 0.15 280) 60%, transparent);
+  --input: oklch(0.33 0.045 278);
+
   --ring: oklch(0.62 0.22 280);
 
   /* Effects */
@@ -109,7 +110,7 @@
 
 .dark {
   /* App is always dark — mirror :root */
-  --background: oklch(0.13 0.03 270);
+  --background: oklch(0.21 0.028 270);
   --foreground: oklch(1 0 0);
 }
 
