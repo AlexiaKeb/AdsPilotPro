@@ -96,17 +96,29 @@ function AuthPage() {
 
   const onGoogle = async () => {
     setLoading(true);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/dashboard",
-    });
-    if (res.error) {
-      toast.error(res.error.message || "Connexion Google échouée");
+    try {
+      const res = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (res.error) {
+        toast.error(res.error.message || "Connexion Google échouée");
+        setLoading(false);
+        return;
+      }
+      if (res.redirected) return;
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        toast.error("Session Google introuvable. Réessayez.");
+        setLoading(false);
+        return;
+      }
+      navigate({ to: "/dashboard", replace: true });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Connexion Google échouée");
       setLoading(false);
-      return;
     }
-    if (res.redirected) return;
-    navigate({ to: "/dashboard", replace: true });
   };
+
 
   const exitAdminMode = () => {
     setAdminMode(false);
