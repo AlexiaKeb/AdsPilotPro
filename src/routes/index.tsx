@@ -173,6 +173,8 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <NavBar />
       <Hero />
+      <SocialProof />
+      <WhoIsItFor />
       <Arsenal />
       <HowItWorks />
       <BattleReports />
