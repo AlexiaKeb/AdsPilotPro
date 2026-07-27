@@ -30,6 +30,14 @@ export const Route = createFileRoute("/pricing")({
 
 const faq = [
   {
+    q: "Puis-je vraiment commencer gratuitement ?",
+    a: "Oui. Le plan Free vous donne 3 audits complets par mois avec le score global et le module Andromeda. Aucune carte bancaire n'est demandée.",
+  },
+  {
+    q: "En quoi AdsPilot Pro est différent d'un tableau Excel ?",
+    a: "L'application intègre des benchmarks sectoriels, un moteur IA (Claude) qui interprète vos chiffres et un PDF de synthèse prêt à partager. Vous gagnez du temps et vous obtenez un diagnostic, pas juste des formules.",
+  },
+  {
     q: "Puis-je annuler à tout moment ?",
     a: "Oui, sans engagement. Vous pouvez résilier votre abonnement en un clic depuis votre profil.",
   },
@@ -40,6 +48,10 @@ const faq = [
   {
     q: "Puis-je travailler avec un expert Meta Ads ?",
     a: "Oui — l'accompagnement personnalisé 1-to-1 avec notre expert Meta Ads est disponible en option depuis votre dashboard, quel que soit votre plan.",
+  },
+  {
+    q: "Quand est-ce que je vais voir un retour sur investissement ?",
+    a: "Si vous dépensez 2 000€/mois en Meta Ads et qu'AdsPilot Pro identifie 10% de gaspillage, vous économisez 200€/mois. L'abonnement PRO à 97€ se rembourse plus de 2 fois dès le premier mois.",
   },
 ];
 
