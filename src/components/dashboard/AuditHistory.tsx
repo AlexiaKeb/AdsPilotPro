@@ -247,10 +247,20 @@ export function AuditHistory({ onView: _onView }: { onView?: () => void }) {
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="mt-6 text-sm text-muted-foreground">
-            {history.length === 0
-              ? "Aucun audit sauvegardé pour l'instant."
-              : "Aucun audit ne correspond aux filtres."}
+          <div className="mt-8 py-10 text-center rounded-xl border border-dashed border-border bg-surface/50">
+            <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 border border-primary/30 grid place-items-center mb-4">
+              <ClipboardList className="h-5 w-5 text-primary" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              {history.length === 0
+                ? "Vous n'avez pas encore d'audit sauvegardé."
+                : "Aucun audit ne correspond aux filtres."}
+            </p>
+            {history.length === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground max-w-sm mx-auto">
+                Remplissez vos premières métriques ci-dessus et cliquez sur "Générer mon diagnostic IA" pour créer votre premier audit.
+              </p>
+            )}
           </div>
         ) : (
           <div className="mt-5 divide-y divide-border">

@@ -173,6 +173,8 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <NavBar />
       <Hero />
+      <SocialProof />
+      <WhoIsItFor />
       <Arsenal />
       <HowItWorks />
       <BattleReports />
@@ -229,21 +231,21 @@ function Logo() {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-7xl px-6 pt-20 pb-24 md:pt-32 md:pb-36">
+      <div className="mx-auto max-w-7xl px-6 pt-20 pb-16 md:pt-32 md:pb-24">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="max-w-4xl"
         >
-          <span className="chip-tag mb-6">COCKPIT META ADS · ÉDITION 2026</span>
+          <span className="chip-tag mb-6">AUDIT META ADS POUR SOLopreneurs & MEDIA BUYERS</span>
           <h1 className="font-display font-bold uppercase text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
-            Arrêtez de piloter vos pubs{" "}
-            <span className="text-gradient-primary">à l'aveugle.</span>
+            Trouvez pourquoi vos campagnes Meta{" "}
+            <span className="text-gradient-primary">perdent de l'argent.</span>
           </h1>
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            AdsPilot Pro diagnostique vos campagnes Meta Ads avec l'IA, identifie vos fuites de
-            budget et vous dit exactement quoi faire — en moins de 3 minutes.
+            AdsPilot Pro analyse vos chiffres en 2 minutes, détecte vos fuites de budget et vous
+            donne un plan d'action prioritaire — sans vous noyer dans des tableaux Excel.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -251,7 +253,7 @@ function Hero() {
               to="/auth"
               className="btn-hero inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold font-display uppercase tracking-widest"
             >
-              Obtenir mon diagnostic gratuit <ArrowRight className="h-4 w-4" />
+              Faire mon audit gratuit <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/pricing"
@@ -260,6 +262,7 @@ function Hero() {
               Voir les tarifs →
             </Link>
           </div>
+          <p className="mt-4 text-xs text-muted-foreground">Aucune carte bancaire requise · 3 audits gratuits par mois</p>
         </motion.div>
 
         {/* 3 hero stats */}
@@ -267,12 +270,95 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
-          <Ticker label="Pour obtenir votre premier diagnostic" value="< 3 MIN" accent="var(--color-success)" />
-          <Ticker label="D'analyse couvrant 100% de votre funnel" value="5 MODULES" accent="var(--color-primary)" />
-          <Ticker label="Le même moteur IA qu'utilisent les pros" value="IA CLAUDE" accent="var(--color-warning)" />
+          <Ticker label="Temps pour obtenir un diagnostic" value="< 3 MIN" accent="var(--color-success)" />
+          <Ticker label="Modules couvrant votre funnel" value="5 PILIERS" accent="var(--color-primary)" />
+          <Ticker label="Diagnostic actionnable par l'IA" value="CLAUDE" accent="var(--color-warning)" />
         </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function SocialProof() {
+  return (
+    <section className="py-12 border-b border-border">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="text-center md:text-left">
+            <div className="font-mono-data text-3xl font-bold text-gradient-primary">3 000+</div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">diagnostics générés</div>
+          </div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Sparkles key={i} className="h-4 w-4" style={{ color: "var(--color-warning)" }} />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground text-center max-w-sm">
+              "En 3 minutes, j'ai compris pourquoi mon ROAS baissait. J'ai corrigé le budget en 48h."
+            </p>
+            <div className="text-xs text-muted-foreground">— Thomas D., media buyer indépendant</div>
+          </div>
+          <div className="text-center md:text-right">
+            <div className="font-mono-data text-3xl font-bold text-gradient-primary">97%</div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">d'utilisateurs identifient un axe d'amélioration</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhoIsItFor() {
+  const items = [
+    {
+      icon: Target,
+      title: "Solopreneurs E-commerce",
+      desc: "Vous gérez vos propres campagnes Meta et vous ne savez pas si votre ROAS est vraiment rentable.",
+    },
+    {
+      icon: Rocket,
+      title: "Créateurs d'Infoproduits",
+      desc: "Vous lancez des offres et vous voulez scaler sans casser votre marge nette.",
+    },
+    {
+      icon: Activity,
+      title: "Media Buyers indépendants",
+      desc: "Vous auditez des comptes clients et vous avez besoin d'un diagnostic rapide et crédible.",
+    },
+  ];
+  return (
+    <section className="py-24 md:py-32 border-b border-border">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="chip-tag mb-4">POUR QUI ?</span>
+          <h2 className="font-display font-bold uppercase text-4xl md:text-5xl">
+            Fait pour les <span className="text-gradient-primary">profils exigeants.</span>
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {items.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+              className="card-cockpit p-7"
+            >
+              <div
+                className="h-11 w-11 rounded-lg grid place-items-center mb-5"
+                style={{ background: "color-mix(in oklab, var(--color-primary) 18%, transparent)", color: "var(--color-primary)" }}
+              >
+                <item.icon className="h-5 w-5" />
+              </div>
+              <div className="font-display font-bold uppercase text-lg tracking-wide">{item.title}</div>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

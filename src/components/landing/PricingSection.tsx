@@ -14,18 +14,17 @@ const plans = [
     name: "FREE",
     price: 0,
     label: "Pour découvrir",
+    outcome: "Idéal pour tester un audit ponctuel",
     cta: "COMMENCER GRATUITEMENT",
     ctaLink: "/auth",
     highlighted: false,
     features: [
-      { text: "3 audits par mois", included: true },
-      { text: "Module Andromeda uniquement", included: true },
-      { text: "Score global sans diagnostic IA", included: true },
+      { text: "3 audits gratuits par mois", included: true },
+      { text: "Score global & module Andromeda", included: true },
       { text: "Diagnostic IA Claude", included: false },
-      { text: "Modules Atlas, Oracle, Vision Créative", included: false },
+      { text: "Modules Atlas, Oracle, Mercury, Vision Créative", included: false },
       { text: "Export PDF brandé", included: false },
       { text: "Historique étendu", included: false },
-      { text: "Accès accompagnement prioritaire", included: false },
       { text: "Simulateur P&L illimité", included: false },
     ],
   },
@@ -34,6 +33,7 @@ const plans = [
     price: 47,
     annualPrice: 470,
     label: "Pour démarrer sérieusement",
+    outcome: "Identifiez vos fuites chaque semaine",
     cta: "CHOISIR STARTER",
     ctaLink: "/auth?plan=starter",
     highlighted: false,
@@ -42,10 +42,10 @@ const plans = [
       { text: "Modules Andromeda + Atlas + Oracle", included: true },
       { text: "Diagnostic IA Claude (5 / mois)", included: true },
       { text: "Historique 30 jours", included: true },
+      { text: "Simulateur P&L", included: true },
       { text: "Module Vision Créative", included: false },
       { text: "Export PDF brandé", included: false },
-      { text: "Accès accompagnement prioritaire", included: false },
-      { text: "Simulateur P&L illimité", included: false },
+      { text: "Accompagnement prioritaire", included: false },
     ],
   },
   {
@@ -53,6 +53,7 @@ const plans = [
     price: 97,
     annualPrice: 970,
     label: "Pour performer sans limite",
+    outcome: "Le cockpit complet pour scaler sereinement",
     badge: "LE PLUS COMPLET",
     cta: "DÉMARRER MON ESSAI GRATUIT",
     ctaSubtext: "7 jours gratuits — sans carte bancaire",
@@ -60,14 +61,13 @@ const plans = [
     highlighted: true,
     features: [
       { text: "Tout le plan Starter inclus", included: true },
-      { text: "Tous les modules dont Vision Créative", included: true },
+      { text: "Tous les modules : Vision Créative + Mercury", included: true },
       { text: "Diagnostic IA Claude illimité", included: true },
       { text: "Export PDF brandé illimité", included: true },
-      { text: "Accès accompagnement prioritaire", included: true },
+      { text: "Historique illimité + suivi de progression", included: true },
       { text: "Simulateur P&L illimité", included: true },
-      { text: "Historique illimité + progression", included: true },
+      { text: "Accompagnement prioritaire", included: true },
       { text: "Support prioritaire", included: true },
-      { text: "Accès bêta nouvelles fonctionnalités", included: true },
     ],
   },
 ];
@@ -174,6 +174,9 @@ export function PricingSection({
                   <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
                     {plan.label}
                   </div>
+                  {plan.outcome && (
+                    <p className="mt-2 text-sm text-foreground/80 leading-snug">{plan.outcome}</p>
+                  )}
                 </div>
 
                 <div className="mb-6">

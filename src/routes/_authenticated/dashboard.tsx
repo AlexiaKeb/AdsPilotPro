@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, ClipboardList, Rocket } from "lucide-react";
+import { LogOut, ClipboardList, Rocket, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
@@ -79,7 +79,12 @@ function Dashboard() {
       <DashHeader profile={profile} onSignOut={onSignOut} />
       <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
-        {tab === "audits" && <AuditsTab />}
+        {tab === "audits" && (
+          <>
+            <QuickStartCard />
+            <AuditsTab />
+          </>
+        )}
         <CoachingCTA />
       </main>
       <AuditHistory onView={() => setTab("audits")} />
@@ -91,6 +96,30 @@ function Dashboard() {
           }
         />
       )}
+    </div>
+  );
+}
+
+function QuickStartCard() {
+  return (
+    <div className="card-cockpit p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+      <div className="flex items-start gap-4">
+        <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/30 shrink-0">
+          <ClipboardList className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <div className="font-display font-bold uppercase tracking-widest text-sm">Démarrage rapide</div>
+          <p className="mt-1 text-sm text-muted-foreground max-w-xl">
+            1. Choisissez votre secteur · 2. Saisissez vos 3 métriques principales · 3. Générez votre diagnostic IA.
+          </p>
+        </div>
+      </div>
+      <Link
+        to="/simulateur"
+        className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest border border-border-strong hover:bg-surface transition"
+      >
+        Ouvrir le simulateur <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
     </div>
   );
 }

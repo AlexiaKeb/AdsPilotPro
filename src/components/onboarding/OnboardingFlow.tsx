@@ -288,15 +288,17 @@ function Step2({
   setAnswers: (a: OnboardingAnswers) => void;
   onNext: () => void;
 }) {
-  const canContinue = !!(answers.sector && answers.budget && answers.challenge && answers.goal);
+  const canContinue = !!answers.sector;
   return (
     <StepWrap>
       <div className="space-y-7">
         <header>
           <h2 className="font-display font-bold text-2xl uppercase tracking-tight">
-            Calibrons votre profil
+            Quel est votre secteur ?
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">4 questions rapides — 30 secondes.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            On adapte les benchmarks et les recommandations à votre business. Une seule question.
+          </p>
         </header>
 
         <Question label="Vous êtes dans quel secteur ?">
@@ -305,49 +307,9 @@ function Step2({
               { value: "ecommerce", label: "E-commerce produits physiques", icon: ShoppingBag },
               { value: "infoproduit", label: "Infoproduits / Formation", icon: GraduationCap },
               { value: "service", label: "Services / Freelance", icon: Wrench },
-              { value: "agency", label: "Agence / Consultant", icon: Building2 },
             ]}
             value={answers.sector}
             onChange={(v) => setAnswers({ ...answers, sector: v as SectorChoice })}
-          />
-        </Question>
-
-        <Question label="Quel est votre budget Meta Ads mensuel ?">
-          <CardChoice
-            options={[
-              { value: "lt1k", label: "Moins de 1 000€ / mois" },
-              { value: "1k_5k", label: "1 000€ — 5 000€ / mois" },
-              { value: "5k_20k", label: "5 000€ — 20 000€ / mois" },
-              { value: "gt20k", label: "Plus de 20 000€ / mois" },
-            ]}
-            value={answers.budget}
-            onChange={(v) => setAnswers({ ...answers, budget: v as BudgetChoice })}
-          />
-        </Question>
-
-        <Question label="Quel est votre défi #1 en ce moment ?">
-          <CardChoice
-            options={[
-              { value: "profitability", label: "Je ne sais pas si mes pubs sont rentables" },
-              { value: "roas_drop", label: "Mon ROAS baisse et je ne sais pas pourquoi" },
-              { value: "scaling_fear", label: "Je veux scaler mais j'ai peur de casser mon algo" },
-              { value: "creative_fatigue", label: "Mes créatives ne performent plus" },
-            ]}
-            value={answers.challenge}
-            onChange={(v) => setAnswers({ ...answers, challenge: v as ChallengeChoice })}
-          />
-        </Question>
-
-        <Question label="Qu'espérez-vous obtenir avec AdsPilot Pro ?">
-          <CardChoice
-            options={[
-              { value: "understand", label: "Comprendre mes chiffres enfin" },
-              { value: "cpa", label: "Optimiser mon CPA" },
-              { value: "scale", label: "Scaler en sécurité" },
-              { value: "creative", label: "Auditer mes créatives" },
-            ]}
-            value={answers.goal}
-            onChange={(v) => setAnswers({ ...answers, goal: v as GoalChoice })}
           />
         </Question>
 
