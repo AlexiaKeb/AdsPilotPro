@@ -174,6 +174,9 @@ export function PricingSection({
                   <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
                     {plan.label}
                   </div>
+                  {plan.outcome && (
+                    <p className="mt-2 text-sm text-foreground/80 leading-snug">{plan.outcome}</p>
+                  )}
                 </div>
 
                 <div className="mb-6">
