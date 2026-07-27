@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LogOut, ClipboardList, Rocket } from "lucide-react";
+import { LogOut, ClipboardList, Rocket, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
