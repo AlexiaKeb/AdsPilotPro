@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSimulateurRouteImport } from './routes/_authenticated/simulateur'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedMetaCallbackRouteImport } from './routes/_authenticated/meta-callback'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAuditIdRouteImport } from './routes/_authenticated/audit/$id'
 
@@ -53,6 +54,12 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMetaCallbackRoute =
+  AuthenticatedMetaCallbackRouteImport.update({
+    id: '/meta-callback',
+    path: '/meta-callback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/simulateur': typeof AuthenticatedSimulateurRoute
   '/_authenticated/audit/$id': typeof AuthenticatedAuditIdRoute
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/dashboard'
+    | '/meta-callback'
     | '/profil'
     | '/simulateur'
     | '/audit/$id'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/dashboard'
+    | '/meta-callback'
     | '/profil'
     | '/simulateur'
     | '/audit/$id'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/_authenticated/dashboard'
+    | '/_authenticated/meta-callback'
     | '/_authenticated/profil'
     | '/_authenticated/simulateur'
     | '/_authenticated/audit/$id'
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/meta-callback': {
+      id: '/_authenticated/meta-callback'
+      path: '/meta-callback'
+      fullPath: '/meta-callback'
+      preLoaderRoute: typeof AuthenticatedMetaCallbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -208,6 +228,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMetaCallbackRoute: typeof AuthenticatedMetaCallbackRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedSimulateurRoute: typeof AuthenticatedSimulateurRoute
   AuthenticatedAuditIdRoute: typeof AuthenticatedAuditIdRoute
@@ -215,6 +236,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMetaCallbackRoute: AuthenticatedMetaCallbackRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedSimulateurRoute: AuthenticatedSimulateurRoute,
   AuthenticatedAuditIdRoute: AuthenticatedAuditIdRoute,
@@ -233,13 +255,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

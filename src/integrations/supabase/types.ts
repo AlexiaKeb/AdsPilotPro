@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      meta_connections: {
+        Row: {
+          access_token: string
+          ad_account_id: string | null
+          ad_account_name: string | null
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          ad_account_id?: string | null
+          ad_account_name?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          ad_account_id?: string | null
+          ad_account_name?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           audits_this_month: number

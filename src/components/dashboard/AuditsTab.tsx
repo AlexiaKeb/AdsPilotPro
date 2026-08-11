@@ -9,6 +9,7 @@ import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/audit-pdf";
 import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
+import { MetaConnectCard, type MetaImportedMetrics } from "./MetaConnectCard";
 
 export type Sector = "ecommerce" | "infoproduit" | "service";
 export type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
@@ -283,8 +284,21 @@ export function AuditsTab() {
   const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
     setInputs((prev) => ({ ...prev, [k]: v }));
 
+  const applyMetaMetrics = (m: MetaImportedMetrics) => {
+    setInputs((prev) => ({
+      ...prev,
+      roas_actual: m.roas > 0 ? m.roas : prev.roas_actual,
+      cpa_actual: m.cpa > 0 ? m.cpa : prev.cpa_actual,
+      daily_budget: m.dailyBudget > 0 ? m.dailyBudget : prev.daily_budget,
+      ctr: m.ctr > 0 ? m.ctr : prev.ctr,
+    }));
+    setActive("andromeda");
+  };
+
   return (
     <div className="space-y-6">
+      <MetaConnectCard onImport={applyMetaMetrics} />
+
       {/* Sector selection */}
       <div className="card-cockpit p-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
