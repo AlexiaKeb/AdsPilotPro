@@ -4,6 +4,7 @@ import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMetaAuthUrl,
+  connectMeta,
   getMetaStatus,
   listMetaAdAccounts,
   selectMetaAdAccount,
@@ -21,6 +22,7 @@ export interface MetaImportedMetrics {
 
 export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetrics) => void }) {
   const authUrl = useServerFn(getMetaAuthUrl);
+  const connect = useServerFn(connectMeta);
   const status = useServerFn(getMetaStatus);
   const listAccounts = useServerFn(listMetaAdAccounts);
   const selectAccount = useServerFn(selectMetaAdAccount);
