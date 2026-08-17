@@ -4,6 +4,7 @@ import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMetaAuthUrl,
+  connectMeta,
   getMetaStatus,
   listMetaAdAccounts,
   selectMetaAdAccount,
@@ -21,6 +22,7 @@ export interface MetaImportedMetrics {
 
 export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetrics) => void }) {
   const authUrl = useServerFn(getMetaAuthUrl);
+  const connect = useServerFn(connectMeta);
   const status = useServerFn(getMetaStatus);
   const listAccounts = useServerFn(listMetaAdAccounts);
   const selectAccount = useServerFn(selectMetaAdAccount);
@@ -48,16 +50,60 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
 
   const onConnect = async () => {
     setBusy("connect");
+    // Meta refuse d'être affiché en iframe : on ouvre une fenêtre popup pendant le clic.
+    const popup = window.open("about:blank", "meta_oauth", "width=600,height=760");
+    if (!popup) {
+      setBusy(null);
+      toast.error("Autorisez les fenêtres popup pour connecter Meta Ads.");
+      return;
+    }
     try {
       const nonce = crypto.randomUUID();
+      const redirectUri = `${window.location.origin}/meta-callback`;
       sessionStorage.setItem("meta_oauth_state", nonce);
-      const { url } = await authUrl({
-        data: { redirectUri: `${window.location.origin}/meta-callback`, state: nonce },
+      const { url } = await authUrl({ data: { redirectUri, state: nonce } });
+      popup.location.href = url;
+
+      const code = await new Promise<string>((resolve, reject) => {
+        const onMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          const payload = event.data as
+            | { type?: string; code?: string; state?: string; error?: string }
+            | null;
+          if (!payload || payload.type !== "meta_oauth_result") return;
+          cleanup();
+          if (payload.error || !payload.code) {
+            reject(new Error(payload.error || "Connexion refusée sur Meta."));
+            return;
+          }
+          if (payload.state !== nonce) {
+            reject(new Error("Vérification de sécurité échouée. Relancez la connexion."));
+            return;
+          }
+          resolve(payload.code);
+        };
+        const timer = window.setInterval(() => {
+          if (popup.closed) {
+            cleanup();
+            reject(new Error("Fenêtre Meta fermée avant la fin de la connexion."));
+          }
+        }, 600);
+        function cleanup() {
+          window.clearInterval(timer);
+          window.removeEventListener("message", onMessage);
+        }
+        window.addEventListener("message", onMessage);
       });
-      window.location.href = url;
+
+      sessionStorage.removeItem("meta_oauth_state");
+      await connect({ data: { code, redirectUri } });
+      toast.success("Compte Meta connecté.");
+      void refresh();
     } catch (e) {
-      setBusy(null);
       toast.error(e instanceof Error ? e.message : "Connexion Meta indisponible.");
+    } finally {
+      if (!popup.closed) popup.close();
+      setBusy(null);
     }
   };
 
