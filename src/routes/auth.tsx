@@ -103,7 +103,8 @@ function AuthPage() {
     setLoading(true);
     try {
       const res = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        // Retour sur /auth : cette page redirige vers /dashboard dès que la session est hydratée.
+        redirect_uri: `${window.location.origin}/auth`,
       });
       if (res.error) {
         toast.error(res.error.message || "Connexion Google échouée");
