@@ -35,6 +35,7 @@ export type CreativeDiagnostic = {
 };
 
 export const analyzeCreative = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }): Promise<CreativeDiagnostic> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
