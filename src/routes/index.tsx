@@ -192,6 +192,14 @@ function Landing() {
 
 
 function NavBar() {
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
