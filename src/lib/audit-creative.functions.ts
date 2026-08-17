@@ -3,7 +3,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const InputSchema = z.object({
-  image_base64: z.string().min(10),
+  // ~8 MB base64 cap to prevent oversized payload abuse
+  image_base64: z.string().min(10).max(8_000_000),
   media_type: z.enum(["image/jpeg", "image/png", "image/webp"]),
   sector: z.string(),
   objectif: z.string(),
