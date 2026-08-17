@@ -35,9 +35,14 @@ function AuthPage() {
   const [adminCreds, setAdminCreds] = useState({ email: "", code: "" });
 
   useEffect(() => {
+    // Une session peut arriver juste après le retour OAuth : on écoute aussi les changements.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate({ to: "/dashboard", replace: true });
+    });
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
+    return () => sub.subscription.unsubscribe();
   }, [navigate]);
 
   // Hidden admin trigger
