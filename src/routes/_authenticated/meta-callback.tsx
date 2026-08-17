@@ -32,6 +32,22 @@ function MetaCallback() {
     const code = params.get("code");
     const state = params.get("state");
     const denied = params.get("error");
+
+    // Flux popup : on renvoie le résultat à la fenêtre principale, qui finalise la connexion.
+    if (window.opener && window.opener !== window) {
+      window.opener.postMessage(
+        {
+          type: "meta_oauth_result",
+          code: code ?? null,
+          state: state ?? null,
+          error: denied ? "Connexion refusée sur Meta." : code ? null : "Code d'autorisation manquant.",
+        },
+        window.location.origin,
+      );
+      window.close();
+      return;
+    }
+
     const expected = sessionStorage.getItem("meta_oauth_state");
     sessionStorage.removeItem("meta_oauth_state");
 
