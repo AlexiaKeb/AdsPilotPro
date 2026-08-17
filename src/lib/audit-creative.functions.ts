@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const InputSchema = z.object({
-  image_base64: z.string().min(10),
+  // ~8 MB base64 cap to prevent oversized payload abuse
+  image_base64: z.string().min(10).max(8_000_000),
   media_type: z.enum(["image/jpeg", "image/png", "image/webp"]),
   sector: z.string(),
   objectif: z.string(),
@@ -33,6 +35,7 @@ export type CreativeDiagnostic = {
 };
 
 export const analyzeCreative = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }): Promise<CreativeDiagnostic> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;

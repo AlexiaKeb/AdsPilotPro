@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const InputSchema = z.object({
@@ -22,6 +23,7 @@ export type AuditDiagnostic = {
 const SYSTEM_PROMPT = `Tu es un consultant expert Meta Ads avec 10 ans d'expérience en e-commerce francophone. Tu analyses des données publicitaires réelles et fournis des diagnostics précis, actionnables et personnalisés. Tu parles comme un expert qui a géré des budgets de 500€ à 50 000€/jour. Tu ne donnes jamais de conseils génériques. Chaque recommandation cite les chiffres exacts fournis et explique pourquoi c'est un problème ET comment le corriger concrètement cette semaine.`;
 
 export const analyzeAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }): Promise<AuditDiagnostic> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
