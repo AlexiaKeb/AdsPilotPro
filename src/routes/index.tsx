@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useInView, useMotionValue, animate } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
   BarChart3,
@@ -192,6 +193,14 @@ function Landing() {
 
 
 function NavBar() {
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -202,10 +211,10 @@ function NavBar() {
           <Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link>
         </nav>
         <Link
-          to="/auth"
+          to={signedIn ? "/dashboard" : "/auth"}
           className="btn-hero inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold font-display uppercase tracking-wider"
         >
-          Accéder <ArrowRight className="h-4 w-4" />
+          {signedIn ? "Mon cockpit" : "Accéder"} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </header>
