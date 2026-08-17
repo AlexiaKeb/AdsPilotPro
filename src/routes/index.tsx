@@ -211,10 +211,10 @@ function NavBar() {
           <Link to="/pricing" className="hover:text-foreground transition">Tarifs</Link>
         </nav>
         <Link
-          to="/auth"
+          to={signedIn ? "/dashboard" : "/auth"}
           className="btn-hero inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold font-display uppercase tracking-wider"
         >
-          Accéder <ArrowRight className="h-4 w-4" />
+          {signedIn ? "Mon cockpit" : "Accéder"} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </header>
