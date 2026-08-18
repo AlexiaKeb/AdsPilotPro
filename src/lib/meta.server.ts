@@ -64,7 +64,8 @@ export async function fetchAdAccounts(accessToken: string): Promise<MetaAdAccoun
   return data.data ?? [];
 }
 
-export type MetaPeriod = 7 | 30 | 90;
+/** 0 = depuis toujours (maximum) */
+export type MetaPeriod = 0 | 7 | 30 | 90;
 
 export interface MetaMetrics {
   roas: number;
