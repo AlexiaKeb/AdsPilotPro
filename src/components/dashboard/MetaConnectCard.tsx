@@ -32,11 +32,16 @@ export interface MetaImportedMetrics {
   hookRate: number;
   holdRate: number;
   periodDays: number;
+  allTime: boolean;
+  periodStart: string | null;
+  periodEnd: string | null;
+  effectiveDays: number;
   accountName?: string | null;
 }
 
-const PERIODS = [7, 30, 90] as const;
+const PERIODS = [7, 30, 90, 0] as const;
 type Period = (typeof PERIODS)[number];
+const periodLabel = (d: Period) => (d === 0 ? "Depuis toujours" : `${d} j`);
 
 function fmt(n: number, suffix = "") {
   return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(n)}${suffix}`;
@@ -148,7 +153,9 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
       const imported: MetaImportedMetrics = { ...m, accountName: adAccountName };
       setMetrics(imported);
       onImport(imported);
-      toast.success(`Métriques Meta importées (${days} derniers jours).`);
+      toast.success(
+        days === 0 ? "Métriques Meta importées (historique complet)." : `Métriques Meta importées (${days} derniers jours).`,
+      );
       void refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Import impossible.");
@@ -276,7 +283,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
                 period === d ? "bg-primary/15 border border-primary text-primary" : "border border-border text-muted-foreground hover:text-foreground"
               }`}
             >
-              {d} j
+              {periodLabel(d)}
             </button>
           ))}
         </div>
@@ -286,7 +293,10 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
             <BarChart3 className="h-3.5 w-3.5 text-primary" />
-            Performance Meta — {metrics.periodDays} derniers jours
+            Performance Meta —{" "}
+            {metrics.allTime
+              ? `depuis toujours${metrics.periodStart ? ` (${new Date(metrics.periodStart).toLocaleDateString("fr-FR")} → ${metrics.periodEnd ? new Date(metrics.periodEnd).toLocaleDateString("fr-FR") : "aujourd'hui"})` : ""}`
+              : `${metrics.periodDays} derniers jours`}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <Stat label="Dépense" value={fmt(metrics.spend, " €")} />

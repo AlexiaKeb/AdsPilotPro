@@ -64,7 +64,8 @@ export async function fetchAdAccounts(accessToken: string): Promise<MetaAdAccoun
   return data.data ?? [];
 }
 
-export type MetaPeriod = 7 | 30 | 90;
+/** 0 = depuis toujours (maximum) */
+export type MetaPeriod = 0 | 7 | 30 | 90;
 
 export interface MetaMetrics {
   roas: number;
@@ -85,9 +86,15 @@ export interface MetaMetrics {
   holdRate: number;
   frequency: number;
   cpm: number;
+  allTime: boolean;
+  periodStart: string | null;
+  periodEnd: string | null;
+  effectiveDays: number;
 }
 
 interface InsightRow {
+  date_start?: string;
+  date_stop?: string;
   spend?: string;
   ctr?: string;
   cpm?: string;
@@ -126,20 +133,31 @@ export async function fetchAccountMetrics(
   periodDays: MetaPeriod = 30,
 ): Promise<MetaMetrics> {
   const actId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
-  const preset = periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d";
+  const preset =
+    periodDays === 0 ? "maximum" : periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d";
   const data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
     access_token: accessToken,
     fields:
       "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_3_sec_watched_actions,video_p75_watched_actions",
     date_preset: preset,
+    time_increment: "all_days",
   });
   const row = data.data?.[0];
   const empty: MetaMetrics = {
     roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays,
     impressions: 0, clicks: 0, revenue: 0, avgCart: 0, addToCart: 0,
     addToCartRate: 0, abandonRate: 0, hookRate: 0, holdRate: 0, frequency: 0, cpm: 0,
+    allTime: periodDays === 0, periodStart: null, periodEnd: null, effectiveDays: periodDays || 0,
   };
   if (!row) return empty;
+
+  const periodStart = row.date_start ?? null;
+  const periodEnd = row.date_stop ?? null;
+  const spanDays =
+    periodStart && periodEnd
+      ? Math.max(1, Math.round((new Date(periodEnd).getTime() - new Date(periodStart).getTime()) / 86_400_000) + 1)
+      : periodDays || 1;
+  const effectiveDays = periodDays === 0 ? spanDays : periodDays;
 
   const spend = Number(row.spend) || 0;
   const impressions = Number(row.impressions) || 0;
@@ -157,7 +175,7 @@ export async function fetchAccountMetrics(
   return {
     roas: round2(roas),
     cpa: round2(cpa),
-    dailyBudget: round2(spend / periodDays),
+    dailyBudget: round2(spend / effectiveDays),
     ctr: round2(Number(row.ctr) || 0),
     spend: round2(spend),
     purchases,
@@ -173,6 +191,10 @@ export async function fetchAccountMetrics(
     holdRate: round2(impressions > 0 ? (p75 / impressions) * 100 : 0),
     frequency: round2(Number(row.frequency) || 0),
     cpm: round2(Number(row.cpm) || 0),
+    allTime: periodDays === 0,
+    periodStart,
+    periodEnd,
+    effectiveDays,
   };
 }
 
