@@ -191,6 +191,10 @@ export async function fetchAccountMetrics(
     holdRate: round2(impressions > 0 ? (p75 / impressions) * 100 : 0),
     frequency: round2(Number(row.frequency) || 0),
     cpm: round2(Number(row.cpm) || 0),
+    allTime: periodDays === 0,
+    periodStart,
+    periodEnd,
+    effectiveDays,
   };
 }
 
