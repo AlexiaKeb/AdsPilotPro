@@ -104,6 +104,7 @@ export function AuditsTab() {
   const [clientName, setClientName] = useState<string>("");
   const [auditName, setAuditName] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<AuditTag[]>([]);
+  const [meta, setMeta] = useState<MetaImportedMetrics | null>(null);
   const [aiByModule, setAiByModule] = useState<AiMap<AuditDiagnostic>>({});
   const [loadingByModule, setLoadingByModule] = useState<AiMap<boolean>>({});
   const reqIdRef = useRef<Record<ScoredModuleId, number>>({
@@ -252,6 +253,27 @@ export function AuditsTab() {
         max_cpa: inputs.avg_cart * 0.35,
         budget: inputs.daily_budget,
         score: moduleScore,
+        ...(meta
+          ? {
+              meta: {
+                accountName: meta.accountName ?? undefined,
+                periodDays: meta.periodDays,
+                spend: meta.spend,
+                revenue: meta.revenue,
+                purchases: meta.purchases,
+                impressions: meta.impressions,
+                clicks: meta.clicks,
+                ctr: meta.ctr,
+                cpm: meta.cpm,
+                frequency: meta.frequency,
+                avgCart: meta.avgCart,
+                addToCartRate: meta.addToCartRate,
+                abandonRate: meta.abandonRate,
+                hookRate: meta.hookRate,
+                holdRate: meta.holdRate,
+              },
+            }
+          : {}),
       },
     })
       .then((diag) => {
@@ -285,11 +307,21 @@ export function AuditsTab() {
     setInputs((prev) => ({ ...prev, [k]: v }));
 
   const applyMetaMetrics = (m: MetaImportedMetrics) => {
+    setMeta(m);
     setInputs((prev) => ({
       ...prev,
+      // Andromeda
       roas_actual: m.roas > 0 ? m.roas : prev.roas_actual,
       cpa_actual: m.cpa > 0 ? m.cpa : prev.cpa_actual,
       daily_budget: m.dailyBudget > 0 ? m.dailyBudget : prev.daily_budget,
+      // Oracle
+      avg_cart: m.avgCart > 0 ? m.avgCart : prev.avg_cart,
+      // Mercury
+      add_to_cart_rate: m.addToCartRate > 0 ? m.addToCartRate : prev.add_to_cart_rate,
+      abandon_rate: m.abandonRate > 0 ? m.abandonRate : prev.abandon_rate,
+      // Vision
+      hook_rate: m.hookRate > 0 ? m.hookRate : prev.hook_rate,
+      hold_rate: m.holdRate > 0 ? m.holdRate : prev.hold_rate,
       ctr: m.ctr > 0 ? m.ctr : prev.ctr,
     }));
     setActive("andromeda");
