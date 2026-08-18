@@ -64,6 +64,8 @@ export async function fetchAdAccounts(accessToken: string): Promise<MetaAdAccoun
   return data.data ?? [];
 }
 
+export type MetaPeriod = 7 | 30 | 90;
+
 export interface MetaMetrics {
   roas: number;
   cpa: number;
@@ -72,47 +74,86 @@ export interface MetaMetrics {
   spend: number;
   purchases: number;
   periodDays: number;
+  impressions: number;
+  clicks: number;
+  revenue: number;
+  avgCart: number;
+  addToCart: number;
+  addToCartRate: number;
+  abandonRate: number;
+  hookRate: number;
+  holdRate: number;
+  frequency: number;
+  cpm: number;
 }
 
 interface InsightRow {
   spend?: string;
   ctr?: string;
+  cpm?: string;
+  impressions?: string;
+  clicks?: string;
+  frequency?: string;
   purchase_roas?: { action_type: string; value: string }[];
   actions?: { action_type: string; value: string }[];
+  action_values?: { action_type: string; value: string }[];
   cost_per_action_type?: { action_type: string; value: string }[];
+  video_3_sec_watched_actions?: { action_type: string; value: string }[];
+  video_p75_watched_actions?: { action_type: string; value: string }[];
 }
 
 const PURCHASE_TYPES = ["omni_purchase", "purchase", "offsite_conversion.fb_pixel_purchase"];
+const ATC_TYPES = ["omni_add_to_cart", "add_to_cart", "offsite_conversion.fb_pixel_add_to_cart"];
+const LPV_TYPES = ["landing_page_view", "omni_landing_page_view"];
 
-function pick(list: { action_type: string; value: string }[] | undefined): number {
+function pick(list: { action_type: string; value: string }[] | undefined, types = PURCHASE_TYPES): number {
   if (!list) return 0;
-  for (const type of PURCHASE_TYPES) {
+  for (const type of types) {
     const hit = list.find((a) => a.action_type === type);
     if (hit) return Number(hit.value) || 0;
   }
   return 0;
 }
 
+function first(list: { action_type: string; value: string }[] | undefined): number {
+  if (!list || list.length === 0) return 0;
+  return Number(list[0]?.value) || 0;
+}
+
 export async function fetchAccountMetrics(
   accessToken: string,
   adAccountId: string,
-  periodDays = 30,
+  periodDays: MetaPeriod = 30,
 ): Promise<MetaMetrics> {
   const actId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
+  const preset = periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d";
   const data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
     access_token: accessToken,
-    fields: "spend,ctr,purchase_roas,actions,cost_per_action_type",
-    date_preset: periodDays <= 7 ? "last_7d" : "last_30d",
+    fields:
+      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_3_sec_watched_actions,video_p75_watched_actions",
+    date_preset: preset,
   });
   const row = data.data?.[0];
-  if (!row) {
-    return { roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays };
-  }
+  const empty: MetaMetrics = {
+    roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays,
+    impressions: 0, clicks: 0, revenue: 0, avgCart: 0, addToCart: 0,
+    addToCartRate: 0, abandonRate: 0, hookRate: 0, holdRate: 0, frequency: 0, cpm: 0,
+  };
+  if (!row) return empty;
+
   const spend = Number(row.spend) || 0;
+  const impressions = Number(row.impressions) || 0;
+  const clicks = Number(row.clicks) || 0;
   const purchases = pick(row.actions);
-  const roas = pick(row.purchase_roas);
+  const addToCart = pick(row.actions, ATC_TYPES);
+  const landingViews = pick(row.actions, LPV_TYPES) || clicks;
+  const revenue = pick(row.action_values);
+  const roas = pick(row.purchase_roas) || (spend > 0 ? revenue / spend : 0);
   const cpaReported = pick(row.cost_per_action_type);
   const cpa = cpaReported || (purchases > 0 ? spend / purchases : 0);
+  const views3s = first(row.video_3_sec_watched_actions);
+  const p75 = first(row.video_p75_watched_actions);
+
   return {
     roas: round2(roas),
     cpa: round2(cpa),
@@ -121,6 +162,17 @@ export async function fetchAccountMetrics(
     spend: round2(spend),
     purchases,
     periodDays,
+    impressions,
+    clicks,
+    revenue: round2(revenue),
+    avgCart: round2(purchases > 0 ? revenue / purchases : 0),
+    addToCart,
+    addToCartRate: round2(landingViews > 0 ? (addToCart / landingViews) * 100 : 0),
+    abandonRate: round2(addToCart > 0 ? (1 - purchases / addToCart) * 100 : 0),
+    hookRate: round2(impressions > 0 ? (views3s / impressions) * 100 : 0),
+    holdRate: round2(impressions > 0 ? (p75 / impressions) * 100 : 0),
+    frequency: round2(Number(row.frequency) || 0),
+    cpm: round2(Number(row.cpm) || 0),
   };
 }
 

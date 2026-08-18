@@ -105,25 +105,30 @@ export const selectMetaAdAccount = createServerFn({ method: "POST" })
 
 export const importMetaMetrics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { periodDays?: number } | undefined) => ({
+    periodDays: (input?.periodDays === 7 ? 7 : input?.periodDays === 90 ? 90 : 30) as 7 | 30 | 90,
+  }))
+
+  .handler(async ({ data, context }) => {
     const { fetchAccountMetrics } = await import("./meta.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
+    const { data: conn } = await supabaseAdmin
       .from("meta_connections")
       .select("access_token, ad_account_id, ad_account_name")
       .eq("user_id", context.userId)
       .maybeSingle();
-    if (!data) throw new Error("Compte Meta non connecté.");
-    if (!data.ad_account_id) throw new Error("Aucun compte publicitaire sélectionné.");
+    if (!conn) throw new Error("Compte Meta non connecté.");
+    if (!conn.ad_account_id) throw new Error("Aucun compte publicitaire sélectionné.");
 
-    const metrics = await fetchAccountMetrics(data.access_token, data.ad_account_id);
+    const metrics = await fetchAccountMetrics(conn.access_token, conn.ad_account_id, data.periodDays);
     await supabaseAdmin
       .from("meta_connections")
       .update({ last_synced_at: new Date().toISOString() })
       .eq("user_id", context.userId);
 
-    return { metrics, adAccountName: data.ad_account_name };
+    return { metrics, adAccountName: conn.ad_account_name };
   });
+
 
 export const disconnectMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

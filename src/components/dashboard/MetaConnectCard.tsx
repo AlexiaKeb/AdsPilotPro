@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2 } from "lucide-react";
+import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMetaAuthUrl,
@@ -18,6 +18,37 @@ export interface MetaImportedMetrics {
   cpa: number;
   dailyBudget: number;
   ctr: number;
+  spend: number;
+  revenue: number;
+  purchases: number;
+  impressions: number;
+  clicks: number;
+  cpm: number;
+  frequency: number;
+  avgCart: number;
+  addToCart: number;
+  addToCartRate: number;
+  abandonRate: number;
+  hookRate: number;
+  holdRate: number;
+  periodDays: number;
+  accountName?: string | null;
+}
+
+const PERIODS = [7, 30, 90] as const;
+type Period = (typeof PERIODS)[number];
+
+function fmt(n: number, suffix = "") {
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(n)}${suffix}`;
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="mt-0.5 font-display font-bold text-sm">{value}</div>
+    </div>
+  );
 }
 
 export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetrics) => void }) {
@@ -33,6 +64,8 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<null | "connect" | "sync" | "accounts" | "disconnect">(null);
   const [accounts, setAccounts] = useState<{ id: string; name: string; currency: string }[]>([]);
+  const [period, setPeriod] = useState<Period>(30);
+  const [metrics, setMetrics] = useState<MetaImportedMetrics | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -107,12 +140,15 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
     }
   };
 
-  const onSync = async () => {
+  const onSync = async (days: Period = period) => {
     setBusy("sync");
+    setPeriod(days);
     try {
-      const { metrics } = await importMetrics({});
-      onImport({ roas: metrics.roas, cpa: metrics.cpa, dailyBudget: metrics.dailyBudget, ctr: metrics.ctr });
-      toast.success("Métriques Meta importées (30 derniers jours).");
+      const { metrics: m, adAccountName } = await importMetrics({ data: { periodDays: days } });
+      const imported: MetaImportedMetrics = { ...m, accountName: adAccountName };
+      setMetrics(imported);
+      onImport(imported);
+      toast.success(`Métriques Meta importées (${days} derniers jours).`);
       void refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Import impossible.");
@@ -190,7 +226,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
           {connected ? (
             <>
               <button
-                onClick={onSync}
+                onClick={() => onSync()}
                 disabled={busy === "sync"}
                 className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50 transition hover:opacity-90"
                 style={{ background: "var(--grad-primary)" }}
@@ -227,6 +263,51 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
           )}
         </div>
       </div>
+
+      {connected && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Période</span>
+          {PERIODS.map((d) => (
+            <button
+              key={d}
+              onClick={() => void onSync(d)}
+              disabled={busy === "sync"}
+              className={`rounded-lg px-3 py-1.5 text-xs font-display font-bold uppercase tracking-widest transition disabled:opacity-50 ${
+                period === d ? "bg-primary/15 border border-primary text-primary" : "border border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {d} j
+            </button>
+          ))}
+        </div>
+      )}
+
+      {connected && metrics && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5 text-primary" />
+            Performance Meta — {metrics.periodDays} derniers jours
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <Stat label="Dépense" value={fmt(metrics.spend, " €")} />
+            <Stat label="Revenu" value={fmt(metrics.revenue, " €")} />
+            <Stat label="ROAS" value={fmt(metrics.roas, "×")} />
+            <Stat label="CPA" value={fmt(metrics.cpa, " €")} />
+            <Stat label="Achats" value={fmt(metrics.purchases)} />
+            <Stat label="Panier moyen" value={fmt(metrics.avgCart, " €")} />
+            <Stat label="CTR" value={fmt(metrics.ctr, " %")} />
+            <Stat label="CPM" value={fmt(metrics.cpm, " €")} />
+            <Stat label="Impressions" value={fmt(metrics.impressions)} />
+            <Stat label="Fréquence" value={fmt(metrics.frequency)} />
+            <Stat label="Hook rate" value={fmt(metrics.hookRate, " %")} />
+            <Stat label="Hold rate" value={fmt(metrics.holdRate, " %")} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont transmis à
+            l&apos;IA lors du diagnostic.
+          </p>
+        </div>
+      )}
 
       {accounts.length > 0 && (
         <div className="grid gap-2 sm:grid-cols-2">

@@ -10,6 +10,25 @@ const InputSchema = z.object({
   max_cpa: z.number(),
   budget: z.number(),
   score: z.number(),
+  meta: z
+    .object({
+      accountName: z.string().optional(),
+      periodDays: z.number(),
+      spend: z.number(),
+      revenue: z.number(),
+      purchases: z.number(),
+      impressions: z.number(),
+      clicks: z.number(),
+      ctr: z.number(),
+      cpm: z.number(),
+      frequency: z.number(),
+      avgCart: z.number(),
+      addToCartRate: z.number(),
+      abandonRate: z.number(),
+      hookRate: z.number(),
+      holdRate: z.number(),
+    })
+    .optional(),
 });
 
 export type AuditDiagnostic = {
@@ -35,6 +54,19 @@ ROAS actuel: ${data.roas} / Seuil rentabilité: ${data.roas_threshold.toFixed(2)
 CPA actuel: ${data.cpa}€ / CPA max acceptable: ${data.max_cpa.toFixed(0)}€
 Budget journalier: ${data.budget}€
 Score global: ${data.score}/100
+${
+      data.meta
+        ? `
+DONNÉES RÉELLES importées depuis Meta Ads${data.meta.accountName ? ` (compte « ${data.meta.accountName} »)` : ""} sur ${data.meta.periodDays} jours :
+- Dépense: ${data.meta.spend}€ / Revenu: ${data.meta.revenue}€ / Achats: ${data.meta.purchases}
+- Panier moyen réel: ${data.meta.avgCart}€
+- Impressions: ${data.meta.impressions} / Clics: ${data.meta.clicks} / CTR: ${data.meta.ctr}% / CPM: ${data.meta.cpm}€ / Fréquence: ${data.meta.frequency}
+- Taux ajout panier: ${data.meta.addToCartRate}% / Taux d'abandon: ${data.meta.abandonRate}%
+- Hook rate (vues 3s): ${data.meta.hookRate}% / Hold rate (75%): ${data.meta.holdRate}%
+Appuie-toi en priorité sur ces chiffres réels plutôt que sur des moyennes de marché.
+`
+        : ""
+    }
 
 Génère un diagnostic structuré en JSON avec exactement ces champs:
 {
