@@ -89,6 +89,8 @@ export interface MetaMetrics {
 }
 
 interface InsightRow {
+  date_start?: string;
+  date_stop?: string;
   spend?: string;
   ctr?: string;
   cpm?: string;
