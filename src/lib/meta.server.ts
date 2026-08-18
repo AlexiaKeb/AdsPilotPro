@@ -86,6 +86,10 @@ export interface MetaMetrics {
   holdRate: number;
   frequency: number;
   cpm: number;
+  allTime: boolean;
+  periodStart: string | null;
+  periodEnd: string | null;
+  effectiveDays: number;
 }
 
 interface InsightRow {
