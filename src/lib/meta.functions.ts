@@ -109,7 +109,7 @@ export const importMetaMetrics = createServerFn({ method: "POST" })
     periodDays: input?.periodDays === 7 || input?.periodDays === 90 ? input.periodDays : (30 as const),
   }))
   .handler(async ({ data, context }) => {
-    const { fetchAccountMetrics, type MetaPeriod } = { fetchAccountMetrics: (await import("./meta.server")).fetchAccountMetrics } as never;
+    const { fetchAccountMetrics } = await import("./meta.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: conn } = await supabaseAdmin
       .from("meta_connections")
