@@ -175,7 +175,7 @@ export async function fetchAccountMetrics(
   return {
     roas: round2(roas),
     cpa: round2(cpa),
-    dailyBudget: round2(spend / periodDays),
+    dailyBudget: round2(spend / effectiveDays),
     ctr: round2(Number(row.ctr) || 0),
     spend: round2(spend),
     purchases,
