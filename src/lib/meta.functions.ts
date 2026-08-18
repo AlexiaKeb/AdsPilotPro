@@ -106,8 +106,9 @@ export const selectMetaAdAccount = createServerFn({ method: "POST" })
 export const importMetaMetrics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { periodDays?: number } | undefined) => ({
-    periodDays: input?.periodDays === 7 || input?.periodDays === 90 ? input.periodDays : (30 as const),
+    periodDays: (input?.periodDays === 7 ? 7 : input?.periodDays === 90 ? 90 : 30) as 7 | 30 | 90,
   }))
+
   .handler(async ({ data, context }) => {
     const { fetchAccountMetrics } = await import("./meta.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
