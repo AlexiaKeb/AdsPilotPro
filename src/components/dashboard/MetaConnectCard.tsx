@@ -289,35 +289,15 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
         </div>
       )}
 
-      {connected && metrics && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <BarChart3 className="h-3.5 w-3.5 text-primary" />
-            Performance Meta —{" "}
-            {metrics.allTime
-              ? `depuis toujours${metrics.periodStart ? ` (${new Date(metrics.periodStart).toLocaleDateString("fr-FR")} → ${metrics.periodEnd ? new Date(metrics.periodEnd).toLocaleDateString("fr-FR") : "aujourd'hui"})` : ""}`
-              : `${metrics.periodDays} derniers jours`}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Stat label="Dépense" value={fmt(metrics.spend, " €")} />
-            <Stat label="Revenu" value={fmt(metrics.revenue, " €")} />
-            <Stat label="ROAS" value={fmt(metrics.roas, "×")} />
-            <Stat label="CPA" value={fmt(metrics.cpa, " €")} />
-            <Stat label="Achats" value={fmt(metrics.purchases)} />
-            <Stat label="Panier moyen" value={fmt(metrics.avgCart, " €")} />
-            <Stat label="CTR" value={fmt(metrics.ctr, " %")} />
-            <Stat label="CPM" value={fmt(metrics.cpm, " €")} />
-            <Stat label="Impressions" value={fmt(metrics.impressions)} />
-            <Stat label="Fréquence" value={fmt(metrics.frequency)} />
-            <Stat label="Hook rate" value={fmt(metrics.hookRate, " %")} />
-            <Stat label="Hold rate" value={fmt(metrics.holdRate, " %")} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont transmis à
-            l&apos;IA lors du diagnostic.
-          </p>
-        </div>
+      {connected && metrics && <MetaPerformancePanel m={metrics} />}
+
+      {connected && !metrics && busy !== "sync" && (
+        <p className="text-sm text-muted-foreground">
+          Aucune donnée chargée pour cette période. Cliquez sur « Importer mes métriques » ou choisissez « Depuis
+          toujours » si vos campagnes sont à l&apos;arrêt.
+        </p>
       )}
+
 
       {accounts.length > 0 && (
         <div className="grid gap-2 sm:grid-cols-2">
