@@ -217,7 +217,14 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
     try {
       await disconnect({});
       setAccounts([]);
+      setMetrics(null);
+      try {
+        window.localStorage.removeItem(CACHE_KEY);
+      } catch {
+        /* ignore */
+      }
       toast.success("Compte Meta déconnecté.");
+
       void refresh();
     } finally {
       setBusy(null);
