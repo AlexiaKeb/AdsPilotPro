@@ -155,7 +155,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
     }
   };
 
-  const onSync = async (days: Period = period) => {
+  const onSync = async (days: Period = period, silent = false) => {
     setBusy("sync");
     setPeriod(days);
     try {
@@ -163,16 +163,36 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
       const imported: MetaImportedMetrics = { ...m, accountName: adAccountName };
       setMetrics(imported);
       onImport(imported);
-      toast.success(
-        days === 0 ? "Métriques Meta importées (historique complet)." : `Métriques Meta importées (${days} derniers jours).`,
-      );
+      try {
+        window.localStorage.setItem(CACHE_KEY, JSON.stringify({ period: days, metrics: imported }));
+      } catch {
+        /* quota */
+      }
+      if (!silent) {
+        toast.success(
+          days === 0
+            ? "Métriques Meta importées (historique complet)."
+            : `Métriques Meta importées (${days} derniers jours).`,
+        );
+      }
       void refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Import impossible.");
+      if (!silent) toast.error(e instanceof Error ? e.message : "Import impossible.");
     } finally {
       setBusy(null);
     }
   };
+
+  // Chargement auto des données à l'ouverture du dashboard (une seule fois).
+  const autoRef = useRef(false);
+  useEffect(() => {
+    if (autoRef.current) return;
+    if (!state?.connected || state.expired || !state.adAccountId) return;
+    autoRef.current = true;
+    void onSync(readCache()?.period ?? period, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
 
   const onLoadAccounts = async () => {
     setBusy("accounts");
