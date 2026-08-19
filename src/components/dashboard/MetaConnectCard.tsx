@@ -83,8 +83,16 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   }, [status]);
 
   useEffect(() => {
+    const cached = readCache();
+    if (cached) {
+      setPeriod(cached.period);
+      setMetrics(cached.metrics);
+      onImport(cached.metrics);
+    }
     void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
+
 
   const onConnect = async () => {
     setBusy("connect");
