@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2, BarChart3 } from "lucide-react";
+import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { MetaPerformancePanel } from "./MetaPerformancePanel";
+
 import {
   getMetaAuthUrl,
   connectMeta,
