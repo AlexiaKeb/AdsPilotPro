@@ -43,17 +43,16 @@ const PERIODS = [7, 30, 90, 0] as const;
 type Period = (typeof PERIODS)[number];
 const periodLabel = (d: Period) => (d === 0 ? "Depuis toujours" : `${d} j`);
 
-function fmt(n: number, suffix = "") {
-  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(n)}${suffix}`;
-}
+const CACHE_KEY = "meta_metrics_cache_v1";
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-display font-bold text-sm">{value}</div>
-    </div>
-  );
+function readCache(): { period: Period; metrics: MetaImportedMetrics } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    return raw ? (JSON.parse(raw) as { period: Period; metrics: MetaImportedMetrics }) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetrics) => void }) {
@@ -71,6 +70,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   const [accounts, setAccounts] = useState<{ id: string; name: string; currency: string }[]>([]);
   const [period, setPeriod] = useState<Period>(30);
   const [metrics, setMetrics] = useState<MetaImportedMetrics | null>(null);
+
 
   const refresh = useCallback(async () => {
     try {
