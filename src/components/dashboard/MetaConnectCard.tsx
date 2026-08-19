@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2, BarChart3 } from "lucide-react";
+import { Loader2, Link2, RefreshCw, Unlink, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { MetaPerformancePanel } from "./MetaPerformancePanel";
+
 import {
   getMetaAuthUrl,
   connectMeta,
@@ -43,17 +45,16 @@ const PERIODS = [7, 30, 90, 0] as const;
 type Period = (typeof PERIODS)[number];
 const periodLabel = (d: Period) => (d === 0 ? "Depuis toujours" : `${d} j`);
 
-function fmt(n: number, suffix = "") {
-  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(n)}${suffix}`;
-}
+const CACHE_KEY = "meta_metrics_cache_v1";
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-surface px-3 py-2.5">
-      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-display font-bold text-sm">{value}</div>
-    </div>
-  );
+function readCache(): { period: Period; metrics: MetaImportedMetrics } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    return raw ? (JSON.parse(raw) as { period: Period; metrics: MetaImportedMetrics }) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetrics) => void }) {
@@ -72,6 +73,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   const [period, setPeriod] = useState<Period>(30);
   const [metrics, setMetrics] = useState<MetaImportedMetrics | null>(null);
 
+
   const refresh = useCallback(async () => {
     try {
       setState(await status({}));
@@ -83,8 +85,16 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   }, [status]);
 
   useEffect(() => {
+    const cached = readCache();
+    if (cached) {
+      setPeriod(cached.period);
+      setMetrics(cached.metrics);
+      onImport(cached.metrics);
+    }
     void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
+
 
   const onConnect = async () => {
     setBusy("connect");
@@ -145,7 +155,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
     }
   };
 
-  const onSync = async (days: Period = period) => {
+  const onSync = async (days: Period = period, silent = false) => {
     setBusy("sync");
     setPeriod(days);
     try {
@@ -153,16 +163,36 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
       const imported: MetaImportedMetrics = { ...m, accountName: adAccountName };
       setMetrics(imported);
       onImport(imported);
-      toast.success(
-        days === 0 ? "Métriques Meta importées (historique complet)." : `Métriques Meta importées (${days} derniers jours).`,
-      );
+      try {
+        window.localStorage.setItem(CACHE_KEY, JSON.stringify({ period: days, metrics: imported }));
+      } catch {
+        /* quota */
+      }
+      if (!silent) {
+        toast.success(
+          days === 0
+            ? "Métriques Meta importées (historique complet)."
+            : `Métriques Meta importées (${days} derniers jours).`,
+        );
+      }
       void refresh();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Import impossible.");
+      if (!silent) toast.error(e instanceof Error ? e.message : "Import impossible.");
     } finally {
       setBusy(null);
     }
   };
+
+  // Chargement auto des données à l'ouverture du dashboard (une seule fois).
+  const autoRef = useRef(false);
+  useEffect(() => {
+    if (autoRef.current) return;
+    if (!state?.connected || state.expired || !state.adAccountId) return;
+    autoRef.current = true;
+    void onSync(readCache()?.period ?? period, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
 
   const onLoadAccounts = async () => {
     setBusy("accounts");
@@ -187,7 +217,14 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
     try {
       await disconnect({});
       setAccounts([]);
+      setMetrics(null);
+      try {
+        window.localStorage.removeItem(CACHE_KEY);
+      } catch {
+        /* ignore */
+      }
       toast.success("Compte Meta déconnecté.");
+
       void refresh();
     } finally {
       setBusy(null);
@@ -289,35 +326,15 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
         </div>
       )}
 
-      {connected && metrics && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-            <BarChart3 className="h-3.5 w-3.5 text-primary" />
-            Performance Meta —{" "}
-            {metrics.allTime
-              ? `depuis toujours${metrics.periodStart ? ` (${new Date(metrics.periodStart).toLocaleDateString("fr-FR")} → ${metrics.periodEnd ? new Date(metrics.periodEnd).toLocaleDateString("fr-FR") : "aujourd'hui"})` : ""}`
-              : `${metrics.periodDays} derniers jours`}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Stat label="Dépense" value={fmt(metrics.spend, " €")} />
-            <Stat label="Revenu" value={fmt(metrics.revenue, " €")} />
-            <Stat label="ROAS" value={fmt(metrics.roas, "×")} />
-            <Stat label="CPA" value={fmt(metrics.cpa, " €")} />
-            <Stat label="Achats" value={fmt(metrics.purchases)} />
-            <Stat label="Panier moyen" value={fmt(metrics.avgCart, " €")} />
-            <Stat label="CTR" value={fmt(metrics.ctr, " %")} />
-            <Stat label="CPM" value={fmt(metrics.cpm, " €")} />
-            <Stat label="Impressions" value={fmt(metrics.impressions)} />
-            <Stat label="Fréquence" value={fmt(metrics.frequency)} />
-            <Stat label="Hook rate" value={fmt(metrics.hookRate, " %")} />
-            <Stat label="Hold rate" value={fmt(metrics.holdRate, " %")} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont transmis à
-            l&apos;IA lors du diagnostic.
-          </p>
-        </div>
+      {connected && metrics && <MetaPerformancePanel m={metrics} />}
+
+      {connected && !metrics && busy !== "sync" && (
+        <p className="text-sm text-muted-foreground">
+          Aucune donnée chargée pour cette période. Cliquez sur « Importer mes métriques » ou choisissez « Depuis
+          toujours » si vos campagnes sont à l&apos;arrêt.
+        </p>
       )}
+
 
       {accounts.length > 0 && (
         <div className="grid gap-2 sm:grid-cols-2">
