@@ -163,8 +163,10 @@ export async function fetchAccountMetrics(
     roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays,
     impressions: 0, clicks: 0, revenue: 0, avgCart: 0, addToCart: 0,
     addToCartRate: 0, abandonRate: 0, hookRate: 0, holdRate: 0, frequency: 0, cpm: 0,
+    leads: 0, costPerLead: 0, leadRate: 0, isLeadGen: false,
     allTime: periodDays === 0, periodStart: null, periodEnd: null, effectiveDays: periodDays || 0,
   };
+
   if (!row) return empty;
 
   const periodStart = row.date_start ?? null;
