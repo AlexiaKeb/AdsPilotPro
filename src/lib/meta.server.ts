@@ -112,6 +112,16 @@ interface InsightRow {
 const PURCHASE_TYPES = ["omni_purchase", "purchase", "offsite_conversion.fb_pixel_purchase"];
 const ATC_TYPES = ["omni_add_to_cart", "add_to_cart", "offsite_conversion.fb_pixel_add_to_cart"];
 const LPV_TYPES = ["landing_page_view", "omni_landing_page_view"];
+const LEAD_TYPES = [
+  "lead",
+  "onsite_conversion.lead_grouped",
+  "offsite_conversion.fb_pixel_lead",
+  "onsite_web_lead",
+  "omni_lead",
+  "leadgen_grouped",
+  "onsite_conversion.lead_form_submitted",
+];
+
 
 function pick(list: { action_type: string; value: string }[] | undefined, types = PURCHASE_TYPES): number {
   if (!list) return 0;
