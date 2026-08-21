@@ -1,10 +1,12 @@
 import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown } from "lucide-react";
+import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown, Lock } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { moduleAllowed, moduleRequiredPlan, type PlanId } from "@/hooks/usePlan";
+import { ModuleLocked } from "./PlanBanner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
 import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/audit-pdf";
 import { VisionCreativeTab } from "./VisionCreativeTab";
@@ -76,6 +78,29 @@ const MODULES: { id: ModuleId; label: string; icon: typeof Activity }[] = [
 
 
 
+const MODULE_BENEFITS: Record<string, string[]> = {
+  oracle: [
+    "Valeur vie client (LTV) calculée sur vos vrais paniers et fréquences d'achat",
+    "CPA maximum rentable à 3, 6 et 12 mois",
+    "Le budget d'acquisition que vous pouvez réellement vous permettre",
+  ],
+  mercury: [
+    "Détection des fuites de conversion entre le clic et l'achat",
+    "Impact chiffré de la vitesse de page sur votre chiffre d'affaires",
+    "Priorisation des correctifs CRO par gain estimé",
+  ],
+  atlas: [
+    "Plan de scaling budget par paliers, sans casser votre ROAS",
+    "Alerte rupture de stock avant qu'elle ne coûte des ventes",
+    "Cadence de montée en budget adaptée à votre structure",
+  ],
+  vision_creative: [
+    "Analyse de vos visuels publicitaires par l'IA (hook, clarté, promesse)",
+    "Angles créatifs à tester en priorité, écrits pour votre offre",
+    "Diagnostic de fatigue créative avant la chute des performances",
+  ],
+};
+
 export type ScoredModuleId = Exclude<ModuleId, "vision_creative">;
 export const SCORED_MODULES: ScoredModuleId[] = ["andromeda", "oracle", "mercury", "atlas"];
 type AiMap<T> = Partial<Record<ScoredModuleId, T>>;
@@ -97,7 +122,7 @@ export const TAG_COLORS: Record<AuditTag, string> = {
   "Archive": "var(--color-muted-foreground)",
 };
 
-export function AuditsTab() {
+export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCreditUsed?: () => void } = {}) {
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
@@ -284,10 +309,18 @@ export function AuditsTab() {
       .then((diag) => {
         if (reqId !== reqIdRef.current[mod]) return;
         setAiByModule((prev) => ({ ...prev, [mod]: diag }));
+        onCreditUsed?.();
       })
       .catch((err: Error) => {
         if (reqId !== reqIdRef.current[mod]) return;
-        toast.error(`Analyse IA: ${err.message}`);
+        const quota = /quota|plan pro|plan sup/i.test(err.message);
+        toast.error(err.message, {
+          duration: quota ? 10000 : 5000,
+          ...(quota
+            ? { action: { label: "Upgrader", onClick: () => { window.location.href = "/pricing"; } } }
+            : {}),
+        });
+        onCreditUsed?.();
       })
       .finally(() => {
         if (reqId !== reqIdRef.current[mod]) return;
@@ -401,10 +434,12 @@ export function AuditsTab() {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {MODULES.map((m) => {
           const isActive = active === m.id;
+          const locked = !moduleAllowed(plan, m.id);
           return (
             <button
               key={m.id}
               onClick={() => setActive(m.id)}
+              title={locked ? "Inclus dans un plan supérieur" : undefined}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs uppercase tracking-widest font-display font-bold transition whitespace-nowrap ${
                 isActive
                   ? "btn-hero"
@@ -413,13 +448,20 @@ export function AuditsTab() {
             >
               <m.icon className="h-3.5 w-3.5" />
               {m.label}
+              {locked && <Lock className="h-3 w-3 opacity-70" />}
             </button>
           );
         })}
       </div>
 
       {/* Active module panel */}
-      {active === "vision_creative" ? (
+      {!moduleAllowed(plan, active) ? (
+        <ModuleLocked
+          moduleLabel={MODULES.find((m) => m.id === active)!.label}
+          requiredPlan={moduleRequiredPlan(active)}
+          benefits={MODULE_BENEFITS[active] ?? []}
+        />
+      ) : active === "vision_creative" ? (
         <motion.div
           key="vision_creative"
           initial={{ opacity: 0, y: 10 }}

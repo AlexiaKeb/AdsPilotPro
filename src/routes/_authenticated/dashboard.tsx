@@ -7,6 +7,8 @@ import { AuditsTab } from "@/components/dashboard/AuditsTab";
 import { AuditHistory } from "@/components/dashboard/AuditHistory";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { CoachingCTA } from "@/components/CoachingCTA";
+import { PlanBanner, PlanChip } from "@/components/dashboard/PlanBanner";
+import { usePlan } from "@/hooks/usePlan";
 
 type TabId = "audits";
 
@@ -37,6 +39,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabId>("audits");
   const [profile, setProfile] = useState<Profile | null>(null);
+  const planState = usePlan();
   
 
   useEffect(() => {
@@ -87,13 +90,14 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <DashHeader profile={profile} onSignOut={onSignOut} />
+      <DashHeader profile={profile} plan={planState.plan} onSignOut={onSignOut} />
       <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
         {tab === "audits" && (
           <>
+            <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
             <QuickStartCard />
-            <AuditsTab />
+            <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
           </>
         )}
         <CoachingCTA />
@@ -137,7 +141,7 @@ function QuickStartCard() {
   );
 }
 
-function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut: () => void }) {
+function DashHeader({ profile, plan, onSignOut }: { profile: Profile | null; plan: import("@/hooks/usePlan").PlanId; onSignOut: () => void }) {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -146,7 +150,7 @@ function DashHeader({ profile, onSignOut }: { profile: Profile | null; onSignOut
             <Rocket className="h-4 w-4 text-white" />
           </div>
           <div className="font-display font-bold tracking-wider">ADSPILOT</div>
-          <span className="chip-tag !py-0.5">PRO</span>
+          <PlanChip plan={plan} />
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden md:block text-right">
