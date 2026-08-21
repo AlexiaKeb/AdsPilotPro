@@ -105,7 +105,7 @@ interface InsightRow {
   actions?: { action_type: string; value: string }[];
   action_values?: { action_type: string; value: string }[];
   cost_per_action_type?: { action_type: string; value: string }[];
-  video_3_sec_watched_actions?: { action_type: string; value: string }[];
+  video_play_actions?: { action_type: string; value: string }[];
   video_p75_watched_actions?: { action_type: string; value: string }[];
 }
 
@@ -138,7 +138,8 @@ export async function fetchAccountMetrics(
   const data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
     access_token: accessToken,
     fields:
-      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_3_sec_watched_actions,video_p75_watched_actions",
+      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_play_actions,video_p75_watched_actions",
+
     date_preset: preset,
     time_increment: "all_days",
   });
@@ -169,7 +170,7 @@ export async function fetchAccountMetrics(
   const roas = pick(row.purchase_roas) || (spend > 0 ? revenue / spend : 0);
   const cpaReported = pick(row.cost_per_action_type);
   const cpa = cpaReported || (purchases > 0 ? spend / purchases : 0);
-  const views3s = first(row.video_3_sec_watched_actions);
+  const views3s = first(row.video_play_actions);
   const p75 = first(row.video_p75_watched_actions);
 
   return {
