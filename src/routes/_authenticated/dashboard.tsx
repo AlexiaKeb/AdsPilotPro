@@ -8,6 +8,7 @@ import { AuditHistory } from "@/components/dashboard/AuditHistory";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { CoachingCTA } from "@/components/CoachingCTA";
 import { PlanBanner, PlanChip } from "@/components/dashboard/PlanBanner";
+import { ProgressPanel } from "@/components/dashboard/ProgressPanel";
 import { usePlan } from "@/hooks/usePlan";
 
 type TabId = "audits";
