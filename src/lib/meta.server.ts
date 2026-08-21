@@ -148,16 +148,50 @@ export async function fetchAccountMetrics(
   periodDays: MetaPeriod = 30,
 ): Promise<MetaMetrics> {
   const actId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
-  const preset =
-    periodDays === 0 ? "maximum" : periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d";
-  const data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
-    access_token: accessToken,
-    fields:
-      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_play_actions,video_p75_watched_actions",
+  const fields =
+    "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_play_actions,video_p75_watched_actions";
 
-    date_preset: preset,
+  const params: Record<string, string> = {
+    access_token: accessToken,
+    fields,
     time_increment: "all_days",
-  });
+  };
+
+  if (periodDays === 0) {
+    // "Depuis toujours" : Meta ne sert des insights que sur ~37 mois glissants.
+    // On demande explicitement la fenêtre maximale depuis la création du compte.
+    let since = new Date(Date.now() - 37 * 30 * 86_400_000);
+    try {
+      const acct = await graph<{ created_time?: string }>(`/${actId}`, {
+        access_token: accessToken,
+        fields: "created_time",
+      });
+      if (acct.created_time) {
+        const created = new Date(acct.created_time);
+        if (!Number.isNaN(created.getTime()) && created > since) since = created;
+      }
+    } catch {
+      /* on garde la fenêtre par défaut */
+    }
+    params["time_range"] = JSON.stringify({
+      since: since.toISOString().slice(0, 10),
+      until: new Date().toISOString().slice(0, 10),
+    });
+  } else {
+    params["date_preset"] = periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d";
+  }
+
+  let data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, params);
+  if (periodDays === 0 && !data.data?.[0]) {
+    // Repli sur le preset natif si la fenêtre explicite ne renvoie rien.
+    data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
+      access_token: accessToken,
+      fields,
+      date_preset: "maximum",
+      time_increment: "all_days",
+    });
+  }
+
   const row = data.data?.[0];
   const empty: MetaMetrics = {
     roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays,
