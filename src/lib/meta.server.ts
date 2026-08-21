@@ -186,13 +186,22 @@ export async function fetchAccountMetrics(
   const revenue = pick(row.action_values);
   const roas = pick(row.purchase_roas) || (spend > 0 ? revenue / spend : 0);
   const cpaReported = pick(row.cost_per_action_type);
-  const cpa = cpaReported || (purchases > 0 ? spend / purchases : 0);
+  const leads = pick(row.actions, LEAD_TYPES);
+  const costPerLeadReported = pick(row.cost_per_action_type, LEAD_TYPES);
+  const costPerLead = costPerLeadReported || (leads > 0 ? spend / leads : 0);
+  const isLeadGen = leads > 0 && purchases === 0;
+  const cpa = isLeadGen ? costPerLead : cpaReported || (purchases > 0 ? spend / purchases : 0);
   const views3s = first(row.video_play_actions);
   const p75 = first(row.video_p75_watched_actions);
 
   return {
     roas: round2(roas),
     cpa: round2(cpa),
+    leads,
+    costPerLead: round2(costPerLead),
+    leadRate: round2(clicks > 0 ? (leads / clicks) * 100 : 0),
+    isLeadGen,
+
     dailyBudget: round2(spend / effectiveDays),
     ctr: round2(Number(row.ctr) || 0),
     spend: round2(spend),
