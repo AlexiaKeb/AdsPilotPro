@@ -110,8 +110,10 @@ function QuickStartCard() {
         <div>
           <div className="font-display font-bold uppercase tracking-widest text-sm">Démarrage rapide</div>
           <p className="mt-1 text-sm text-muted-foreground max-w-xl">
-            1. Choisissez votre secteur · 2. Saisissez vos 3 métriques principales · 3. Générez votre diagnostic IA.
+            1. Connectez Meta Ads (ou saisissez vos métriques) · 2. Choisissez un module · 3. Cliquez sur « Générer
+            mon diagnostic IA ». Le simulateur sert à tester des scénarios avant d&apos;investir.
           </p>
+
         </div>
       </div>
       <Link
