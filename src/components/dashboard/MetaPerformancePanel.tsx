@@ -194,19 +194,41 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
 
       {/* Détails */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Stat label="ROAS" value={nf(m.roas, "×")} tone={m.roas >= 2 ? "good" : "bad"} />
-        <Stat label="CPA" value={nf(m.cpa, " €")} />
+        {leadGen ? (
+          <>
+            <Stat label="Leads" value={nf(m.leads)} tone={m.leads > 0 ? "good" : undefined} />
+            <Stat label="Coût par lead" value={nf(m.costPerLead, " €")} />
+            <Stat label="Taux de lead" value={nf(m.leadRate, " %")} hint="Leads / clics" />
+          </>
+        ) : (
+          <>
+            <Stat label="ROAS" value={nf(m.roas, "×")} tone={m.roas >= 2 ? "good" : "bad"} />
+            <Stat label="CPA" value={nf(m.cpa, " €")} />
+          </>
+        )}
         <Stat label="CTR" value={nf(m.ctr, " %")} tone={m.ctr >= 1 ? "good" : "bad"} />
         <Stat label="CPM" value={nf(m.cpm, " €")} />
         <Stat label="Impressions" value={nf(m.impressions)} />
         <Stat label="Fréquence" value={nf(m.frequency)} tone={m.frequency <= 3 ? "good" : "bad"} />
         <Stat label="Hook rate" value={nf(m.hookRate, " %")} hint="Vues 3s" />
         <Stat label="Hold rate" value={nf(m.holdRate, " %")} hint="Vues 75%" />
-        <Stat label="Taux ajout panier" value={nf(m.addToCartRate, " %")} />
-        <Stat label="Taux d'abandon" value={nf(m.abandonRate, " %")} tone={m.abandonRate <= 70 ? "good" : "bad"} />
         <Stat label="Clics" value={nf(m.clicks)} />
-        <Stat label="Panier moyen" value={nf(m.avgCart, " €")} />
+        {!leadGen && (
+          <>
+            <Stat label="Taux ajout panier" value={nf(m.addToCartRate, " %")} />
+            <Stat
+              label="Taux d'abandon"
+              value={nf(m.abandonRate, " %")}
+              tone={m.abandonRate <= 70 ? "good" : "bad"}
+            />
+            <Stat label="Panier moyen" value={nf(m.avgCart, " €")} />
+          </>
+        )}
+        {leadGen && m.leads > 0 && (
+          <Stat label="Leads / jour" value={nf(m.leads / Math.max(m.effectiveDays, 1))} />
+        )}
       </div>
+
 
       <p className="text-xs text-muted-foreground">
         Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont
