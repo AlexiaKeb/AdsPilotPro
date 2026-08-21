@@ -27,6 +27,11 @@ const InputSchema = z.object({
       abandonRate: z.number(),
       hookRate: z.number(),
       holdRate: z.number(),
+      leads: z.number().optional(),
+      costPerLead: z.number().optional(),
+      leadRate: z.number().optional(),
+      isLeadGen: z.boolean().optional(),
+
     })
     .optional(),
 });
