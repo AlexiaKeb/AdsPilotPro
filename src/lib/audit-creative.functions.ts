@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { consumeAiCredit } from "./plan-quota.server";
 
 const InputSchema = z.object({
   // ~8 MB base64 cap to prevent oversized payload abuse
@@ -37,7 +38,8 @@ export type CreativeDiagnostic = {
 export const analyzeCreative = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
-  .handler(async ({ data }): Promise<CreativeDiagnostic> => {
+  .handler(async ({ data, context }): Promise<CreativeDiagnostic> => {
+    await consumeAiCredit(context.supabase, "creative");
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
 
