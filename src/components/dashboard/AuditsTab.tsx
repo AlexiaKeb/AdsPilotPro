@@ -307,13 +307,12 @@ export function AuditsTab() {
 
 
 
-  const setSector = (s: Sector) => setInputs({ ...DEFAULTS[s] });
-  const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
-    setInputs((prev) => ({ ...prev, [k]: v }));
+  const metaRef = useRef<MetaImportedMetrics | null>(null);
+  const [metaFilled, setMetaFilled] = useState<string[]>([]);
 
-  const applyMetaMetrics = (m: MetaImportedMetrics) => {
-    setMeta(m);
-    setInputs((prev) => ({
+  const mergeMeta = (prev: AuditInputs, m: MetaImportedMetrics | null): AuditInputs => {
+    if (!m) return prev;
+    return {
       ...prev,
       // Andromeda
       roas_actual: m.roas > 0 ? m.roas : prev.roas_actual,
@@ -328,13 +327,52 @@ export function AuditsTab() {
       hook_rate: m.hookRate > 0 ? m.hookRate : prev.hook_rate,
       hold_rate: m.holdRate > 0 ? m.holdRate : prev.hold_rate,
       ctr: m.ctr > 0 ? m.ctr : prev.ctr,
-    }));
-    setActive("andromeda");
+    };
+  };
+
+  const setSector = (s: Sector) => setInputs(mergeMeta({ ...DEFAULTS[s] }, metaRef.current));
+  const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
+    setInputs((prev) => ({ ...prev, [k]: v }));
+
+  const applyMetaMetrics = (m: MetaImportedMetrics) => {
+    setMeta(m);
+    metaRef.current = m;
+    setInputs((prev) => mergeMeta(prev, m));
+    const filled: string[] = [];
+    if (m.roas > 0) filled.push("ROAS");
+    if (m.cpa > 0) filled.push(m.isLeadGen ? "Coût par lead" : "CPA");
+    if (m.dailyBudget > 0) filled.push("Budget/j");
+    if (m.avgCart > 0) filled.push("Panier moyen");
+    if (m.addToCartRate > 0) filled.push("Taux ajout panier");
+    if (m.abandonRate > 0) filled.push("Taux d'abandon");
+    if (m.hookRate > 0) filled.push("Hook rate");
+    if (m.holdRate > 0) filled.push("Hold rate");
+    if (m.ctr > 0) filled.push("CTR");
+    setMetaFilled(filled);
   };
 
   return (
     <div className="space-y-6">
       <MetaConnectCard onImport={applyMetaMetrics} />
+
+      {meta && (
+        <div className="card-cockpit p-4 text-xs">
+          {metaFilled.length > 0 ? (
+            <p className="text-muted-foreground">
+              <span className="font-display font-bold uppercase tracking-widest text-foreground">
+                Champs pré-remplis depuis Meta
+              </span>{" "}
+              — {metaFilled.join(" · ")}. Les autres champs restent à saisir manuellement.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              Aucune donnée exploitable sur la période sélectionnée : les modules ne peuvent pas être
+              pré-remplis. Choisissez « Depuis toujours » ou saisissez vos métriques manuellement.
+            </p>
+          )}
+        </div>
+      )}
+
 
       {/* Sector selection */}
       <div className="card-cockpit p-6">

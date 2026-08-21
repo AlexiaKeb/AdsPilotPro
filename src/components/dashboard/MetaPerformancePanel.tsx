@@ -231,9 +231,15 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
 
 
       <p className="text-xs text-muted-foreground">
-        Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont
-        transmis à l&apos;IA lors du diagnostic.
+        Les métriques disponibles pré-remplissent les champs correspondants des modules d&apos;audit
+        (ROAS, CPA/CPL, budget, panier moyen, CTR, hook &amp; hold rate) et sont transmises à l&apos;IA lors du
+        diagnostic. Les champs sans équivalent Meta restent à saisir manuellement.
+        {m.allTime && (
+          <> Note&nbsp;: Meta ne fournit les statistiques que sur les 37 derniers mois — les campagnes plus
+          anciennes ne sont plus accessibles via l&apos;API.</>
+        )}
       </p>
+
     </div>
   );
 }
