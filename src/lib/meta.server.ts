@@ -105,7 +105,7 @@ interface InsightRow {
   actions?: { action_type: string; value: string }[];
   action_values?: { action_type: string; value: string }[];
   cost_per_action_type?: { action_type: string; value: string }[];
-  video_3_sec_watched_actions?: { action_type: string; value: string }[];
+  video_play_actions?: { action_type: string; value: string }[];
   video_p75_watched_actions?: { action_type: string; value: string }[];
 }
 
