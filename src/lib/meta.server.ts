@@ -86,10 +86,15 @@ export interface MetaMetrics {
   holdRate: number;
   frequency: number;
   cpm: number;
+  leads: number;
+  costPerLead: number;
+  leadRate: number;
+  isLeadGen: boolean;
   allTime: boolean;
   periodStart: string | null;
   periodEnd: string | null;
   effectiveDays: number;
+
 }
 
 interface InsightRow {
