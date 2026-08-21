@@ -60,13 +60,20 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
   const clickRate = m.impressions > 0 ? (m.clicks / m.impressions) * 100 : 0;
   const atcRate = m.clicks > 0 ? (m.addToCart / m.clicks) * 100 : 0;
   const buyRate = m.addToCart > 0 ? (m.purchases / m.addToCart) * 100 : 0;
+  const leadGen = m.isLeadGen || (m.leads > 0 && m.purchases === 0);
 
-  const funnel = [
-    { name: "Impressions", value: m.impressions, pct: 100 },
-    { name: "Clics", value: m.clicks, pct: clickRate },
-    { name: "Ajouts panier", value: m.addToCart, pct: atcRate },
-    { name: "Achats", value: m.purchases, pct: buyRate },
-  ];
+  const funnel = leadGen
+    ? [
+        { name: "Impressions", value: m.impressions, pct: 100 },
+        { name: "Clics", value: m.clicks, pct: clickRate },
+        { name: "Leads", value: m.leads, pct: m.leadRate },
+      ]
+    : [
+        { name: "Impressions", value: m.impressions, pct: 100 },
+        { name: "Clics", value: m.clicks, pct: clickRate },
+        { name: "Ajouts panier", value: m.addToCart, pct: atcRate },
+        { name: "Achats", value: m.purchases, pct: buyRate },
+      ];
 
   return (
     <div className="space-y-5">
@@ -80,24 +87,42 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
       <div className="rounded-xl border border-border bg-surface-2 p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            Résultat net sur la période
+            {leadGen ? "Coût par lead sur la période" : "Résultat net sur la période"}
           </div>
-          <div
-            className="mt-1 font-mono-data text-3xl font-bold flex items-center gap-2"
-            style={{ color: profitable ? "var(--color-success)" : "var(--color-danger)" }}
-          >
-            {profitable ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
-            {nf(profit, " €")}
-          </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {nf(m.revenue, " €")} de revenu pour {nf(m.spend, " €")} investis · ROAS {nf(m.roas, "×")}
-          </div>
+          {leadGen ? (
+            <>
+              <div className="mt-1 font-mono-data text-3xl font-bold text-primary">
+                {nf(m.costPerLead, " €")}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {nf(m.leads)} leads générés pour {nf(m.spend, " €")} investis · {nf(m.leadRate, " %")} des clics
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="mt-1 font-mono-data text-3xl font-bold flex items-center gap-2"
+                style={{ color: profitable ? "var(--color-success)" : "var(--color-danger)" }}
+              >
+                {profitable ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
+                {nf(profit, " €")}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {nf(m.revenue, " €")} de revenu pour {nf(m.spend, " €")} investis · ROAS {nf(m.roas, "×")}
+              </div>
+            </>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 min-w-[220px]">
           <Stat label="Budget / jour" value={nf(m.dailyBudget, " €")} hint={`${m.effectiveDays} j`} />
-          <Stat label="Achats" value={nf(m.purchases)} hint={`Panier ${nf(m.avgCart, " €")}`} />
+          {leadGen ? (
+            <Stat label="Leads" value={nf(m.leads)} hint={`CPL ${nf(m.costPerLead, " €")}`} />
+          ) : (
+            <Stat label="Achats" value={nf(m.purchases)} hint={`Panier ${nf(m.avgCart, " €")}`} />
+          )}
         </div>
       </div>
+
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Dépense vs revenu */}
