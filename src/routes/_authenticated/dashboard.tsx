@@ -92,8 +92,9 @@ function Dashboard() {
       <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
         {tab === "audits" && (
           <>
+            <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
             <QuickStartCard />
-            <AuditsTab />
+            <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
           </>
         )}
         <CoachingCTA />
