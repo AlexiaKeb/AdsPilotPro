@@ -33,7 +33,12 @@ export interface MetaImportedMetrics {
   abandonRate: number;
   hookRate: number;
   holdRate: number;
+  leads: number;
+  costPerLead: number;
+  leadRate: number;
+  isLeadGen: boolean;
   periodDays: number;
+
   allTime: boolean;
   periodStart: string | null;
   periodEnd: string | null;
