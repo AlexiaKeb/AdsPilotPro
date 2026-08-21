@@ -86,10 +86,15 @@ export interface MetaMetrics {
   holdRate: number;
   frequency: number;
   cpm: number;
+  leads: number;
+  costPerLead: number;
+  leadRate: number;
+  isLeadGen: boolean;
   allTime: boolean;
   periodStart: string | null;
   periodEnd: string | null;
   effectiveDays: number;
+
 }
 
 interface InsightRow {
@@ -112,6 +117,16 @@ interface InsightRow {
 const PURCHASE_TYPES = ["omni_purchase", "purchase", "offsite_conversion.fb_pixel_purchase"];
 const ATC_TYPES = ["omni_add_to_cart", "add_to_cart", "offsite_conversion.fb_pixel_add_to_cart"];
 const LPV_TYPES = ["landing_page_view", "omni_landing_page_view"];
+const LEAD_TYPES = [
+  "lead",
+  "onsite_conversion.lead_grouped",
+  "offsite_conversion.fb_pixel_lead",
+  "onsite_web_lead",
+  "omni_lead",
+  "leadgen_grouped",
+  "onsite_conversion.lead_form_submitted",
+];
+
 
 function pick(list: { action_type: string; value: string }[] | undefined, types = PURCHASE_TYPES): number {
   if (!list) return 0;
@@ -148,8 +163,10 @@ export async function fetchAccountMetrics(
     roas: 0, cpa: 0, dailyBudget: 0, ctr: 0, spend: 0, purchases: 0, periodDays,
     impressions: 0, clicks: 0, revenue: 0, avgCart: 0, addToCart: 0,
     addToCartRate: 0, abandonRate: 0, hookRate: 0, holdRate: 0, frequency: 0, cpm: 0,
+    leads: 0, costPerLead: 0, leadRate: 0, isLeadGen: false,
     allTime: periodDays === 0, periodStart: null, periodEnd: null, effectiveDays: periodDays || 0,
   };
+
   if (!row) return empty;
 
   const periodStart = row.date_start ?? null;
@@ -169,13 +186,22 @@ export async function fetchAccountMetrics(
   const revenue = pick(row.action_values);
   const roas = pick(row.purchase_roas) || (spend > 0 ? revenue / spend : 0);
   const cpaReported = pick(row.cost_per_action_type);
-  const cpa = cpaReported || (purchases > 0 ? spend / purchases : 0);
+  const leads = pick(row.actions, LEAD_TYPES);
+  const costPerLeadReported = pick(row.cost_per_action_type, LEAD_TYPES);
+  const costPerLead = costPerLeadReported || (leads > 0 ? spend / leads : 0);
+  const isLeadGen = leads > 0 && purchases === 0;
+  const cpa = isLeadGen ? costPerLead : cpaReported || (purchases > 0 ? spend / purchases : 0);
   const views3s = first(row.video_play_actions);
   const p75 = first(row.video_p75_watched_actions);
 
   return {
     roas: round2(roas),
     cpa: round2(cpa),
+    leads,
+    costPerLead: round2(costPerLead),
+    leadRate: round2(clicks > 0 ? (leads / clicks) * 100 : 0),
+    isLeadGen,
+
     dailyBudget: round2(spend / effectiveDays),
     ctr: round2(Number(row.ctr) || 0),
     spend: round2(spend),

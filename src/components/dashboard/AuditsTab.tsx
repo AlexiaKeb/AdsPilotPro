@@ -271,6 +271,11 @@ export function AuditsTab() {
                 abandonRate: meta.abandonRate,
                 hookRate: meta.hookRate,
                 holdRate: meta.holdRate,
+                leads: meta.leads,
+                costPerLead: meta.costPerLead,
+                leadRate: meta.leadRate,
+                isLeadGen: meta.isLeadGen,
+
               },
             }
           : {}),

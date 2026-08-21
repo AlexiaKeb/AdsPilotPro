@@ -27,6 +27,11 @@ const InputSchema = z.object({
       abandonRate: z.number(),
       hookRate: z.number(),
       holdRate: z.number(),
+      leads: z.number().optional(),
+      costPerLead: z.number().optional(),
+      leadRate: z.number().optional(),
+      isLeadGen: z.boolean().optional(),
+
     })
     .optional(),
 });
@@ -63,7 +68,14 @@ DONNÉES RÉELLES importées depuis Meta Ads${data.meta.accountName ? ` (compte 
 - Impressions: ${data.meta.impressions} / Clics: ${data.meta.clicks} / CTR: ${data.meta.ctr}% / CPM: ${data.meta.cpm}€ / Fréquence: ${data.meta.frequency}
 - Taux ajout panier: ${data.meta.addToCartRate}% / Taux d'abandon: ${data.meta.abandonRate}%
 - Hook rate (vues 3s): ${data.meta.hookRate}% / Hold rate (75%): ${data.meta.holdRate}%
+${
+  data.meta.leads
+    ? `- Leads générés: ${data.meta.leads} / Coût par lead: ${data.meta.costPerLead}€ / Taux de lead (leads/clics): ${data.meta.leadRate}%
+${data.meta.isLeadGen ? "Ce compte fait de la GÉNÉRATION DE LEADS (aucun achat e-commerce tracké) : raisonne en coût par lead, volume de leads et qualité du tunnel lead, pas en ROAS/panier moyen." : ""}`
+    : ""
+}
 Appuie-toi en priorité sur ces chiffres réels plutôt que sur des moyennes de marché.
+
 `
         : ""
     }

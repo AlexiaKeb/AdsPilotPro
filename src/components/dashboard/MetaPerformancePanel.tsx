@@ -60,13 +60,20 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
   const clickRate = m.impressions > 0 ? (m.clicks / m.impressions) * 100 : 0;
   const atcRate = m.clicks > 0 ? (m.addToCart / m.clicks) * 100 : 0;
   const buyRate = m.addToCart > 0 ? (m.purchases / m.addToCart) * 100 : 0;
+  const leadGen = m.isLeadGen || (m.leads > 0 && m.purchases === 0);
 
-  const funnel = [
-    { name: "Impressions", value: m.impressions, pct: 100 },
-    { name: "Clics", value: m.clicks, pct: clickRate },
-    { name: "Ajouts panier", value: m.addToCart, pct: atcRate },
-    { name: "Achats", value: m.purchases, pct: buyRate },
-  ];
+  const funnel = leadGen
+    ? [
+        { name: "Impressions", value: m.impressions, pct: 100 },
+        { name: "Clics", value: m.clicks, pct: clickRate },
+        { name: "Leads", value: m.leads, pct: m.leadRate },
+      ]
+    : [
+        { name: "Impressions", value: m.impressions, pct: 100 },
+        { name: "Clics", value: m.clicks, pct: clickRate },
+        { name: "Ajouts panier", value: m.addToCart, pct: atcRate },
+        { name: "Achats", value: m.purchases, pct: buyRate },
+      ];
 
   return (
     <div className="space-y-5">
@@ -80,24 +87,42 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
       <div className="rounded-xl border border-border bg-surface-2 p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            Résultat net sur la période
+            {leadGen ? "Coût par lead sur la période" : "Résultat net sur la période"}
           </div>
-          <div
-            className="mt-1 font-mono-data text-3xl font-bold flex items-center gap-2"
-            style={{ color: profitable ? "var(--color-success)" : "var(--color-danger)" }}
-          >
-            {profitable ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
-            {nf(profit, " €")}
-          </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {nf(m.revenue, " €")} de revenu pour {nf(m.spend, " €")} investis · ROAS {nf(m.roas, "×")}
-          </div>
+          {leadGen ? (
+            <>
+              <div className="mt-1 font-mono-data text-3xl font-bold text-primary">
+                {nf(m.costPerLead, " €")}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {nf(m.leads)} leads générés pour {nf(m.spend, " €")} investis · {nf(m.leadRate, " %")} des clics
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="mt-1 font-mono-data text-3xl font-bold flex items-center gap-2"
+                style={{ color: profitable ? "var(--color-success)" : "var(--color-danger)" }}
+              >
+                {profitable ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
+                {nf(profit, " €")}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {nf(m.revenue, " €")} de revenu pour {nf(m.spend, " €")} investis · ROAS {nf(m.roas, "×")}
+              </div>
+            </>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2 min-w-[220px]">
           <Stat label="Budget / jour" value={nf(m.dailyBudget, " €")} hint={`${m.effectiveDays} j`} />
-          <Stat label="Achats" value={nf(m.purchases)} hint={`Panier ${nf(m.avgCart, " €")}`} />
+          {leadGen ? (
+            <Stat label="Leads" value={nf(m.leads)} hint={`CPL ${nf(m.costPerLead, " €")}`} />
+          ) : (
+            <Stat label="Achats" value={nf(m.purchases)} hint={`Panier ${nf(m.avgCart, " €")}`} />
+          )}
         </div>
       </div>
+
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Dépense vs revenu */}
@@ -169,19 +194,41 @@ export function MetaPerformancePanel({ m }: { m: MetaImportedMetrics }) {
 
       {/* Détails */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Stat label="ROAS" value={nf(m.roas, "×")} tone={m.roas >= 2 ? "good" : "bad"} />
-        <Stat label="CPA" value={nf(m.cpa, " €")} />
+        {leadGen ? (
+          <>
+            <Stat label="Leads" value={nf(m.leads)} tone={m.leads > 0 ? "good" : undefined} />
+            <Stat label="Coût par lead" value={nf(m.costPerLead, " €")} />
+            <Stat label="Taux de lead" value={nf(m.leadRate, " %")} hint="Leads / clics" />
+          </>
+        ) : (
+          <>
+            <Stat label="ROAS" value={nf(m.roas, "×")} tone={m.roas >= 2 ? "good" : "bad"} />
+            <Stat label="CPA" value={nf(m.cpa, " €")} />
+          </>
+        )}
         <Stat label="CTR" value={nf(m.ctr, " %")} tone={m.ctr >= 1 ? "good" : "bad"} />
         <Stat label="CPM" value={nf(m.cpm, " €")} />
         <Stat label="Impressions" value={nf(m.impressions)} />
         <Stat label="Fréquence" value={nf(m.frequency)} tone={m.frequency <= 3 ? "good" : "bad"} />
         <Stat label="Hook rate" value={nf(m.hookRate, " %")} hint="Vues 3s" />
         <Stat label="Hold rate" value={nf(m.holdRate, " %")} hint="Vues 75%" />
-        <Stat label="Taux ajout panier" value={nf(m.addToCartRate, " %")} />
-        <Stat label="Taux d'abandon" value={nf(m.abandonRate, " %")} tone={m.abandonRate <= 70 ? "good" : "bad"} />
         <Stat label="Clics" value={nf(m.clicks)} />
-        <Stat label="Panier moyen" value={nf(m.avgCart, " €")} />
+        {!leadGen && (
+          <>
+            <Stat label="Taux ajout panier" value={nf(m.addToCartRate, " %")} />
+            <Stat
+              label="Taux d'abandon"
+              value={nf(m.abandonRate, " %")}
+              tone={m.abandonRate <= 70 ? "good" : "bad"}
+            />
+            <Stat label="Panier moyen" value={nf(m.avgCart, " €")} />
+          </>
+        )}
+        {leadGen && m.leads > 0 && (
+          <Stat label="Leads / jour" value={nf(m.leads / Math.max(m.effectiveDays, 1))} />
+        )}
       </div>
+
 
       <p className="text-xs text-muted-foreground">
         Ces chiffres remplissent automatiquement les modules Andromeda, Oracle, Mercury et Vision, et sont
