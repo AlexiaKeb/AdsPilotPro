@@ -138,7 +138,8 @@ export async function fetchAccountMetrics(
   const data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
     access_token: accessToken,
     fields:
-      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_3_sec_watched_actions,video_p75_watched_actions",
+      "spend,ctr,cpm,impressions,clicks,frequency,purchase_roas,actions,action_values,cost_per_action_type,video_play_actions,video_p75_watched_actions",
+
     date_preset: preset,
     time_increment: "all_days",
   });
