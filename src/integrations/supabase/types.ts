@@ -85,6 +85,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_calls_this_month: number
           audits_this_month: number
           avatar_url: string | null
           country: string | null
@@ -102,8 +103,10 @@ export type Database = {
           sector: string | null
           timezone: string | null
           updated_at: string
+          usage_period_start: string
         }
         Insert: {
+          ai_calls_this_month?: number
           audits_this_month?: number
           avatar_url?: string | null
           country?: string | null
@@ -121,8 +124,10 @@ export type Database = {
           sector?: string | null
           timezone?: string | null
           updated_at?: string
+          usage_period_start?: string
         }
         Update: {
+          ai_calls_this_month?: number
           audits_this_month?: number
           avatar_url?: string | null
           country?: string | null
@@ -140,6 +145,7 @@ export type Database = {
           sector?: string | null
           timezone?: string | null
           updated_at?: string
+          usage_period_start?: string
         }
         Relationships: []
       }
@@ -193,6 +199,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_ai_credit: { Args: { _kind?: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

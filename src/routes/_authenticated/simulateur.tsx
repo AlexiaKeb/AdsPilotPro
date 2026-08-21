@@ -3,6 +3,17 @@ import { ArrowLeft, Activity } from "lucide-react";
 import { SimulateurPanel } from "@/components/dashboard/SimulateurPanel";
 
 export const Route = createFileRoute("/_authenticated/simulateur")({
+  head: () => ({
+    meta: [
+      { title: "Simulateur de rentabilité — AdsPilot Pro" },
+      { name: "description", content: "Simulez l'impact de votre ROAS, CPA et budget sur votre rentabilité publicitaire en temps réel." },
+      { property: "og:title", content: "Simulateur de rentabilité — AdsPilot Pro" },
+      { property: "og:description", content: "Simulez l'impact de votre ROAS, CPA et budget sur votre rentabilité publicitaire en temps réel." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: SimulateurPage,
 });
 

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { consumeAiCredit } from "./plan-quota.server";
 
 const InputSchema = z.object({
   sector: z.string(),
@@ -49,7 +50,8 @@ const SYSTEM_PROMPT = `Tu es un consultant expert Meta Ads avec 10 ans d'expéri
 export const analyzeAudit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
-  .handler(async ({ data }): Promise<AuditDiagnostic> => {
+  .handler(async ({ data, context }): Promise<AuditDiagnostic> => {
+    await consumeAiCredit(context.supabase, "audit");
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
 

@@ -19,6 +19,17 @@ interface Profile {
 }
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Dashboard — AdsPilot Pro" },
+      { name: "description", content: "Vos audits Meta Ads, vos scores de performance et vos diagnostics IA en un seul écran." },
+      { property: "og:title", content: "Dashboard — AdsPilot Pro" },
+      { property: "og:description", content: "Vos audits Meta Ads, vos scores de performance et vos diagnostics IA en un seul écran." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Dashboard,
 });
 

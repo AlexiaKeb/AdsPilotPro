@@ -15,6 +15,17 @@ import { deleteAccount } from "@/lib/account.functions";
 import { emitAudit } from "@/components/dashboard/auditHistoryBus";
 
 export const Route = createFileRoute("/_authenticated/profil")({
+  head: () => ({
+    meta: [
+      { title: "Mon profil — AdsPilot Pro" },
+      { name: "description", content: "Gérez votre identité, votre abonnement, l'historique de vos audits et la sécurité de votre compte." },
+      { property: "og:title", content: "Mon profil — AdsPilot Pro" },
+      { property: "og:description", content: "Gérez votre identité, votre abonnement, l'historique de vos audits et la sécurité de votre compte." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ProfilePage,
 });
 

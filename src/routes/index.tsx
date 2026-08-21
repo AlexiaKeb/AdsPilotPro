@@ -619,10 +619,18 @@ function Footer() {
               Légal
             </div>
             <ul className="space-y-2 text-xs text-muted-foreground">
-              <li><span className="opacity-60">Mentions légales</span></li>
-              <li><span className="opacity-60">Politique de confidentialité</span></li>
-              <li><span className="opacity-60">CGU</span></li>
+              <li>
+                <Link to="/mentions-legales" className="hover:text-foreground transition">
+                  Mentions légales
+                </Link>
+              </li>
+              <li>
+                <Link to="/confidentialite" className="hover:text-foreground transition">
+                  Politique de confidentialité
+                </Link>
+              </li>
             </ul>
+
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-border text-center font-mono uppercase tracking-widest text-[10px] text-muted-foreground">

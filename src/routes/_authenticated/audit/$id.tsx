@@ -31,6 +31,17 @@ import {
 } from "@/components/dashboard/AuditsTab";
 
 export const Route = createFileRoute("/_authenticated/audit/$id")({
+  head: () => ({
+    meta: [
+      { title: "Détail de l'audit — AdsPilot Pro" },
+      { name: "description", content: "Consultez le détail d'un audit enregistré : scores par module, diagnostic IA et export PDF." },
+      { property: "og:title", content: "Détail de l'audit — AdsPilot Pro" },
+      { property: "og:description", content: "Consultez le détail d'un audit enregistré : scores par module, diagnostic IA et export PDF." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AuditDetailPage,
 });
 
