@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, Circle, ListChecks, Loader2, Trash2 } from "lucide-react";
+import { AlarmClock, CheckCircle2, Circle, ListChecks, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { emitAudit, onAudit } from "./auditHistoryBus";
@@ -12,6 +12,23 @@ export interface ActionTask {
   impact: string;
   horizon: string;
   done: boolean;
+  created_at: string;
+}
+
+const HORIZON_DAYS: Record<string, number> = {
+  "48h": 2,
+  "7 jours": 7,
+  "30 jours": 30,
+};
+
+/** Nombre de jours de retard d'une tâche (0 = dans les temps). */
+export function overdueDays(task: ActionTask): number {
+  if (task.done) return 0;
+  const limit = HORIZON_DAYS[task.horizon] ?? 7;
+  const created = new Date(task.created_at).getTime();
+  if (Number.isNaN(created)) return 0;
+  const elapsed = Math.floor((Date.now() - created) / 86_400_000);
+  return Math.max(0, elapsed - limit);
 }
 
 const MODULE_LABEL: Record<string, string> = {
@@ -43,7 +60,7 @@ export function ActionPlanPanel() {
     }
     const { data, error } = await supabase
       .from("action_tasks")
-      .select("id, module, title, detail, impact, horizon, done")
+      .select("id, module, title, detail, impact, horizon, done, created_at")
       .eq("user_id", uid)
       .order("done", { ascending: true })
       .order("created_at", { ascending: false })
@@ -82,8 +99,11 @@ export function ActionPlanPanel() {
     }
   };
 
-  const open = tasks.filter((t) => !t.done);
+  const open = tasks
+    .filter((t) => !t.done)
+    .sort((a, b) => overdueDays(b) - overdueDays(a));
   const done = tasks.filter((t) => t.done);
+  const late = open.filter((t) => overdueDays(t) > 0);
   const total = tasks.length;
   const pct = total ? Math.round((done.length / total) * 100) : 0;
   const visible = showDone ? tasks : open;
@@ -111,6 +131,24 @@ export function ActionPlanPanel() {
           </button>
         )}
       </div>
+
+      {late.length > 0 && (
+        <div
+          className="flex items-start gap-3 rounded-lg border p-3"
+          style={{ borderColor: "var(--color-danger)", background: "color-mix(in oklab, var(--color-danger) 8%, transparent)" }}
+        >
+          <AlarmClock className="h-4 w-4 mt-0.5" style={{ color: "var(--color-danger)" }} />
+          <div className="text-xs">
+            <div className="font-bold uppercase tracking-widest font-mono" style={{ color: "var(--color-danger)" }}>
+              {late.length} action{late.length > 1 ? "s" : ""} en retard
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              Le délai que vous vous étiez fixé est dépassé. Traitez-les en priorité : ce sont elles qui bloquent vos
+              résultats.
+            </p>
+          </div>
+        </div>
+      )}
 
       {total > 0 && (
         <div className="space-y-1.5">
@@ -144,6 +182,7 @@ export function ActionPlanPanel() {
               className={`group flex items-start gap-3 rounded-lg border border-border p-3 transition ${
                 t.done ? "opacity-60" : "hover:border-border-strong"
               }`}
+              style={overdueDays(t) > 0 ? { borderColor: "var(--color-danger)" } : undefined}
             >
               <button onClick={() => toggle(t)} aria-label={t.done ? "Rouvrir l'action" : "Marquer comme terminée"} className="mt-0.5">
                 {t.done ? (
@@ -164,6 +203,14 @@ export function ActionPlanPanel() {
                   </span>
                   <span className="rounded px-2 py-0.5 border border-border text-muted-foreground">{t.horizon}</span>
                   <span className="text-muted-foreground">{MODULE_LABEL[t.module] ?? t.module}</span>
+                  {overdueDays(t) > 0 && (
+                    <span
+                      className="rounded px-2 py-0.5 font-bold"
+                      style={{ background: "var(--color-danger)", color: "var(--color-background)" }}
+                    >
+                      En retard · {overdueDays(t)} j
+                    </span>
+                  )}
                 </div>
               </div>
               <button
