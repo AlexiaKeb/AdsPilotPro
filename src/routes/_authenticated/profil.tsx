@@ -200,7 +200,7 @@ function ProfilePage() {
         <div className="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-md grid place-items-center" style={{ background: "var(--grad-primary)" }}>
-              <User className="h-4 w-4 text-white" />
+              <User className="h-4 w-4 text-primary-foreground" />
             </div>
             <div className="font-display font-bold tracking-wider uppercase">Mon profil</div>
           </div>
@@ -309,7 +309,7 @@ function IdentitySection({
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
             ) : (
-              <span className="font-display font-bold text-2xl text-white">{initials}</span>
+              <span className="font-display font-bold text-2xl text-primary-foreground">{initials}</span>
             )}
           </div>
           <button
@@ -422,7 +422,7 @@ function ActivitySection({
           </div>
           <button
             onClick={() => onReview(stats.last!)}
-            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest text-white transition hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground transition hover:opacity-90"
             style={{ background: "var(--grad-primary)" }}
           >
             <Eye className="h-3.5 w-3.5" /> Revoir
@@ -606,7 +606,7 @@ function SecuritySection() {
                 <button
                   onClick={onDelete}
                   disabled={deleting || deleteConfirm !== "SUPPRIMER"}
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50"
                   style={{ background: "var(--color-danger)" }}
                 >
                   {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

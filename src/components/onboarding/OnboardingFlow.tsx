@@ -249,7 +249,7 @@ function Step1({ onNext }: { onNext: () => void }) {
           className="h-16 w-16 rounded-2xl grid place-items-center mb-6"
           style={{ background: "var(--grad-primary)" }}
         >
-          <Rocket className="h-8 w-8 text-white" />
+          <Rocket className="h-8 w-8 text-primary-foreground" />
         </div>
         <div className="text-xs font-mono uppercase tracking-[0.3em] text-primary mb-3">
           AdsPilot Pro
@@ -269,7 +269,7 @@ function Step1({ onNext }: { onNext: () => void }) {
         </p>
         <button
           onClick={onNext}
-          className="mt-10 inline-flex items-center gap-2 rounded-lg px-8 py-4 text-xs font-display font-bold uppercase tracking-widest text-white hover:opacity-90 transition"
+          className="mt-10 inline-flex items-center gap-2 rounded-lg px-8 py-4 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90 transition"
           style={{ background: "var(--grad-primary)" }}
         >
           Commencer <ArrowRight className="h-4 w-4" />
@@ -317,7 +317,7 @@ function Step2({
           <button
             onClick={onNext}
             disabled={!canContinue}
-            className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition"
+            className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition"
             style={{ background: "var(--grad-primary)" }}
           >
             Continuer <ArrowRight className="h-4 w-4" />
@@ -404,7 +404,7 @@ function Step3({
           <div className="flex justify-end">
             <button
               onClick={onRun}
-              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-white hover:opacity-90 transition"
+              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90 transition"
               style={{ background: "var(--grad-primary)" }}
             >
               Analyser <ArrowRight className="h-4 w-4" />
@@ -499,7 +499,7 @@ function Step4({
           <button
             onClick={onDashboard}
             disabled={finishing}
-            className="inline-flex items-center gap-2 rounded-lg px-8 py-4 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 hover:opacity-90 transition"
+            className="inline-flex items-center gap-2 rounded-lg px-8 py-4 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-60 hover:opacity-90 transition"
             style={{ background: "var(--grad-primary)" }}
           >
             {finishing && <Loader2 className="h-4 w-4 animate-spin" />}

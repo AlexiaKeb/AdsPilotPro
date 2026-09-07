@@ -640,7 +640,7 @@ function OverviewPage({
                   borderRadius: 8,
                   fontSize: 12,
                 }}
-                labelStyle={{ color: "#fff" }}
+                labelStyle={{ color: "var(--color-primary-foreground)" }}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Line

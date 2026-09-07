@@ -65,7 +65,7 @@ function PricingPage() {
               className="relative h-8 w-8 rounded-md grid place-items-center"
               style={{ background: "var(--grad-primary)" }}
             >
-              <Rocket className="relative h-4 w-4 text-white" />
+              <Rocket className="relative h-4 w-4 text-primary-foreground" />
             </div>
             <span className="font-display font-bold tracking-wider">ADSPILOT</span>
             <span className="chip-tag !py-0.5">PRO</span>

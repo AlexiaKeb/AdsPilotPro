@@ -291,7 +291,7 @@ export function VisionCreativeTab() {
                 ⚡ Action prioritaire cette semaine
               </div>
             </div>
-            <div className="text-sm text-white font-bold leading-relaxed">
+            <div className="text-sm text-primary-foreground font-bold leading-relaxed">
               {diagnostic.action_prioritaire}
             </div>
           </div>
@@ -397,7 +397,7 @@ function AxeCard({ axe }: { axe: AxeScore }) {
           <div className="text-[10px] uppercase tracking-widest font-display font-bold text-[#FF3B5C] mb-1">
             Correction →
           </div>
-          <div className="text-sm text-white leading-relaxed">{axe.correction}</div>
+          <div className="text-sm text-primary-foreground leading-relaxed">{axe.correction}</div>
         </div>
       )}
 

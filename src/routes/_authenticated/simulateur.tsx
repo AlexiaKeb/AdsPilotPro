@@ -24,7 +24,7 @@ function SimulateurPage() {
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-md grid place-items-center" style={{ background: "var(--grad-primary)" }}>
-              <Activity className="h-4 w-4 text-white" />
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
             <div className="font-display font-bold tracking-wider uppercase">Simulateur</div>
           </div>

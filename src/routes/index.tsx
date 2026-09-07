@@ -227,7 +227,7 @@ function Logo() {
     <Link to="/" className="flex items-center gap-2.5">
       <div className="relative h-8 w-8 rounded-md grid place-items-center" style={{ background: "var(--grad-primary)" }}>
         <div className="absolute inset-0 rounded-md opacity-50 blur-md" style={{ background: "var(--grad-primary)" }} />
-        <Rocket className="relative h-4 w-4 text-white" />
+        <Rocket className="relative h-4 w-4 text-primary-foreground" />
       </div>
       <div className="flex items-center gap-2">
         <span className="font-display font-bold tracking-wider text-foreground">ADSPILOT</span>

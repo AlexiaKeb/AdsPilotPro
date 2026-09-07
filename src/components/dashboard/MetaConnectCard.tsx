@@ -286,7 +286,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
               <button
                 onClick={() => onSync()}
                 disabled={busy === "sync"}
-                className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50 transition hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50 transition hover:opacity-90"
                 style={{ background: "var(--grad-primary)" }}
               >
                 {busy === "sync" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
@@ -322,7 +322,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
             <button
               onClick={onConnect}
               disabled={busy === "connect"}
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50 transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50 transition hover:opacity-90"
               style={{ background: "var(--grad-primary)" }}
             >
               {busy === "connect" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}

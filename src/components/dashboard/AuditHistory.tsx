@@ -330,7 +330,7 @@ export function AuditHistory({ onView: _onView }: { onView?: () => void }) {
                             key={t}
                             className="px-2 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-widest"
                             style={{
-                              color: "#fff",
+                              color: "var(--color-primary-foreground)",
                               background: color,
                             }}
                           >
@@ -411,7 +411,7 @@ export function AuditHistory({ onView: _onView }: { onView?: () => void }) {
               <button
                 onClick={() => onDelete(confirmDel)}
                 disabled={busyId === confirmDel.id}
-                className="flex-1 py-2.5 rounded-md text-xs font-display font-bold uppercase tracking-widest text-white"
+                className="flex-1 py-2.5 rounded-md text-xs font-display font-bold uppercase tracking-widest text-primary-foreground"
                 style={{ background: "var(--color-danger)" }}
               >
                 {busyId === confirmDel.id ? (

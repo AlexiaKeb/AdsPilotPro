@@ -215,7 +215,7 @@ function AuditDetailPage() {
         <button
           onClick={onDownloadPdf}
           disabled={pdfBusy}
-          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 transition hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-60 transition hover:opacity-90"
           style={{ background: "var(--grad-primary)" }}
         >
           {pdfBusy ? (
@@ -264,7 +264,7 @@ function AuditDetailPage() {
                   return (
                     <span
                       key={t}
-                      className="px-2.5 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-widest text-white"
+                      className="px-2.5 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-widest text-primary-foreground"
                       style={{ background: color }}
                     >
                       {t}
