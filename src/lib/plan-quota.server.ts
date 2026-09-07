@@ -34,8 +34,10 @@ export async function consumeAiCredit(
   if (result.allowed) return;
 
   if (result.reason === "plan_required") {
+    const required = (result.required_plan ?? "pro").toUpperCase();
+    const what = kind === "creative" ? "L'analyse créative" : "Ce module";
     throw new Error(
-      "L'analyse créative est réservée au plan PRO. Passez au plan PRO pour l'utiliser.",
+      `${what} est réservé au plan ${required}. Passez au plan ${required} pour l'utiliser.`,
     );
   }
   if (result.reason === "quota_exceeded") {
