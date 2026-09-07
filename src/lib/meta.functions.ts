@@ -176,3 +176,34 @@ export const getMetaAlerts = createServerFn({ method: "POST" })
       previousRange,
     };
   });
+
+export const getMetaBenchmarkData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { periodDays?: number } | undefined) => ({
+    periodDays: (input?.periodDays === 7 ? 7 : input?.periodDays === 90 ? 90 : 30) as 7 | 30 | 90,
+  }))
+  .handler(async ({ data, context }) => {
+    const { fetchAccountMetrics } = await import("./meta.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: conn }, { data: profile }] = await Promise.all([
+      supabaseAdmin
+        .from("meta_connections")
+        .select("access_token, ad_account_id, ad_account_name, token_expires_at")
+        .eq("user_id", context.userId)
+        .maybeSingle(),
+      supabaseAdmin.from("profiles").select("sector").eq("id", context.userId).maybeSingle(),
+    ]);
+
+    if (!conn || !conn.ad_account_id) return null;
+    if (conn.token_expires_at && new Date(conn.token_expires_at).getTime() < Date.now()) return null;
+
+    const metrics = await fetchAccountMetrics(conn.access_token, conn.ad_account_id, data.periodDays);
+
+    return {
+      metrics,
+      sector: (profile?.sector as string | null) ?? null,
+      accountName: conn.ad_account_name,
+      periodDays: data.periodDays,
+    };
+  });
