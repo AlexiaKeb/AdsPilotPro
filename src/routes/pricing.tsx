@@ -15,7 +15,7 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Free ou Pro à 47€/mois. Un investissement qui se rembourse en 48h. Sans engagement, annulable à tout moment.",
+          "Free (3 diagnostics IA/mois), Starter 47€ ou Pro 97€. Sans engagement, annulable à tout moment.",
       },
       { property: "og:title", content: "Tarifs AdsPilot Pro — Free & Pro" },
       {
