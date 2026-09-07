@@ -185,7 +185,7 @@ export async function fetchAccountMetrics(
   }
 
   let data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, params);
-  if (periodDays === 0 && !data.data?.[0]) {
+  if (!range && periodDays === 0 && !data.data?.[0]) {
     // Repli sur le preset natif si la fenêtre explicite ne renvoie rien.
     data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
       access_token: accessToken,
