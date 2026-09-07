@@ -103,7 +103,9 @@ function Dashboard() {
             <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
             <QuickStartCard />
             <AlertsPanel />
+            <ActionPlanPanel />
             <ProgressPanel />
+
 
             <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
           </>
