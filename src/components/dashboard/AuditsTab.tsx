@@ -12,6 +12,8 @@ import { downloadAuditPdf, type AuditPdfData, type AuditPdfMetric } from "@/lib/
 import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
 import { MetaConnectCard, type MetaImportedMetrics } from "./MetaConnectCard";
+import { addTasksFromDiagnostic } from "./ActionPlanPanel";
+
 
 export type Sector = "ecommerce" | "infoproduit" | "service";
 export type ModuleId = "andromeda" | "oracle" | "mercury" | "atlas" | "vision_creative";
