@@ -101,8 +101,19 @@ Génère un diagnostic structuré en JSON avec exactement ces champs:
   "probleme_critique": "Le problème #1 avec explication chiffrée",
   "action_immediate": "Ce que faire CETTE SEMAINE, étape par étape",
   "action_30_jours": "L'objectif à 30 jours avec métriques cibles",
-  "alerte": "Ce qui va empirer si rien n'est fait"
+  "alerte": "Ce qui va empirer si rien n'est fait",
+  "plan_action": [
+    {
+      "titre": "Tâche courte et actionnable (max 80 caractères, commence par un verbe)",
+      "detail": "Comment l'exécuter concrètement, avec les chiffres et le seuil cible",
+      "impact": "fort | moyen | faible",
+      "delai": "48h | 7 jours | 30 jours"
+    }
+  ]
 }
+
+"plan_action" doit contenir 4 à 6 tâches concrètes, ordonnées par priorité, exécutables par un solopreneur seul, sans généralités.
+
 
 Réponds UNIQUEMENT avec le JSON, sans markdown ni texte autour.`;
 
