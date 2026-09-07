@@ -97,7 +97,6 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} plan={planState.plan} onSignOut={onSignOut} />
-      <TabBar tab={tab} setTab={setTab} />
       <main className="mx-auto max-w-7xl px-6 py-8">
         {tab === "audits" && (
           <div className="rounded-3xl bg-card border border-border shadow-xl shadow-slate-200/40 overflow-hidden">
