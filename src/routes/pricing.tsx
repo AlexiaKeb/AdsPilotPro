@@ -31,7 +31,7 @@ export const Route = createFileRoute("/pricing")({
 const faq = [
   {
     q: "Puis-je vraiment commencer gratuitement ?",
-    a: "Oui. Le plan Free vous donne 3 audits complets par mois avec le score global et le module Andromeda. Aucune carte bancaire n'est demandée.",
+    a: "Oui. Le plan Free vous donne 3 diagnostics IA par mois sur le module Andromeda (rentabilité), la connexion Meta Ads, le simulateur, l'historique et l'export PDF. Aucune carte bancaire n'est demandée.",
   },
   {
     q: "En quoi AdsPilot Pro est différent d'un tableau Excel ?",
