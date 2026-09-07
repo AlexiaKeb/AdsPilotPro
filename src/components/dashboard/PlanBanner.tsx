@@ -9,7 +9,7 @@ export function PlanChip({ plan }: { plan: PlanId }) {
       className="px-2 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-widest"
       style={
         isPro
-          ? { background: "var(--grad-primary)", color: "#fff" }
+          ? { background: "var(--grad-primary)", color: "var(--color-primary-foreground)" }
           : { border: "1px solid var(--color-border-strong)", color: "var(--color-muted-foreground)" }
       }
     >
@@ -95,7 +95,7 @@ export function PlanBanner({
             <p className="mt-1.5 text-xs text-muted-foreground">{nextPitch}</p>
             <Link
               to="/pricing"
-              className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white transition hover:opacity-90"
+              className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground transition hover:opacity-90"
               style={{ background: "var(--grad-primary)" }}
             >
               Passer au {PLAN_LABEL[nextPlan]} →
@@ -140,7 +140,7 @@ export function ModuleLocked({
       <div className="mt-6">
         <Link
           to="/pricing"
-          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-white transition hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground transition hover:opacity-90"
           style={{ background: "var(--grad-primary)" }}
         >
           Débloquer {moduleLabel} →
