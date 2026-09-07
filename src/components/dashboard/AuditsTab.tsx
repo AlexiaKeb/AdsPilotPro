@@ -839,6 +839,48 @@ function AiRecommendations({
               tone="danger"
             />
           </div>
+
+          {plan.length > 0 && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <ListChecks className="h-4 w-4 text-primary" />
+                <span className="font-display font-bold uppercase tracking-widest text-xs">
+                  Plan d&apos;action · {plan.length} tâches
+                </span>
+              </div>
+              <ol className="space-y-2">
+                {plan.map((t, i) => (
+                  <li key={i} className="text-sm">
+                    <span className="font-medium">
+                      {i + 1}. {t.titre}
+                    </span>
+                    <span className="ml-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      {t.impact} · {t.delai}
+                    </span>
+                    {t.detail && <p className="mt-0.5 text-xs text-muted-foreground">{t.detail}</p>}
+                  </li>
+                ))}
+              </ol>
+              <button
+                onClick={handleAddTasks}
+                disabled={addingTasks || tasksAdded}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest border border-primary/40 text-primary hover:bg-primary/10 disabled:opacity-60 transition"
+              >
+                {addingTasks ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Ajout en cours…
+                  </>
+                ) : tasksAdded ? (
+                  <>✅ Ajouté à votre plan d&apos;action</>
+                ) : (
+                  <>
+                    <ListChecks className="h-4 w-4" /> Ajouter au plan d&apos;action
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {onDownloadPdf && (
             <button
               onClick={handleDownload}
