@@ -739,14 +739,35 @@ function VisionPanel({ inputs, r }: { inputs: AuditInputs; r: Record<string, num
 function AiRecommendations({
   loading,
   diagnostic,
+  moduleId,
   onDownloadPdf,
 }: {
   loading: boolean;
   diagnostic: AuditDiagnostic | null;
+  moduleId?: string;
   onDownloadPdf?: () => void;
 }) {
   const [generating, setGenerating] = useState(false);
+  const [addingTasks, setAddingTasks] = useState(false);
+  const [tasksAdded, setTasksAdded] = useState(false);
   if (!loading && !diagnostic) return null;
+
+  const plan = diagnostic?.plan_action ?? [];
+
+  const handleAddTasks = async () => {
+    if (!plan.length || addingTasks) return;
+    setAddingTasks(true);
+    try {
+      const n = await addTasksFromDiagnostic(moduleId ?? "andromeda", plan);
+      setTasksAdded(true);
+      toast.success(`${n} actions ajoutées à votre plan d'action`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setAddingTasks(false);
+    }
+  };
+
 
   const handleDownload = async () => {
     if (!onDownloadPdf || generating) return;
