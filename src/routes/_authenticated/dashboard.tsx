@@ -233,7 +233,7 @@ function DashHeader({ profile, plan, onSignOut }: { profile: Profile | null; pla
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-md grid place-items-center" style={{ background: "var(--grad-primary)" }}>
-            <Rocket className="h-4 w-4 text-white" />
+            <Rocket className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="font-display font-bold tracking-wider">ADSPILOT</div>
           <PlanChip plan={plan} />
@@ -255,7 +255,7 @@ function DashHeader({ profile, plan, onSignOut }: { profile: Profile | null; pla
               />
             ) : (
               <span
-                className="h-7 w-7 rounded-full grid place-items-center text-[11px] font-display font-bold text-white"
+                className="h-7 w-7 rounded-full grid place-items-center text-[11px] font-display font-bold text-primary-foreground"
                 style={{ background: "var(--grad-primary)" }}
               >
                 {initialsOf(profile)}
