@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_tasks: {
+        Row: {
+          created_at: string
+          detail: string | null
+          done: boolean
+          done_at: string | null
+          horizon: string
+          id: string
+          impact: string
+          module: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          done?: boolean
+          done_at?: string | null
+          horizon?: string
+          id?: string
+          impact?: string
+          module?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          done?: boolean
+          done_at?: string | null
+          horizon?: string
+          id?: string
+          impact?: string
+          module?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audits: {
         Row: {
           created_at: string
