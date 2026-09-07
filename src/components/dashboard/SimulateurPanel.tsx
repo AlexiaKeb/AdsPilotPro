@@ -114,7 +114,7 @@ export function SimulateurPanel() {
       <button
         onClick={() => void onGenerate()}
         disabled={loadingAi}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-sm font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 transition hover:opacity-90"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-sm font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-60 transition hover:opacity-90"
         style={{ background: "var(--grad-primary)" }}
       >
         {loadingAi ? (

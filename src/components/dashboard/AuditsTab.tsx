@@ -515,7 +515,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
                 <button
                   onClick={() => runDiagnostic(activeScored)}
                   disabled={!moduleReady[activeScored] || !!loadingByModule[activeScored]}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-50 disabled:cursor-not-allowed transition hover:opacity-90"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition hover:opacity-90"
                   style={{ background: "var(--grad-primary)" }}
                 >
                   {loadingByModule[activeScored] ? (
@@ -644,7 +644,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
         </div>
         <Link
           to="/simulateur"
-          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-white transition hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground transition hover:opacity-90"
           style={{ background: "var(--grad-primary)" }}
         >
           Ouvrir le simulateur →
@@ -889,7 +889,7 @@ function AiRecommendations({
             <button
               onClick={handleDownload}
               disabled={generating}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-white disabled:opacity-60 transition hover:opacity-90"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-60 transition hover:opacity-90"
               style={{ background: "var(--grad-primary)" }}
             >
               {generating ? (

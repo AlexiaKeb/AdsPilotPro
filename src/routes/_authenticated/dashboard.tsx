@@ -97,22 +97,42 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashHeader profile={profile} plan={planState.plan} onSignOut={onSignOut} />
-      <TabBar tab={tab} setTab={setTab} />
-      <main className="mx-auto max-w-7xl px-6 py-10 space-y-10">
+      <main className="mx-auto max-w-7xl px-6 py-8">
         {tab === "audits" && (
-          <>
-            <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
-            <QuickStartCard />
-            <AlertsPanel />
-            <ActionPlanPanel />
-            <ProgressPanel />
-            <BenchmarkPanel />
+          <div className="rounded-3xl bg-card border border-border shadow-xl shadow-slate-200/40 overflow-hidden">
+            {/* Greeting header */}
+            <div className="px-8 py-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h1 className="font-display font-bold text-2xl tracking-tight text-foreground">
+                  {profile?.full_name ? `Bonjour, ${profile.full_name}` : "Bienvenue sur AdsPilot"}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Connectez Meta, lancez un diagnostic et suivez votre progression.
+                </p>
+              </div>
+              <PlanChip plan={planState.plan} />
+            </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-12">
+              {/* Main workspace */}
+              <div className="lg:col-span-8 p-8 space-y-8 border-r border-border">
+                <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
+                <QuickStartCard />
+                <AlertsPanel />
+                <ActionPlanPanel />
+                <ProgressPanel />
+                <BenchmarkPanel />
+                <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
+              </div>
 
-            <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
-          </>
+              {/* Right sidebar */}
+              <aside className="lg:col-span-4 p-8 space-y-8 bg-surface-2/40">
+                <UpgradeCard plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
+                <CoachingCTA />
+              </aside>
+            </div>
+          </div>
         )}
-        <CoachingCTA />
       </main>
       <AuditHistory onView={() => setTab("audits")} />
       {showOnboarding && profile && (
@@ -122,6 +142,63 @@ function Dashboard() {
             setProfile((prev) => (prev ? { ...prev, onboarding_completed: true } : prev))
           }
         />
+      )}
+    </div>
+  );
+}
+
+function UpgradeCard({
+  plan,
+  used,
+  limit,
+  remaining,
+}: {
+  plan: import("@/hooks/usePlan").PlanId;
+  used: number;
+  limit: number | null;
+  remaining: number | null;
+}) {
+  const next = plan === "free" ? "Starter" : plan === "starter" ? "Pro" : null;
+  return (
+    <div className="card-cockpit p-6 space-y-4">
+      <div>
+        <div className="font-display font-bold uppercase tracking-widest text-sm">Passer à la vitesse supérieure</div>
+        <p className="text-sm text-muted-foreground mt-1">
+          {plan === "free"
+            ? "Débloquez tous les modules et 5 diagnostics IA par mois."
+            : plan === "starter"
+              ? "Passez en illimité avec le module Vision Créative et l'accompagnement prioritaire."
+              : "Vous utilisez déjà le plan le plus complet."}
+        </p>
+      </div>
+      {next ? (
+        <>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground font-mono">
+              <span>Crédits IA utilisés</span>
+              <span>{used} / {limit == null ? "∞" : limit}</span>
+            </div>
+            <div className="h-2 rounded-full bg-border overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${Math.min(100, limit == null ? 0 : (used / limit) * 100)}%` }}
+              />
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {remaining == null
+                ? "Crédits IA illimités ce mois-ci"
+                : `${remaining} diagnostic${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""} ce mois-ci`}
+            </div>
+          </div>
+          <Link
+            to="/pricing"
+            className="btn-hero inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground"
+          >
+            Passer {next} <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      ) : (
+        <div className="text-xs text-muted-foreground">Toutes les fonctionnalités sont activées.</div>
       )}
     </div>
   );
@@ -159,7 +236,7 @@ function DashHeader({ profile, plan, onSignOut }: { profile: Profile | null; pla
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-md grid place-items-center" style={{ background: "var(--grad-primary)" }}>
-            <Rocket className="h-4 w-4 text-white" />
+            <Rocket className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="font-display font-bold tracking-wider">ADSPILOT</div>
           <PlanChip plan={plan} />
@@ -181,7 +258,7 @@ function DashHeader({ profile, plan, onSignOut }: { profile: Profile | null; pla
               />
             ) : (
               <span
-                className="h-7 w-7 rounded-full grid place-items-center text-[11px] font-display font-bold text-white"
+                className="h-7 w-7 rounded-full grid place-items-center text-[11px] font-display font-bold text-primary-foreground"
                 style={{ background: "var(--grad-primary)" }}
               >
                 {initialsOf(profile)}

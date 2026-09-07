@@ -147,7 +147,7 @@ export function PricingSection({
                 style={{
                   background: isPro
                     ? "linear-gradient(180deg, color-mix(in oklab, var(--color-primary) 10%, var(--color-surface)) 0%, var(--color-surface) 100%)"
-                    : "#12142A",
+                    : "var(--color-surface)",
                   border: isPro
                     ? "1.5px solid var(--color-primary)"
                     : "1px solid var(--color-border)",
@@ -245,7 +245,7 @@ export function PricingSection({
           transition={{ duration: 0.4 }}
           className="mt-14 rounded-2xl p-8 md:p-10 text-center"
           style={{
-            background: "#0B0D1F",
+            background: "var(--color-muted)",
             border: "1px solid var(--color-border-strong)",
           }}
         >
