@@ -7,8 +7,8 @@ export function CoachingCTA() {
     <section
       className="rounded-2xl p-8 md:p-10"
       style={{
-        background: "rgba(0, 229, 160, 0.10)",
-        border: "1px solid rgba(0, 229, 160, 0.45)",
+        background: "color-mix(in oklab, var(--color-success) 10%, transparent)",
+        border: "1px solid color-mix(in oklab, var(--color-success) 30%, transparent)",
       }}
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -17,8 +17,8 @@ export function CoachingCTA() {
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-widest"
               style={{
-                background: "rgba(0, 229, 160, 0.18)",
-                color: "rgb(0, 229, 160)",
+                background: "color-mix(in oklab, var(--color-success) 15%, transparent)",
+                color: "var(--color-success)",
               }}
             >
               <Calendar className="h-3 w-3" /> ACCOMPAGNEMENT PERSONNALISÉ
@@ -27,7 +27,7 @@ export function CoachingCTA() {
           <h3 className="font-display font-bold uppercase text-2xl md:text-3xl tracking-tight">
             Vous voulez aller plus vite ?
           </h3>
-          <p className="mt-3 text-sm md:text-base text-foreground/80 leading-relaxed">
+          <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
             Travaillez directement avec notre expert Meta Ads — plus de 10 ans
             d'expérience. Audit de compte, stratégie scaling, ou suivi mensuel.
           </p>
@@ -38,7 +38,7 @@ export function CoachingCTA() {
               "Accompagnement mensuel",
             ].map((t) => (
               <li key={t} className="flex items-start gap-2">
-                <span style={{ color: "rgb(0, 229, 160)" }}>✓</span>
+                <span className="text-success">✓</span>
                 <span>{t}</span>
               </li>
             ))}
@@ -49,8 +49,8 @@ export function CoachingCTA() {
             href={CALENDLY_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl px-6 py-4 text-xs font-display font-bold uppercase tracking-widest text-background transition hover:opacity-90"
-            style={{ background: "rgb(0, 229, 160)" }}
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-4 text-xs font-display font-bold uppercase tracking-widest text-success-foreground transition hover:opacity-90"
+            style={{ background: "var(--color-success)" }}
           >
             Réserver une session <ArrowRight className="h-4 w-4" />
           </a>
