@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown, Lock } from "lucide-react";
+import { Save, Loader2, Activity, Eye, Rocket, BarChart3, Sparkles, Brain, AlertTriangle, Target, Calendar, Zap, FileDown, Lock, ListChecks } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
