@@ -155,8 +155,8 @@ function UpgradeCard({
 }: {
   plan: import("@/hooks/usePlan").PlanId;
   used: number;
-  limit: number;
-  remaining: number;
+  limit: number | null;
+  remaining: number | null;
 }) {
   const next = plan === "free" ? "Starter" : plan === "starter" ? "Pro" : null;
   return (
