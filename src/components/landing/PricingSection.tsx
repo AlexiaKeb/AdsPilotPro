@@ -226,11 +226,6 @@ export function PricingSection({
                   >
                     {plan.cta} <ArrowRight className="h-4 w-4" />
                   </Link>
-                  {plan.ctaSubtext && (
-                    <div className="mt-3 text-center text-xs text-muted-foreground">
-                      {plan.ctaSubtext}
-                    </div>
-                  )}
                   {isPro && (
                     <div className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
                       Paiement disponible prochainement
