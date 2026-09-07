@@ -540,7 +540,9 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
                 <AiRecommendations
                   loading={!!loadingByModule[activeScored]}
                   diagnostic={aiByModule[activeScored] ?? null}
+                  moduleId={activeScored}
                   onDownloadPdf={() =>
+
                     buildAndDownloadPdf({
                       clientName,
                       sector: inputs.sector,
