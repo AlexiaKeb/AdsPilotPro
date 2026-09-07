@@ -265,3 +265,78 @@ export async function fetchAccountMetrics(
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Connexion durable : renouvellement automatique du token long-lived          */
+/* -------------------------------------------------------------------------- */
+
+export interface MetaConnectionRow {
+  access_token: string;
+  ad_account_id: string | null;
+  ad_account_name: string | null;
+  token_expires_at: string | null;
+  last_synced_at?: string | null;
+}
+
+/** Échange un token long-lived encore valide contre un nouveau (~60 jours). */
+export async function refreshLongLivedToken(accessToken: string) {
+  const { appId, appSecret } = metaAppCredentials();
+  const res = await graph<{ access_token: string; expires_in?: number }>("/oauth/access_token", {
+    grant_type: "fb_exchange_token",
+    client_id: appId,
+    client_secret: appSecret,
+    fb_exchange_token: accessToken,
+  });
+  const expiresIn = res.expires_in ?? 60 * 24 * 3600;
+  return {
+    accessToken: res.access_token,
+    expiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
+  };
+}
+
+const REFRESH_WINDOW_MS = 10 * 24 * 3600 * 1000; // renouvelle 10 jours avant l'échéance
+
+/**
+ * Charge la connexion Meta de l'utilisateur et renouvelle le token si nécessaire.
+ * Retourne null si aucune connexion, ou si le token est définitivement invalide.
+ */
+export async function getLiveConnection(
+  userId: string,
+): Promise<(MetaConnectionRow & { expired: boolean; refreshed: boolean }) | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: conn } = await supabaseAdmin
+    .from("meta_connections")
+    .select("access_token, ad_account_id, ad_account_name, token_expires_at, last_synced_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!conn) return null;
+
+  const expiresAt = conn.token_expires_at ? new Date(conn.token_expires_at).getTime() : 0;
+  const needsRefresh = !expiresAt || expiresAt - Date.now() < REFRESH_WINDOW_MS;
+  if (!needsRefresh) return { ...conn, expired: false, refreshed: false };
+
+  try {
+    const fresh = await refreshLongLivedToken(conn.access_token);
+    await supabaseAdmin
+      .from("meta_connections")
+      .update({ access_token: fresh.accessToken, token_expires_at: fresh.expiresAt })
+      .eq("user_id", userId);
+    return {
+      ...conn,
+      access_token: fresh.accessToken,
+      token_expires_at: fresh.expiresAt,
+      expired: false,
+      refreshed: true,
+    };
+  } catch {
+    // Le token ne peut plus être renouvelé : l'utilisateur doit se reconnecter.
+    const stillValid = expiresAt > Date.now();
+    if (!stillValid) {
+      await supabaseAdmin
+        .from("meta_connections")
+        .update({ token_expires_at: new Date(Date.now() - 1000).toISOString() })
+        .eq("user_id", userId);
+    }
+    return { ...conn, expired: !stillValid, refreshed: false };
+  }
+}
