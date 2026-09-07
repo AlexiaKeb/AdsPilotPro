@@ -15,9 +15,17 @@ export interface QuotaResult {
  * La logique de quota vit dans la fonction SQL `consume_ai_credit`
  * (atomique, SECURITY DEFINER) : impossible à contourner côté client.
  */
+export type AiCreditKind =
+  | "andromeda"
+  | "oracle"
+  | "mercury"
+  | "atlas"
+  | "simulateur"
+  | "creative";
+
 export async function consumeAiCredit(
   supabase: SupabaseClient,
-  kind: "audit" | "creative",
+  kind: AiCreditKind,
 ): Promise<void> {
   const { data, error } = await supabase.rpc("consume_ai_credit", { _kind: kind });
   if (error) throw new Error("Vérification de votre plan impossible. Réessayez.");
