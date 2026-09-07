@@ -14,7 +14,9 @@ export type AuditRecordFull = {
 type Events = {
   "audit:saved": void;
   "audit:open": AuditRecordFull;
+  "tasks:changed": void;
 };
+
 
 export function emitAudit<K extends keyof Events>(name: K, detail?: Events[K]) {
   if (typeof window === "undefined") return;

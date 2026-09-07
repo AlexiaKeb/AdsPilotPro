@@ -41,13 +41,22 @@ const InputSchema = z.object({
     .optional(),
 });
 
+export type ActionTaskSuggestion = {
+  titre: string;
+  detail: string;
+  impact: "fort" | "moyen" | "faible";
+  delai: "48h" | "7 jours" | "30 jours";
+};
+
 export type AuditDiagnostic = {
   diagnostic_principal: string;
   probleme_critique: string;
   action_immediate: string;
   action_30_jours: string;
   alerte: string;
+  plan_action?: ActionTaskSuggestion[];
 };
+
 
 const SYSTEM_PROMPT = `Tu es un consultant expert Meta Ads avec 10 ans d'expérience en e-commerce francophone. Tu analyses des données publicitaires réelles et fournis des diagnostics précis, actionnables et personnalisés. Tu parles comme un expert qui a géré des budgets de 500€ à 50 000€/jour. Tu ne donnes jamais de conseils génériques. Chaque recommandation cite les chiffres exacts fournis et explique pourquoi c'est un problème ET comment le corriger concrètement cette semaine.`;
 
@@ -92,8 +101,19 @@ Génère un diagnostic structuré en JSON avec exactement ces champs:
   "probleme_critique": "Le problème #1 avec explication chiffrée",
   "action_immediate": "Ce que faire CETTE SEMAINE, étape par étape",
   "action_30_jours": "L'objectif à 30 jours avec métriques cibles",
-  "alerte": "Ce qui va empirer si rien n'est fait"
+  "alerte": "Ce qui va empirer si rien n'est fait",
+  "plan_action": [
+    {
+      "titre": "Tâche courte et actionnable (max 80 caractères, commence par un verbe)",
+      "detail": "Comment l'exécuter concrètement, avec les chiffres et le seuil cible",
+      "impact": "fort | moyen | faible",
+      "delai": "48h | 7 jours | 30 jours"
+    }
+  ]
 }
+
+"plan_action" doit contenir 4 à 6 tâches concrètes, ordonnées par priorité, exécutables par un solopreneur seul, sans généralités.
+
 
 Réponds UNIQUEMENT avec le JSON, sans markdown ni texte autour.`;
 

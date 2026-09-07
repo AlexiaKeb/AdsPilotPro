@@ -10,6 +10,8 @@ import { CoachingCTA } from "@/components/CoachingCTA";
 import { PlanBanner, PlanChip } from "@/components/dashboard/PlanBanner";
 import { ProgressPanel } from "@/components/dashboard/ProgressPanel";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+import { ActionPlanPanel } from "@/components/dashboard/ActionPlanPanel";
+
 
 import { usePlan } from "@/hooks/usePlan";
 
@@ -101,7 +103,9 @@ function Dashboard() {
             <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
             <QuickStartCard />
             <AlertsPanel />
+            <ActionPlanPanel />
             <ProgressPanel />
+
 
             <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
           </>
