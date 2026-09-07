@@ -37,71 +37,48 @@ export function PlanBanner({
   const exhausted = !unlimited && (remaining ?? 0) <= 0;
   const pct = unlimited ? 100 : Math.min(100, Math.round((used / Math.max(1, limit)) * 100));
 
-  const nextPlan: PlanId | null = plan === "free" ? "starter" : plan === "starter" ? "pro" : null;
-  const nextPitch =
-    plan === "free"
-      ? "Débloquez Oracle LTV, Mercury CRO et Atlas Scaling + 5 diagnostics IA / mois"
-      : "Diagnostics IA illimités + Vision Créative (analyse de vos visuels par l'IA)";
-
   return (
     <div
       className="card-cockpit p-5 md:p-6"
       style={exhausted ? { borderColor: "var(--color-primary)" } : undefined}
     >
-      <div className="flex flex-col lg:flex-row lg:items-center gap-5 justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
-              <Zap className="h-4 w-4 text-primary" />
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/30">
+            <Zap className="h-4 w-4 text-primary" />
+          </div>
+          <div>
             <div className="font-display font-bold uppercase tracking-widest text-sm">
               Plan {PLAN_LABEL[plan]}
             </div>
             <PlanChip plan={plan} />
           </div>
-
-          <div className="mt-3 max-w-md">
-            <div className="flex items-baseline justify-between text-xs font-mono uppercase tracking-widest text-muted-foreground">
-              <span>Diagnostics IA ce mois</span>
-              <span className="text-foreground font-bold">
-                {unlimited ? "Illimités" : `${used} / ${limit}`}
-              </span>
-            </div>
-            <div className="mt-1.5 h-1.5 w-full rounded-full bg-surface border border-border overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${pct}%`,
-                  background: exhausted ? "var(--color-danger)" : "var(--grad-primary)",
-                }}
-              />
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {unlimited
-                ? "Analysez autant de campagnes que vous voulez, sans limite."
-                : exhausted
-                  ? "Quota atteint — passez au plan supérieur pour relancer vos diagnostics dès maintenant."
-                  : `Il vous reste ${remaining} diagnostic${(remaining ?? 0) > 1 ? "s" : ""} IA ce mois-ci.`}
-            </p>
-          </div>
         </div>
 
-        {nextPlan && (
-          <div className="lg:w-[320px] shrink-0 rounded-xl border border-primary/30 bg-primary/5 p-4">
-            <div className="flex items-center gap-2 text-xs font-display font-bold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Passer au {PLAN_LABEL[nextPlan]}
-            </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">{nextPitch}</p>
-            <Link
-              to="/pricing"
-              className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-primary-foreground transition hover:opacity-90"
-              style={{ background: "var(--grad-primary)" }}
-            >
-              Passer au {PLAN_LABEL[nextPlan]} →
-            </Link>
+        <div className="sm:w-[280px]">
+          <div className="flex items-baseline justify-between text-xs font-mono uppercase tracking-widest text-muted-foreground">
+            <span>Diagnostics IA ce mois</span>
+            <span className="text-foreground font-bold">
+              {unlimited ? "Illimités" : `${used} / ${limit}`}
+            </span>
           </div>
-        )}
+          <div className="mt-1.5 h-1.5 w-full rounded-full bg-surface-2 border border-border overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${pct}%`,
+                background: exhausted ? "var(--color-danger)" : "var(--grad-primary)",
+              }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {unlimited
+              ? "Analysez autant de campagnes que vous voulez, sans limite."
+              : exhausted
+                ? "Quota atteint — passez au plan supérieur pour relancer vos diagnostics dès maintenant."
+                : `Il vous reste ${remaining} diagnostic${(remaining ?? 0) > 1 ? "s" : ""} IA ce mois-ci.`}
+          </p>
+        </div>
       </div>
     </div>
   );
