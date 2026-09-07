@@ -9,6 +9,8 @@ import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { CoachingCTA } from "@/components/CoachingCTA";
 import { PlanBanner, PlanChip } from "@/components/dashboard/PlanBanner";
 import { ProgressPanel } from "@/components/dashboard/ProgressPanel";
+import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+
 import { usePlan } from "@/hooks/usePlan";
 
 type TabId = "audits";
@@ -98,7 +100,9 @@ function Dashboard() {
           <>
             <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
             <QuickStartCard />
+            <AlertsPanel />
             <ProgressPanel />
+
             <AuditsTab plan={planState.plan} onCreditUsed={planState.refresh} />
           </>
         )}

@@ -143,3 +143,36 @@ export const disconnectMeta = createServerFn({ method: "POST" })
     await supabaseAdmin.from("meta_connections").delete().eq("user_id", context.userId);
     return { ok: true };
   });
+
+export const getMetaAlerts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { fetchAccountMetrics } = await import("./meta.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: conn } = await supabaseAdmin
+      .from("meta_connections")
+      .select("access_token, ad_account_id, ad_account_name, token_expires_at")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (!conn || !conn.ad_account_id) return null;
+    if (conn.token_expires_at && new Date(conn.token_expires_at).getTime() < Date.now()) return null;
+
+    const day = 86_400_000;
+    const iso = (d: number) => new Date(d).toISOString().slice(0, 10);
+    const now = Date.now();
+    const currentRange = { since: iso(now - 7 * day), until: iso(now - day) };
+    const previousRange = { since: iso(now - 14 * day), until: iso(now - 8 * day) };
+
+    const [current, previous] = await Promise.all([
+      fetchAccountMetrics(conn.access_token, conn.ad_account_id, 7, currentRange),
+      fetchAccountMetrics(conn.access_token, conn.ad_account_id, 7, previousRange),
+    ]);
+
+    return {
+      current,
+      previous,
+      accountName: conn.ad_account_name,
+      currentRange,
+      previousRange,
+    };
+  });

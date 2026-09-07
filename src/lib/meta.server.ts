@@ -146,6 +146,7 @@ export async function fetchAccountMetrics(
   accessToken: string,
   adAccountId: string,
   periodDays: MetaPeriod = 30,
+  range?: { since: string; until: string },
 ): Promise<MetaMetrics> {
   const actId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
   const fields =
@@ -157,7 +158,9 @@ export async function fetchAccountMetrics(
     time_increment: "all_days",
   };
 
-  if (periodDays === 0) {
+  if (range) {
+    params["time_range"] = JSON.stringify(range);
+  } else if (periodDays === 0) {
     // "Depuis toujours" : Meta ne sert des insights que sur ~37 mois glissants.
     // On demande explicitement la fenêtre maximale depuis la création du compte.
     let since = new Date(Date.now() - 37 * 30 * 86_400_000);
@@ -182,7 +185,7 @@ export async function fetchAccountMetrics(
   }
 
   let data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, params);
-  if (periodDays === 0 && !data.data?.[0]) {
+  if (!range && periodDays === 0 && !data.data?.[0]) {
     // Repli sur le preset natif si la fenêtre explicite ne renvoie rien.
     data = await graph<{ data: InsightRow[] }>(`/${actId}/insights`, {
       access_token: accessToken,
