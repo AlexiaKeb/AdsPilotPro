@@ -268,6 +268,15 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
             {state?.expired && (
               <p className="mt-1 text-xs text-[var(--color-warning)]">Session Meta expirée — reconnectez votre compte.</p>
             )}
+            {connected && state?.daysLeft !== null && state?.daysLeft !== undefined && (
+              <p
+                className={`mt-1 text-xs ${state.daysLeft <= 7 ? "text-[var(--color-warning)]" : "text-muted-foreground"}`}
+              >
+                {state.daysLeft <= 7
+                  ? `Connexion à renouveler sous ${state.daysLeft} j — cliquez sur « Reconnecter » pour éviter toute coupure.`
+                  : `Connexion active · renouvellement automatique (${state.daysLeft} j restants)`}
+              </p>
+            )}
           </div>
         </div>
 
@@ -291,6 +300,16 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
                 {busy === "accounts" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                 Changer de compte
               </button>
+              {state?.daysLeft !== null && state?.daysLeft !== undefined && state.daysLeft <= 7 && (
+                <button
+                  onClick={onConnect}
+                  disabled={busy === "connect"}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-warning)] px-3 py-2.5 text-xs font-display font-bold uppercase tracking-widest text-[var(--color-warning)] hover:bg-surface transition"
+                >
+                  {busy === "connect" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                  Reconnecter
+                </button>
+              )}
               <button
                 onClick={onDisconnect}
                 disabled={busy === "disconnect"}
@@ -307,7 +326,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
               style={{ background: "var(--grad-primary)" }}
             >
               {busy === "connect" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
-              Connecter Meta Ads
+              {state?.expired ? "Reconnecter Meta Ads" : "Connecter Meta Ads"}
             </button>
           )}
         </div>
