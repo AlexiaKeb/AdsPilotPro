@@ -271,6 +271,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
     );
     analyze({
       data: {
+        module: mod,
         sector: sectorLabel(inputs.sector),
         roas: inputs.roas_actual,
         roas_threshold: results.roasThreshold,

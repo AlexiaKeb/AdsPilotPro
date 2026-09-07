@@ -45,6 +45,7 @@ export function SimulateurPanel() {
     try {
       const result = await analyze({
         data: {
+          module: "simulateur" as const,
           sector,
           roas: roasActual,
           roas_threshold: k.roasThreshold,

@@ -271,7 +271,7 @@ function Hero() {
               Voir les tarifs →
             </Link>
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">Aucune carte bancaire requise · 3 audits gratuits par mois</p>
+          <p className="mt-4 text-xs text-muted-foreground">Aucune carte bancaire requise · 3 diagnostics IA gratuits par mois</p>
         </motion.div>
 
         {/* 3 hero stats */}

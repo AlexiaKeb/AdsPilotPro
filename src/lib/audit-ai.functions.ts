@@ -4,6 +4,10 @@ import { z } from "zod";
 import { consumeAiCredit } from "./plan-quota.server";
 
 const InputSchema = z.object({
+  /** Module d'où provient la demande : détermine le plan minimum requis (vérifié en base). */
+  module: z
+    .enum(["andromeda", "oracle", "mercury", "atlas", "simulateur"])
+    .default("andromeda"),
   sector: z.string(),
   roas: z.number(),
   roas_threshold: z.number(),
@@ -51,7 +55,7 @@ export const analyzeAudit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data, context }): Promise<AuditDiagnostic> => {
-    await consumeAiCredit(context.supabase, "audit");
+    await consumeAiCredit(context.supabase, data.module);
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
 
