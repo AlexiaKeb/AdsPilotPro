@@ -7,6 +7,9 @@ export interface MetaStatus {
   adAccountName: string | null;
   lastSyncedAt: string | null;
   expired: boolean;
+  expiresAt: string | null;
+  daysLeft: number | null;
+  autoRenewed: boolean;
 }
 
 export const getMetaAuthUrl = createServerFn({ method: "POST" })
@@ -56,37 +59,43 @@ export const connectMeta = createServerFn({ method: "POST" })
 export const getMetaStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MetaStatus> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("meta_connections")
-      .select("ad_account_id, ad_account_name, last_synced_at, token_expires_at")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!data) {
-      return { connected: false, adAccountId: null, adAccountName: null, lastSyncedAt: null, expired: false };
+    const { getLiveConnection } = await import("./meta.server");
+    const conn = await getLiveConnection(context.userId);
+    if (!conn) {
+      return {
+        connected: false,
+        adAccountId: null,
+        adAccountName: null,
+        lastSyncedAt: null,
+        expired: false,
+        expiresAt: null,
+        daysLeft: null,
+        autoRenewed: false,
+      };
     }
-    const expired = !!data.token_expires_at && new Date(data.token_expires_at).getTime() < Date.now();
+    const daysLeft = conn.token_expires_at
+      ? Math.max(0, Math.round((new Date(conn.token_expires_at).getTime() - Date.now()) / 86_400_000))
+      : null;
     return {
       connected: true,
-      adAccountId: data.ad_account_id,
-      adAccountName: data.ad_account_name,
-      lastSyncedAt: data.last_synced_at,
-      expired,
+      adAccountId: conn.ad_account_id,
+      adAccountName: conn.ad_account_name,
+      lastSyncedAt: conn.last_synced_at ?? null,
+      expired: conn.expired,
+      expiresAt: conn.token_expires_at,
+      daysLeft,
+      autoRenewed: conn.refreshed,
     };
   });
 
 export const listMetaAdAccounts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { fetchAdAccounts } = await import("./meta.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("meta_connections")
-      .select("access_token")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!data) throw new Error("Compte Meta non connecté.");
-    const accounts = await fetchAdAccounts(data.access_token);
+    const { fetchAdAccounts, getLiveConnection } = await import("./meta.server");
+    const conn = await getLiveConnection(context.userId);
+    if (!conn) throw new Error("Compte Meta non connecté.");
+    if (conn.expired) throw new Error("Session Meta expirée — reconnectez votre compte.");
+    const accounts = await fetchAdAccounts(conn.access_token);
     return accounts.map((a) => ({ id: a.id, name: a.name, currency: a.currency }));
   });
 
@@ -116,14 +125,11 @@ export const importMetaMetrics = createServerFn({ method: "POST" })
   }))
 
   .handler(async ({ data, context }) => {
-    const { fetchAccountMetrics } = await import("./meta.server");
+    const { fetchAccountMetrics, getLiveConnection } = await import("./meta.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: conn } = await supabaseAdmin
-      .from("meta_connections")
-      .select("access_token, ad_account_id, ad_account_name")
-      .eq("user_id", context.userId)
-      .maybeSingle();
+    const conn = await getLiveConnection(context.userId);
     if (!conn) throw new Error("Compte Meta non connecté.");
+    if (conn.expired) throw new Error("Session Meta expirée — reconnectez votre compte.");
     if (!conn.ad_account_id) throw new Error("Aucun compte publicitaire sélectionné.");
 
     const metrics = await fetchAccountMetrics(conn.access_token, conn.ad_account_id, data.periodDays);
@@ -147,15 +153,9 @@ export const disconnectMeta = createServerFn({ method: "POST" })
 export const getMetaAlerts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { fetchAccountMetrics } = await import("./meta.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: conn } = await supabaseAdmin
-      .from("meta_connections")
-      .select("access_token, ad_account_id, ad_account_name, token_expires_at")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!conn || !conn.ad_account_id) return null;
-    if (conn.token_expires_at && new Date(conn.token_expires_at).getTime() < Date.now()) return null;
+    const { fetchAccountMetrics, getLiveConnection } = await import("./meta.server");
+    const conn = await getLiveConnection(context.userId);
+    if (!conn || !conn.ad_account_id || conn.expired) return null;
 
     const day = 86_400_000;
     const iso = (d: number) => new Date(d).toISOString().slice(0, 10);
@@ -183,20 +183,15 @@ export const getMetaBenchmarkData = createServerFn({ method: "POST" })
     periodDays: (input?.periodDays === 7 ? 7 : input?.periodDays === 90 ? 90 : 30) as 7 | 30 | 90,
   }))
   .handler(async ({ data, context }) => {
-    const { fetchAccountMetrics } = await import("./meta.server");
+    const { fetchAccountMetrics, getLiveConnection } = await import("./meta.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [{ data: conn }, { data: profile }] = await Promise.all([
-      supabaseAdmin
-        .from("meta_connections")
-        .select("access_token, ad_account_id, ad_account_name, token_expires_at")
-        .eq("user_id", context.userId)
-        .maybeSingle(),
+    const [conn, { data: profile }] = await Promise.all([
+      getLiveConnection(context.userId),
       supabaseAdmin.from("profiles").select("sector").eq("id", context.userId).maybeSingle(),
     ]);
 
-    if (!conn || !conn.ad_account_id) return null;
-    if (conn.token_expires_at && new Date(conn.token_expires_at).getTime() < Date.now()) return null;
+    if (!conn || !conn.ad_account_id || conn.expired) return null;
 
     const metrics = await fetchAccountMetrics(conn.access_token, conn.ad_account_id, data.periodDays);
 
