@@ -176,15 +176,19 @@ function UpgradeCard({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground font-mono">
               <span>Crédits IA utilisés</span>
-              <span>{used} / {limit === Infinity ? "∞" : limit}</span>
+              <span>{used} / {limit == null ? "∞" : limit}</span>
             </div>
             <div className="h-2 rounded-full bg-border overflow-hidden">
               <div
                 className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, limit === Infinity ? 0 : (used / limit) * 100)}%` }}
+                style={{ width: `${Math.min(100, limit == null ? 0 : (used / limit) * 100)}%` }}
               />
             </div>
-            <div className="text-xs text-muted-foreground">{remaining} diagnostic{remaining > 1 ? "s" : ""} restant{remaining > 1 ? "s" : ""} ce mois-ci</div>
+            <div className="text-xs text-muted-foreground">
+              {remaining == null
+                ? "Crédits IA illimités ce mois-ci"
+                : `${remaining} diagnostic${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""} ce mois-ci`}
+            </div>
           </div>
           <Link
             to="/pricing"
