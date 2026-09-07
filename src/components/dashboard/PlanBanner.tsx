@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Zap, Lock, Check } from "lucide-react";
+import { Zap, Lock, Check } from "lucide-react";
 import { PLAN_LABEL, type PlanId } from "@/hooks/usePlan";
 
 export function PlanChip({ plan }: { plan: PlanId }) {
