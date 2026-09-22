@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminCommandRouteImport } from './routes/admin-command'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RTokenRouteImport } from './routes/r/$token'
 import { Route as AuthenticatedSimulateurRouteImport } from './routes/_authenticated/simulateur'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedMetaCallbackRouteImport } from './routes/_authenticated/meta-callback'
@@ -56,6 +57,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSimulateurRoute = AuthenticatedSimulateurRouteImport.update({
   id: '/simulateur',
   path: '/simulateur',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
+  '/r/$token': typeof RTokenRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/profil': typeof AuthenticatedProfilRoute
   '/simulateur': typeof AuthenticatedSimulateurRoute
+  '/r/$token': typeof RTokenRoute
   '/audit/$id': typeof AuthenticatedAuditIdRoute
 }
 export interface FileRoutesById {
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/meta-callback': typeof AuthenticatedMetaCallbackRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/simulateur': typeof AuthenticatedSimulateurRoute
+  '/r/$token': typeof RTokenRoute
   '/_authenticated/audit/$id': typeof AuthenticatedAuditIdRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/meta-callback'
     | '/profil'
     | '/simulateur'
+    | '/r/$token'
     | '/audit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/meta-callback'
     | '/profil'
     | '/simulateur'
+    | '/r/$token'
     | '/audit/$id'
   id:
     | '__root__'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/meta-callback'
     | '/_authenticated/profil'
     | '/_authenticated/simulateur'
+    | '/r/$token'
     | '/_authenticated/audit/$id'
   fileRoutesById: FileRoutesById
 }
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PricingRoute: typeof PricingRoute
+  RTokenRoute: typeof RTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/simulateur': {
@@ -293,6 +313,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   PricingRoute: PricingRoute,
+  RTokenRoute: RTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
