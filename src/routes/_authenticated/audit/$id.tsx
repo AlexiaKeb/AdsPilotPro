@@ -29,6 +29,7 @@ import {
   type Sector,
   type ScoredModuleId,
 } from "@/components/dashboard/AuditsTab";
+import { ShareAuditCard } from "@/components/dashboard/ShareAuditCard";
 
 export const Route = createFileRoute("/_authenticated/audit/$id")({
   head: () => ({
@@ -362,6 +363,9 @@ function AuditDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Share */}
+      <ShareAuditCard auditId={audit.id} />
 
       {/* Metrics */}
       <section className="card-cockpit p-6">

@@ -56,6 +56,53 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_shares: {
+        Row: {
+          audit_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_viewed_at: string | null
+          revoked: boolean
+          token: string
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          audit_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          revoked?: boolean
+          token: string
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          audit_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          revoked?: boolean
+          token?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_shares_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audits: {
         Row: {
           created_at: string
