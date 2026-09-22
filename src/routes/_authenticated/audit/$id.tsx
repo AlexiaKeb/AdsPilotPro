@@ -363,6 +363,9 @@ function AuditDetailPage() {
         </div>
       </section>
 
+      {/* Share */}
+      <ShareAuditCard auditId={audit.id} />
+
       {/* Metrics */}
       <section className="card-cockpit p-6">
         <SectionTitle title="Métriques saisies" subtitle="Données du diagnostic" />
