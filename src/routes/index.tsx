@@ -76,95 +76,94 @@ function Counter({
 /* ============ Arsenal data ============ */
 const arsenal = [
   {
-    code: "ATLAS",
-    sub: "(P&L)",
+    code: "ANDROMEDA",
+    sub: "(RENTABILITÉ)",
     cat: "FINANCE",
     icon: BarChart3,
-    title: "Le Titan Financier",
+    title: "Votre vrai seuil de rentabilité",
     desc:
-      "Ne vous fiez plus au ROAS menteur. Maîtrisez votre profit net réel après chaque dépense logistique et fiscale.",
+      "ROAS de rentabilité et CPA maximum calculés sur VOTRE marge (produit, livraison, frais), pas sur une moyenne. Vous savez enfin à partir de quand vous perdez de l'argent.",
     accent: "var(--color-success)",
   },
   {
     code: "ORACLE",
-    sub: "(VISION)",
-    cat: "KPI",
+    sub: "(LTV)",
+    cat: "ACQUISITION",
     icon: Eye,
-    title: "L'Audit Créatif IA",
+    title: "Ce que vaut un client",
     desc:
-      "Détectez instantanément pourquoi vos publicités ne convertissent pas avant même de dépenser votre budget.",
+      "Marge générée par client sur 12 mois et ratio LTV/CPA : le budget d'acquisition que vous pouvez réellement vous permettre.",
     accent: "var(--color-primary)",
   },
   {
     code: "MERCURY",
-    sub: "(SCALE)",
-    cat: "SIMULATION",
+    sub: "(CRO)",
+    cat: "CONVERSION",
     icon: Rocket,
-    title: "Le Simulateur de Profit",
+    title: "Les fuites entre le clic et l'achat",
     desc:
-      "Prédisez vos revenus à 30 jours et simulez vos hausses de budget sans jamais casser votre algorithme.",
+      "Ajout panier, abandon, vitesse de page : repérez où vos visiteurs décrochent avant de dépenser plus en publicité.",
     accent: "var(--color-warning)",
   },
   {
-    code: "ANDROMEDA",
-    sub: "",
-    cat: "KPI",
+    code: "ATLAS",
+    sub: "(SCALING)",
+    cat: "OPÉRATIONS",
     icon: Activity,
-    title: "Benchmark industriel",
+    title: "Scaler sans rupture",
     desc:
-      "Comparez vos signaux Meta aux leaders du top 1% et identifiez vos goulots d'étranglement.",
+      "Couverture de stock et dépendance fournisseur : vérifiez que votre logistique tient avant d'augmenter le budget (e-commerce).",
     accent: "var(--color-primary)",
   },
   {
-    code: "AUDIT STRATÉGIQUE",
-    sub: "",
-    cat: "EXPERTISE",
-    icon: Search,
-    title: "Scanner 360° du tunnel",
-    desc:
-      "Identifiez les frictions qui tuent votre conversion et optimisez chaque étape du parcours client.",
-    accent: "var(--color-success)",
-  },
-  {
     code: "VISION CRÉATIVE",
-    sub: "",
+    sub: "(PRO)",
     cat: "IA",
     icon: Sparkles,
-    title: "Notation créative IA en 30 secondes",
+    title: "Notation créative IA",
     desc:
-      "Uploadez votre photo ou vidéo — l'IA la note instantanément et pointe les frictions qui tuent vos conversions.",
+      "Envoyez une image : l'IA la note sur 5 axes (hook, lisibilité, offre, format mobile, appel à l'action) et propose une correction concrète.",
     accent: "var(--color-warning)",
   },
-
+  {
+    code: "COCKPIT META",
+    sub: "",
+    cat: "DONNÉES",
+    icon: Search,
+    title: "Vos chiffres Meta, sans ressaisie",
+    desc:
+      "Connexion en lecture seule, import automatique, alertes de dégradation semaine après semaine et positionnement par rapport à des repères sectoriels.",
+    accent: "var(--color-success)",
+  },
 ];
 
 const battleReports = [
   {
-    code: "LE TITAN ATLAS",
-    tag: "P&L",
+    code: "SEUIL DE RENTABILITÉ",
+    tag: "EXEMPLE",
     icon: TrendingUp,
-    title: "Fuite −4 150 € détectée",
-    metric: "+18%",
-    metricLabel: "marge nette",
-    desc: "Reconstruction du P&L réel : identification des frais cachés et restauration de la marge.",
+    title: "Marge 40 % → ROAS de rentabilité 2,5×",
+    metric: "2,5×",
+    metricLabel: "à dépasser pour gagner",
+    desc: "Avec un ROAS de 2,0 vous perdez de l'argent malgré un « bon » résultat apparent. C'est la formule utilisée dans l'app.",
   },
   {
-    code: "L'EXPLOSION ORACLE",
-    tag: "VISION",
+    code: "CPA MAXIMUM",
+    tag: "EXEMPLE",
     icon: Zap,
-    title: "CTR 0.80% → 3.20%",
-    metric: "×4",
-    metricLabel: "performance créa",
-    desc: "Correction du Hook Rate diagnostiquée par l'audit IA en moins de 90 secondes.",
+    title: "Panier 65 € à 40 % de marge",
+    metric: "26 €",
+    metricLabel: "CPA maximum rentable",
+    desc: "Au-delà de 26 € par client acquis, la première commande est déficitaire : seule la LTV peut compenser.",
   },
   {
-    code: "L'ACCÉLÉRATEUR MERCURY",
-    tag: "SCALE",
+    code: "RATIO LTV / CPA",
+    tag: "EXEMPLE",
     icon: Target,
-    title: "ROI prédit 4.5 → réel 4.48",
-    metric: "98%",
-    metricLabel: "précision modèle",
-    desc: "Scaling progressif validé par simulation avant exécution. Algorithme préservé.",
+    title: "78 € de marge/client (3 commandes/an) pour 26 € de CPA",
+    metric: "3:1",
+    metricLabel: "ratio de référence sain",
+    desc: "Un ratio de 3 pour 1 laisse de la marge de manœuvre pour scaler sans mettre la trésorerie en danger.",
   },
 ];
 
@@ -282,7 +281,7 @@ function Hero() {
           className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4"
         >
           <Ticker label="Temps pour obtenir un diagnostic" value="< 3 MIN" accent="var(--color-success)" />
-          <Ticker label="Modules couvrant votre funnel" value="5 PILIERS" accent="var(--color-primary)" />
+          <Ticker label="Du seuil de rentabilité à la créa" value="4 DIAGNOSTICS + CRÉA" accent="var(--color-primary)" />
           <Ticker label="Diagnostic actionnable par l'IA" value="CLAUDE" accent="var(--color-warning)" />
         </motion.div>
       </div>
@@ -293,27 +292,18 @@ function Hero() {
 function SocialProof() {
   return (
     <section className="py-12 border-b border-border">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          <div className="text-center md:text-left">
-            <div className="font-mono-data text-3xl font-bold text-gradient-primary">3 000+</div>
-            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">diagnostics générés</div>
-          </div>
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Sparkles key={i} className="h-4 w-4" style={{ color: "var(--color-warning)" }} />
-              ))}
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          {[
+            ["Lecture seule", "Meta Ads : nous ne pouvons ni modifier vos campagnes ni dépenser votre budget."],
+            ["Vos données restent à vous", "Suppression du compte et révocation de l'accès Meta en un clic."],
+            ["Rapports partageables", "Liens en lecture seule avec date d'expiration, révocables à tout moment."],
+          ].map(([t, d]) => (
+            <div key={t}>
+              <div className="font-display font-bold uppercase tracking-widest text-sm">{t}</div>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{d}</p>
             </div>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              "En 3 minutes, j'ai compris pourquoi mon ROAS baissait. J'ai corrigé le budget en 48h."
-            </p>
-            <div className="text-xs text-muted-foreground">— Thomas D., media buyer indépendant</div>
-          </div>
-          <div className="text-center md:text-right">
-            <div className="font-mono-data text-3xl font-bold text-gradient-primary">97%</div>
-            <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">d'utilisateurs identifient un axe d'amélioration</div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
@@ -378,13 +368,13 @@ const steps = [
     n: "01",
     icon: ClipboardList,
     title: "Entrez vos métriques",
-    desc: "ROAS, CPA, budget, créatives — 2 minutes de saisie maximum.",
+    desc: "Connectez Meta en lecture seule ou saisissez vos chiffres, avec votre marge réelle.",
   },
   {
     n: "02",
     icon: Brain,
     title: "L'IA analyse",
-    desc: "Claude identifie vos fuites et compare aux benchmarks du secteur.",
+    desc: "Vos seuils de rentabilité sont calculés, puis l'IA interprète vos chiffres et repère vos fuites.",
   },
   {
     n: "03",
@@ -458,12 +448,12 @@ function Arsenal() {
     <section id="arsenal" className="py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="max-w-2xl mb-14">
-          <span className="chip-tag mb-4">ARSENAL · SIX PILIERS</span>
+          <span className="chip-tag mb-4">LES MODULES</span>
           <h2 className="font-display font-bold uppercase text-4xl md:text-5xl">
             Six modules. <span className="text-gradient-primary">Une discipline.</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Chaque module est un instrument de précision. Ensemble, ils forment l'infrastructure décisionnelle du top 1%.
+            Chaque module répond à une question précise : est-ce que je gagne de l'argent, où est-ce que je perds, et que faire cette semaine.
           </p>
         </div>
 
@@ -504,9 +494,9 @@ function BattleReports() {
     <section id="rapports" className="py-24 md:py-32 border-t border-border">
       <div className="mx-auto max-w-7xl px-6">
         <div className="max-w-2xl mb-14">
-          <span className="chip-tag mb-4">RAPPORTS DE BATAILLE</span>
+          <span className="chip-tag mb-4">EXEMPLES ILLUSTRATIFS</span>
           <h2 className="font-display font-bold uppercase text-4xl md:text-5xl">
-            Données réelles. <span className="text-gradient-primary">Verdicts définitifs.</span>
+            Des chiffres qui <span className="text-gradient-primary">changent vos décisions.</span>
           </h2>
         </div>
 

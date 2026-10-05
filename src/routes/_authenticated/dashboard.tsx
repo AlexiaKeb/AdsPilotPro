@@ -159,18 +159,33 @@ function UpgradeCard({
   remaining: number | null;
 }) {
   const next = plan === "free" ? "Starter" : plan === "starter" ? "Pro" : null;
+  const [intent, setIntent] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("adspilot_plan_intent");
+      setIntent(v === "starter" || v === "pro" ? v : null);
+    } catch {
+      setIntent(null);
+    }
+  }, []);
   return (
     <div className="card-cockpit p-6 space-y-4">
       <div>
         <div className="font-display font-bold uppercase tracking-widest text-sm">Passer à la vitesse supérieure</div>
         <p className="text-sm text-muted-foreground mt-1">
           {plan === "free"
-            ? "Débloquez tous les modules et 5 diagnostics IA par mois."
+            ? "Débloquez Oracle LTV, Mercury CRO et Atlas Scaling, avec plus de diagnostics IA."
             : plan === "starter"
               ? "Passez en illimité avec le module Vision Créative et l'accompagnement prioritaire."
               : "Vous utilisez déjà le plan le plus complet."}
         </p>
       </div>
+      {intent && intent !== plan && (
+        <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-xs text-foreground/90">
+          Vous avez choisi le plan <strong>{intent === "pro" ? "Pro" : "Starter"}</strong>. Le paiement en
+          ligne ouvre très bientôt : votre choix est mémorisé et nous vous prévenons dès l&apos;ouverture.
+        </div>
+      )}
       {next ? (
         <>
           <div className="space-y-2">

@@ -15,13 +15,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Free (3 diagnostics IA/mois), Starter 47€ ou Pro 97€. Sans engagement, annulable à tout moment.",
+          "Free (3 diagnostics IA/mois), Starter 47€ ou Pro 97€. Sans engagement.",
       },
-      { property: "og:title", content: "Tarifs AdsPilot Pro — Free & Pro" },
+      { property: "og:title", content: "Tarifs AdsPilot Pro — Free, Starter & Pro" },
       {
         property: "og:description",
         content:
-          "Comparez nos plans : audits illimités, IA Claude, modules Atlas/Oracle/Mercury/Vision.",
+          "Comparez nos plans : diagnostics IA, modules Andromeda, Oracle, Mercury, Atlas et Vision Créative.",
       },
     ],
   }),
@@ -39,11 +39,11 @@ const faq = [
   },
   {
     q: "Puis-je annuler à tout moment ?",
-    a: "Oui, sans engagement. Vous pouvez résilier votre abonnement en un clic depuis votre profil.",
+    a: "Oui, sans engagement. Le paiement en ligne ouvre prochainement ; les abonnements seront résiliables en un clic depuis votre profil.",
   },
   {
     q: "Mes données publicitaires sont-elles sécurisées ?",
-    a: "Oui, vos données sont chiffrées et ne sont jamais partagées avec des tiers. Vous restez seul propriétaire de vos métriques.",
+    a: "La connexion Meta est en lecture seule, votre jeton d'accès reste côté serveur (jamais exposé dans le navigateur) et vos données ne sont pas revendues. Vous pouvez tout supprimer, y compris la connexion Meta, depuis votre profil.",
   },
   {
     q: "Puis-je travailler avec un expert Meta Ads ?",
@@ -51,7 +51,7 @@ const faq = [
   },
   {
     q: "Quand est-ce que je vais voir un retour sur investissement ?",
-    a: "Si vous dépensez 2 000€/mois en Meta Ads et qu'AdsPilot Pro identifie 10% de gaspillage, vous économisez 200€/mois. L'abonnement PRO à 97€ se rembourse plus de 2 fois dès le premier mois.",
+    a: "À titre d'illustration : avec 2 000€/mois de dépense et 10% de gaspillage identifié, soit 200€/mois, un abonnement Pro à 97€ serait rentabilisé. Le gain réel dépend de votre compte et n'est pas garanti.",
   },
 ];
 
@@ -84,12 +84,12 @@ function PricingPage() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <span className="chip-tag mb-6">TARIFS · 2026</span>
           <h1 className="font-display font-bold uppercase text-4xl md:text-6xl leading-[1] tracking-tight">
-            Un investissement qui se rembourse{" "}
-            <span className="text-gradient-primary">en 48h.</span>
+            Un investissement pensé pour{" "}
+            <span className="text-gradient-primary">se rembourser.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Votre budget Meta Ads tourne à perte en ce moment. AdsPilot Pro l'identifie et le
-            corrige.
+            Savez-vous à partir de quel ROAS votre budget Meta Ads devient réellement rentable ?
+            AdsPilot Pro le calcule sur votre marge et vous dit où agir.
           </p>
         </div>
       </section>
