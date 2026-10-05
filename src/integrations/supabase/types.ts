@@ -172,6 +172,42 @@ export type Database = {
         }
         Relationships: []
       }
+      leak_scans: {
+        Row: {
+          created_at: string
+          id: string
+          leak_total: number
+          margin_pct: number
+          net_profit: number
+          period_days: number
+          summary: Json
+          total_spend: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leak_total?: number
+          margin_pct: number
+          net_profit?: number
+          period_days: number
+          summary?: Json
+          total_spend?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leak_total?: number
+          margin_pct?: number
+          net_profit?: number
+          period_days?: number
+          summary?: Json
+          total_spend?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ai_calls_this_month: number
@@ -182,6 +218,7 @@ export type Database = {
           email: string
           first_name: string | null
           full_name: string | null
+          gross_margin_pct: number | null
           has_andromeda_access: boolean
           id: string
           last_name: string | null
@@ -203,6 +240,7 @@ export type Database = {
           email: string
           first_name?: string | null
           full_name?: string | null
+          gross_margin_pct?: number | null
           has_andromeda_access?: boolean
           id: string
           last_name?: string | null
@@ -224,6 +262,7 @@ export type Database = {
           email?: string
           first_name?: string | null
           full_name?: string | null
+          gross_margin_pct?: number | null
           has_andromeda_access?: boolean
           id?: string
           last_name?: string | null

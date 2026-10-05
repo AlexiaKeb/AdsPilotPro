@@ -368,3 +368,80 @@ export async function purgeMetaConnection(userId: string): Promise<void> {
   if (conn?.access_token) await revokeMetaPermissions(conn.access_token);
   await supabaseAdmin.from("meta_connections").delete().eq("user_id", userId);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Insights par campagne / pub (Profit Leak Scan)                              */
+/* -------------------------------------------------------------------------- */
+
+export interface MetaEntityRow {
+  id: string;
+  name: string;
+  campaignName: string | null;
+  spend: number;
+  impressions: number;
+  clicks: number;
+  purchases: number;
+  revenue: number;
+  frequency: number;
+  ctr: number;
+}
+
+interface EntityInsightRow extends InsightRow {
+  campaign_id?: string;
+  campaign_name?: string;
+  ad_id?: string;
+  ad_name?: string;
+}
+
+/**
+ * Insights au niveau campagne ou pub sur la période, avec pagination Meta.
+ * `maxRows` borne le volume (les lignes sont triées par dépense décroissante côté Meta).
+ */
+export async function fetchEntityInsights(
+  accessToken: string,
+  adAccountId: string,
+  level: "campaign" | "ad",
+  periodDays: 7 | 30 | 90,
+  maxRows = 200,
+): Promise<MetaEntityRow[]> {
+  const actId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
+  const idFields = level === "campaign" ? "campaign_id,campaign_name" : "ad_id,ad_name,campaign_name";
+  const params: Record<string, string> = {
+    access_token: accessToken,
+    level,
+    fields: `${idFields},spend,ctr,impressions,clicks,frequency,actions,action_values`,
+    date_preset: periodDays === 7 ? "last_7d" : periodDays === 90 ? "last_90d" : "last_30d",
+    sort: "spend_descending",
+    limit: "100",
+  };
+
+  const rows: EntityInsightRow[] = [];
+  let page = await graph<{ data: EntityInsightRow[]; paging?: { next?: string } }>(
+    `/${actId}/insights`,
+    params,
+  );
+  rows.push(...(page.data ?? []));
+  // Pagination : on suit `paging.next` (URL complète fournie par Meta, domaine vérifié).
+  while (page.paging?.next && rows.length < maxRows) {
+    const next = new URL(page.paging.next);
+    if (next.hostname !== "graph.facebook.com") break;
+    const res = await fetch(next.toString());
+    const json = (await res.json()) as typeof page & { error?: { message?: string } };
+    if (!res.ok || json.error) throw new Error(json.error?.message || `Erreur Meta API (${res.status})`);
+    page = json;
+    rows.push(...(page.data ?? []));
+  }
+
+  return rows.slice(0, maxRows).map((r) => ({
+    id: (level === "campaign" ? r.campaign_id : r.ad_id) ?? "",
+    name: (level === "campaign" ? r.campaign_name : r.ad_name) ?? "Sans nom",
+    campaignName: level === "ad" ? (r.campaign_name ?? null) : null,
+    spend: Number(r.spend) || 0,
+    impressions: Number(r.impressions) || 0,
+    clicks: Number(r.clicks) || 0,
+    purchases: pick(r.actions),
+    revenue: pick(r.action_values),
+    frequency: Number(r.frequency) || 0,
+    ctr: Number(r.ctr) || 0,
+  }));
+}

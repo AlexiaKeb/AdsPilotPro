@@ -12,6 +12,7 @@ import { ProgressPanel } from "@/components/dashboard/ProgressPanel";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { BenchmarkPanel } from "@/components/dashboard/BenchmarkPanel";
 import { ActionPlanPanel } from "@/components/dashboard/ActionPlanPanel";
+import { ProfitLeakScan } from "@/components/dashboard/ProfitLeakScan";
 
 
 import { usePlan } from "@/hooks/usePlan";
@@ -117,6 +118,7 @@ function Dashboard() {
               {/* Main workspace */}
               <div className="lg:col-span-8 p-8 space-y-8 border-r border-border">
                 <PlanBanner plan={planState.plan} used={planState.used} limit={planState.limit} remaining={planState.remaining} />
+                <ProfitLeakScan />
                 <QuickStartCard />
                 <AlertsPanel />
                 <ActionPlanPanel />

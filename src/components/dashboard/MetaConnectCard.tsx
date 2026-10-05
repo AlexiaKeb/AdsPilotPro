@@ -247,7 +247,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
   const connected = !!state?.connected && !state.expired;
 
   return (
-    <div className="card-cockpit p-6 space-y-5">
+    <div id="meta-connect" className="card-cockpit p-6 space-y-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
           <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/30 shrink-0">
