@@ -340,3 +340,31 @@ export async function getLiveConnection(
     return { ...conn, expired: !stillValid, refreshed: false };
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Déconnexion / suppression : révocation côté Meta + purge du token           */
+/* -------------------------------------------------------------------------- */
+
+/** Révoque les permissions accordées à l'app côté Meta (best-effort, ne bloque jamais). */
+export async function revokeMetaPermissions(accessToken: string): Promise<void> {
+  try {
+    await fetch(`${META_GRAPH}/me/permissions?access_token=${encodeURIComponent(accessToken)}`, {
+      method: "DELETE",
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    /* le token sera de toute façon supprimé de notre base */
+  }
+}
+
+/** Supprime la connexion Meta d'un utilisateur : révocation chez Meta puis suppression du token. */
+export async function purgeMetaConnection(userId: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: conn } = await supabaseAdmin
+    .from("meta_connections")
+    .select("access_token")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (conn?.access_token) await revokeMetaPermissions(conn.access_token);
+  await supabaseAdmin.from("meta_connections").delete().eq("user_id", userId);
+}

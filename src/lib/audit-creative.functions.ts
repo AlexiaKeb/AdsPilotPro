@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { consumeAiCredit } from "./plan-quota.server";
+import { consumeAiCredit, refundAiCredit } from "./plan-quota.server";
+import { AI_MODEL, AI_TIMEOUT_MS } from "./ai-config.server";
 
 const InputSchema = z.object({
   // ~8 MB base64 cap to prevent oversized payload abuse
@@ -11,6 +12,28 @@ const InputSchema = z.object({
   objectif: z.string(),
   hook_rate: z.number().optional().nullable(),
   ctr: z.number().optional().nullable(),
+});
+
+const AxeSchema = z.object({
+  score: z.number(),
+  label: z.string(),
+  analyse: z.string(),
+  correction: z.string(),
+});
+
+const CreativeSchema = z.object({
+  verdict: z.enum(["VERT", "ORANGE", "ROUGE"]),
+  verdict_phrase: z.string(),
+  score_global: z.number(),
+  axes: z.object({
+    hook_visuel: AxeSchema,
+    lisibilite_message: AxeSchema,
+    clarte_offre: AxeSchema,
+    format_mobile: AxeSchema,
+    appel_action: AxeSchema,
+  }),
+  action_prioritaire: z.string(),
+  point_fort: z.string(),
 });
 
 export type AxeScore = {
@@ -35,15 +58,11 @@ export type CreativeDiagnostic = {
   point_fort: string;
 };
 
-export const analyzeCreative = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => InputSchema.parse(input))
-  .handler(async ({ data, context }): Promise<CreativeDiagnostic> => {
-    await consumeAiCredit(context.supabase, "creative");
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
+async function callClaudeVision(data: z.infer<typeof InputSchema>): Promise<CreativeDiagnostic> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY manquante");
 
-    const textPrompt = `Tu es un expert en créatives publicitaires Meta Ads avec 10 ans d'expérience. Tu audites des publicités dans toutes les langues et tous les marchés.
+  const textPrompt = `Tu es un expert en créatives publicitaires Meta Ads avec 10 ans d'expérience. Tu audites des publicités dans toutes les langues et tous les marchés.
 
 Contexte DÉCLARÉ par l'annonceur (fait établi, ne le remets jamais en question, ne le remplace pas par une supposition) :
 - Secteur : ${data.sector}
@@ -68,64 +87,80 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, exactement da
   "verdict_phrase": "Une phrase de verdict global percutante",
   "score_global": nombre entre 0 et 100,
   "axes": {
-    "hook_visuel": { "score": nombre, "label": "HOOK VISUEL — STOP SCROLL", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort à conserver" },
-    "lisibilite_message": { "score": nombre, "label": "LISIBILITÉ DU MESSAGE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
-    "clarte_offre": { "score": nombre, "label": "CLARTÉ DE L'OFFRE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
-    "format_mobile": { "score": nombre, "label": "FORMAT MOBILE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
-    "appel_action": { "score": nombre, "label": "APPEL À L'ACTION", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" }
+  "hook_visuel": { "score": nombre, "label": "HOOK VISUEL — STOP SCROLL", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort à conserver" },
+  "lisibilite_message": { "score": nombre, "label": "LISIBILITÉ DU MESSAGE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
+  "clarte_offre": { "score": nombre, "label": "CLARTÉ DE L'OFFRE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
+  "format_mobile": { "score": nombre, "label": "FORMAT MOBILE", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" },
+  "appel_action": { "score": nombre, "label": "APPEL À L'ACTION", "analyse": "1-2 phrases", "correction": "Action concrète ou point fort" }
   },
   "action_prioritaire": "La UNE chose à corriger en premier cette semaine",
   "point_fort": "Le meilleur élément de cette créative à conserver absolument"
 }`;
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 1500,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: data.media_type,
-                  data: data.image_base64,
-                },
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+    body: JSON.stringify({
+      model: AI_MODEL,
+      max_tokens: 1500,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: data.media_type,
+                data: data.image_base64,
               },
-              { type: "text", text: textPrompt },
-            ],
-          },
-        ],
-      }),
-    });
+            },
+            { type: "text", text: textPrompt },
+          ],
+        },
+      ],
+    }),
+  });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 300)}`);
-    }
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 300)}`);
+  }
 
-    const payload = (await res.json()) as {
-      content?: Array<{ type: string; text?: string }>;
-    };
-    const text = payload.content?.find((c) => c.type === "text")?.text ?? "";
-    const cleaned = text
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```\s*$/i, "")
-      .trim();
+  const payload = (await res.json()) as {
+    content?: Array<{ type: string; text?: string }>;
+  };
+  const text = payload.content?.find((c) => c.type === "text")?.text ?? "";
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```\s*$/i, "")
+    .trim();
 
+  let raw: unknown;
+  try {
+    raw = JSON.parse(cleaned);
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Réponse IA non parsable");
+    raw = JSON.parse(match[0]);
+  }
+  return CreativeSchema.parse(raw) as CreativeDiagnostic;
+}
+
+export const analyzeCreative = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .handler(async ({ data, context }): Promise<CreativeDiagnostic> => {
+    await consumeAiCredit(context.supabase, "creative");
     try {
-      return JSON.parse(cleaned) as CreativeDiagnostic;
-    } catch {
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error("Réponse IA non parsable");
-      return JSON.parse(match[0]) as CreativeDiagnostic;
+      return await callClaudeVision(data);
+    } catch (e) {
+      await refundAiCredit(context.userId, "creative");
+      throw e;
     }
   });

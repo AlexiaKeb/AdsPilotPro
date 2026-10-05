@@ -289,6 +289,7 @@ export type Database = {
     }
     Functions: {
       consume_ai_credit: { Args: { _kind?: string }; Returns: Json }
+      refund_ai_credit: { Args: { _uid: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
