@@ -140,6 +140,14 @@ export function scoreEntity(e: EntityInsight, marginPct: number, minSpend: numbe
       reason: `ROAS ${x(roas)} (seuil ${x(be)}), ${e.purchases} ventes, fréquence ${e.frequency.toFixed(1)} : marge de scaling.`,
     };
   }
+  if (profit < 0) {
+    return {
+      ...base,
+      leak: 0,
+      verdict: "keep",
+      reason: `ROAS ${x(roas)} quasi au seuil (${x(be)}) : à l'équilibre, ${eur(-profit)} de marge en moins. Surveillez avant de décider.`,
+    };
+  }
   return {
     ...base,
     leak: 0,

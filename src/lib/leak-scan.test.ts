@@ -131,3 +131,10 @@ test("une pub d'une campagne déjà à couper ne double pas l'économie", () => 
   assert.equal(res.actions.length, 1);
   assert.equal(res.actions[0]?.level, "campaign");
 });
+
+test("ROAS à 96 % du seuil => keep avec un libellé « à l'équilibre », pas « rentable »", () => {
+  const r = scoreEntity(ent({ id: "a", spend: 1000, revenue: 2400, purchases: 30 }), MARGIN, 50);
+  assert.equal(r.verdict, "keep");
+  assert.ok(r.profit < 0);
+  assert.match(r.reason, /équilibre/);
+});
