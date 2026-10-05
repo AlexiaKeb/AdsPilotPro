@@ -3,6 +3,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Zap, Brain, AlertTriangle, Target, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
+import {
+  breakevenCpa,
+  breakevenRoas,
+  ltv12 as computeLtv12,
+  netProfit,
+  profitabilityScore,
+  ltvScore,
+} from "@/lib/profit-engine";
 
 type Tone = "primary" | "success" | "warning" | "danger";
 
@@ -17,9 +25,7 @@ export function SimulateurPanel() {
   const [daily, setDaily] = useState(150);
   const [price, setPrice] = useState(80);
   const [cogs, setCogs] = useState(35);
-  const [ctr, setCtr] = useState(1.8);
-  const [convRate, setConvRate] = useState(2.5);
-  const [retention, setRetention] = useState(35);
+  const [ordersPerYear, setOrdersPerYear] = useState(1.5);
   const [roasActual, setRoasActual] = useState(2.5);
   const [cpaActual, setCpaActual] = useState(28);
   const [ai, setAi] = useState<AuditDiagnostic | null>(null);
@@ -27,18 +33,19 @@ export function SimulateurPanel() {
   const analyze = useServerFn(analyzeAudit);
 
   const k = useMemo(() => {
-    const margin = price - price * (cogs / 100);
-    const roasThreshold = margin > 0 ? price / margin : 0;
-    const maxCpa = margin * 0.7;
-    const ltv12 = price * (1 + retention / 100) * 1.6;
+    // Marge brute avant pub = 100 % − coûts variables (produit, livraison, frais)
+    const marginPct = Math.max(0, 100 - cogs);
+    const roasThreshold = breakevenRoas(marginPct);
+    const maxCpa = breakevenCpa(price, marginPct);
+    const ltv = computeLtv12(price, ordersPerYear, marginPct);
+    const ltv12 = ltv.revenue;
     const revenue = daily * 30 * roasActual;
-    const cogsCost = revenue * (cogs / 100);
-    const netMonthly = revenue - daily * 30 - cogsCost;
-    const roasScore = roasThreshold > 0 ? Math.min(1, roasActual / roasThreshold) : 0;
-    const cpaScore = maxCpa > 0 ? Math.min(1, maxCpa / Math.max(cpaActual, 1)) : 0;
-    const score = Math.round((roasScore * 0.6 + cpaScore * 0.4) * 100);
+    const netMonthly = netProfit(daily * 30, revenue, marginPct);
+    const roasScore = profitabilityScore(roasActual, marginPct);
+    const cpaScore = ltvScore(ltv.margin, cpaActual);
+    const score = Math.round(roasScore * 0.6 + cpaScore * 0.4);
     return { roasThreshold, maxCpa, ltv12, netMonthly, score };
-  }, [daily, price, cogs, retention, roasActual, cpaActual]);
+  }, [daily, price, cogs, ordersPerYear, roasActual, cpaActual]);
 
   const onGenerate = async () => {
     setLoadingAi(true);
@@ -90,17 +97,15 @@ export function SimulateurPanel() {
           <Slider label="ROAS actuel" value={roasActual} min={0.1} max={12} step={0.1} unit="×" onChange={setRoasActual} decimals={1} />
           <Slider label="CPA actuel" value={cpaActual} min={1} max={500} step={1} unit="€" onChange={setCpaActual} />
           <Slider label="Prix de vente moyen" value={price} min={10} max={500} step={1} unit="€" onChange={setPrice} />
-          <Slider label="COGS" value={cogs} min={0} max={80} step={1} unit="%" onChange={setCogs} />
-          <Slider label="CTR" value={ctr} min={0.1} max={6} step={0.1} unit="%" onChange={setCtr} decimals={1} />
-          <Slider label="Taux de conversion" value={convRate} min={0.1} max={10} step={0.1} unit="%" onChange={setConvRate} decimals={1} />
-          <Slider label="Rétention LTV" value={retention} min={0} max={120} step={1} unit="%" onChange={setRetention} />
+          <Slider label="Coûts variables (produit, livraison, frais)" value={cogs} min={0} max={95} step={1} unit="%" onChange={setCogs} />
+          <Slider label="Commandes par client / 12 mois" value={ordersPerYear} min={1} max={8} step={0.1} unit="×" onChange={setOrdersPerYear} decimals={1} />
         </div>
 
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-5">
           <Kpi label="Bénéfice net mensuel" value={k.netMonthly} unit="€" tone={k.netMonthly >= 0 ? "success" : "danger"} hero />
           <Kpi label="ROAS de sécurité" value={k.roasThreshold} unit="×" decimals={2} tone="primary" hero />
           <Kpi label="CPA maximum" value={k.maxCpa} unit="€" tone="warning" />
-          <Kpi label="LTV 12 mois" value={k.ltv12} unit="€" tone="success" />
+          <Kpi label="CA par client / 12 mois" value={k.ltv12} unit="€" tone="success" />
           <div className="md:col-span-2 card-cockpit p-6">
             <SectionTitle title="Verdict de rentabilité" subtitle="Simulation instantanée" />
             <div className="mt-4 grid grid-cols-2 gap-4">
