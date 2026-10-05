@@ -16,7 +16,7 @@ const plans = [
     label: "Pour découvrir",
     outcome: "Idéal pour tester un audit ponctuel",
     cta: "COMMENCER GRATUITEMENT",
-    ctaLink: "/auth",
+    ctaPlan: undefined as "starter" | "pro" | undefined,
     highlighted: false,
     features: [
       { text: "3 diagnostics IA Claude / mois", included: true },
@@ -36,7 +36,7 @@ const plans = [
     label: "Pour démarrer sérieusement",
     outcome: "Identifiez vos fuites chaque semaine",
     cta: "CHOISIR STARTER",
-    ctaLink: "/auth?plan=starter",
+    ctaPlan: "starter" as "starter" | "pro" | undefined,
     highlighted: false,
     features: [
       { text: "Tout le plan Free inclus", included: true },
@@ -56,7 +56,7 @@ const plans = [
     outcome: "Le cockpit complet pour scaler sereinement",
     badge: "LE PLUS COMPLET",
     cta: "CHOISIR PRO",
-    ctaLink: "/auth?plan=pro",
+    ctaPlan: "pro" as "starter" | "pro" | undefined,
     highlighted: true,
     features: [
       { text: "Tout le plan Starter inclus", included: true },
@@ -72,7 +72,7 @@ const plans = [
 
 export function PricingSection({
   title = "TRANSPARENT. SANS ENGAGEMENT.",
-  subtitle = "Un investissement qui se rembourse en moins de 48h.",
+  subtitle = "Commencez gratuitement, passez à un plan payant quand le gain est évident.",
   showHeader = true,
 }: PricingSectionProps) {
   const [annual, setAnnual] = useState(false);
@@ -219,16 +219,17 @@ export function PricingSection({
 
                 <div className="mt-auto">
                   <Link
-                    to={plan.ctaLink}
+                    to="/auth"
+                    search={plan.ctaPlan ? { plan: plan.ctaPlan } : {}}
                     className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-xs font-bold font-display uppercase tracking-widest transition ${
                       isPro ? "btn-hero" : "border border-border-strong text-foreground hover:bg-surface"
                     }`}
                   >
                     {plan.cta} <ArrowRight className="h-4 w-4" />
                   </Link>
-                  {isPro && (
+                  {plan.price > 0 && (
                     <div className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Paiement disponible prochainement
+                      Paiement en ligne : ouverture prochaine
                     </div>
                   )}
                 </div>
@@ -249,25 +250,20 @@ export function PricingSection({
             border: "1px solid var(--color-border-strong)",
           }}
         >
-          <span className="chip-tag mb-4">RETOUR SUR INVESTISSEMENT</span>
+          <span className="chip-tag mb-4">EXEMPLE DE RETOUR SUR INVESTISSEMENT</span>
           <p className="text-lg md:text-xl text-foreground/90 leading-relaxed max-w-3xl mx-auto">
             Si vous dépensez{" "}
             <span className="font-mono-data font-bold" style={{ color: "var(--color-success)" }}>
-              2 000€/mois
+              2 000 €/mois
             </span>{" "}
-            en Meta Ads et qu'AdsPilot Pro identifie{" "}
+            en Meta Ads et que 10 % de ce budget part dans des campagnes non rentables, ce sont{" "}
             <span className="font-mono-data font-bold" style={{ color: "var(--color-success)" }}>
-              10% de gaspillage
+              200 €/mois
             </span>{" "}
-            — vous économisez{" "}
-            <span className="font-mono-data font-bold" style={{ color: "var(--color-success)" }}>
-              200€/mois
-            </span>
-            .
+            à récupérer.
           </p>
-          <p className="mt-4 font-display font-bold uppercase tracking-wider text-2xl md:text-3xl">
-            L'abonnement se rembourse{" "}
-            <span style={{ color: "var(--color-success)" }}>4× chaque mois.</span>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Illustration chiffrée, pas une promesse de résultat : l&apos;économie réelle dépend de votre compte.
           </p>
         </motion.div>
       </div>

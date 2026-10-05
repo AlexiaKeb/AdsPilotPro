@@ -145,8 +145,8 @@ export const importMetaMetrics = createServerFn({ method: "POST" })
 export const disconnectMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("meta_connections").delete().eq("user_id", context.userId);
+    const { purgeMetaConnection } = await import("./meta.server");
+    await purgeMetaConnection(context.userId);
     return { ok: true };
   });
 

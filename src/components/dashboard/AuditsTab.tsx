@@ -13,6 +13,14 @@ import { VisionCreativeTab } from "./VisionCreativeTab";
 import { emitAudit, onAudit } from "./auditHistoryBus";
 import { MetaConnectCard, type MetaImportedMetrics } from "./MetaConnectCard";
 import { addTasksFromDiagnostic } from "./ActionPlanPanel";
+import {
+  DEFAULT_MARGIN_PCT,
+  breakevenCpa,
+  breakevenRoas,
+  ltv12 as computeLtv12,
+  ltvScore,
+  profitabilityScore,
+} from "@/lib/profit-engine";
 
 
 export type Sector = "ecommerce" | "infoproduit" | "service";
@@ -24,6 +32,8 @@ export interface AuditInputs {
   roas_actual: number;
   cpa_actual: number;
   daily_budget: number;
+  /** Marge brute avant pub (%) : prix − produit − livraison − frais − remboursements. */
+  gross_margin: number;
   // Oracle (LTV)
   avg_cart: number;
   purchase_freq: number;
@@ -46,6 +56,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   ecommerce: {
     sector: "ecommerce",
     roas_actual: 2.5, cpa_actual: 28, daily_budget: 200,
+    gross_margin: DEFAULT_MARGIN_PCT.ecommerce,
     avg_cart: 65, purchase_freq: 1.8, retention: 35,
     add_to_cart_rate: 6, abandon_rate: 70, page_speed: 2.4,
     stock_coverage_days: 30, supplier_count: 1,
@@ -54,6 +65,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   infoproduit: {
     sector: "infoproduit",
     roas_actual: 3.2, cpa_actual: 45, daily_budget: 300,
+    gross_margin: DEFAULT_MARGIN_PCT.infoproduit,
     avg_cart: 120, purchase_freq: 1.2, retention: 22,
     add_to_cart_rate: 4, abandon_rate: 60, page_speed: 1.8,
     stock_coverage_days: 365, supplier_count: 1,
@@ -62,6 +74,7 @@ const DEFAULTS: Record<Sector, AuditInputs> = {
   service: {
     sector: "service",
     roas_actual: 4.0, cpa_actual: 60, daily_budget: 500,
+    gross_margin: DEFAULT_MARGIN_PCT.service,
     avg_cart: 350, purchase_freq: 1.4, retention: 55,
     add_to_cart_rate: 8, abandon_rate: 50, page_speed: 2.0,
     stock_coverage_days: 365, supplier_count: 1,
@@ -128,6 +141,8 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
   const [inputs, setInputs] = useState<AuditInputs>(DEFAULTS.ecommerce);
   const [active, setActive] = useState<ModuleId>("andromeda");
   const [saving, setSaving] = useState(false);
+  // false tant que l'utilisateur n'a ni saisi ni importé de données : évite de sauvegarder des valeurs d'exemple.
+  const [edited, setEdited] = useState(false);
   const [clientName, setClientName] = useState<string>("");
   const [auditName, setAuditName] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<AuditTag[]>([]);
@@ -167,14 +182,17 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
   // Compute results in real time
   const results = useMemo(() => {
     const i = inputs;
-    // Andromeda
-    const roasThreshold = 1 / (1 - 0.35); // simplifié : marge cible 35%
-    const andromedaScore = clamp01(i.roas_actual / (roasThreshold * 1.5)) * 100;
+    // Andromeda — seuil de rentabilité calculé depuis la marge réelle
+    const roasThreshold = breakevenRoas(i.gross_margin);
+    const andromedaScore = profitabilityScore(i.roas_actual, i.gross_margin);
+    const maxCpa = breakevenCpa(i.avg_cart, i.gross_margin);
 
-    // Oracle LTV
-    const ltv12 = i.avg_cart * i.purchase_freq * (1 + i.retention / 100);
-    const latentCashFlow = ltv12 - i.avg_cart;
-    const oracleScore = clamp01(i.retention / 60) * 100;
+    // Oracle LTV — marge générée par client sur 12 mois vs coût d'acquisition
+    const ltv = computeLtv12(i.avg_cart, i.purchase_freq, i.gross_margin);
+    const ltv12 = ltv.revenue;
+    const ltv12Margin = ltv.margin;
+    const latentCashFlow = ltv.revenue - i.avg_cart;
+    const oracleScore = ltvScore(ltv12Margin, i.cpa_actual);
 
     // Mercury CRO
     const conversionEfficiency = i.add_to_cart_rate * (1 - i.abandon_rate / 100);
@@ -197,8 +215,10 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
       // Andromeda
       roasThreshold,
       andromedaScore,
+      maxCpa,
       // Oracle
       ltv12,
+      ltv12Margin,
       latentCashFlow,
       oracleScore,
       // Mercury
@@ -219,6 +239,10 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
   }, [inputs]);
 
   const onSave = async () => {
+    if (!edited) {
+      toast.error("Ces chiffres sont des valeurs d'exemple. Saisissez vos données ou importez Meta avant de sauvegarder.");
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
@@ -253,6 +277,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
       if (!rec) return;
       const merged = { ...DEFAULTS[(rec.sector as Sector) ?? "ecommerce"], ...(rec.inputs ?? {}) } as AuditInputs;
       setInputs(merged);
+      setEdited(true);
       const ai = (rec.results?.ai_recommendations ?? {}) as AiMap<AuditDiagnostic>;
       setAiByModule(ai);
       setActive("andromeda");
@@ -278,7 +303,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
         roas: inputs.roas_actual,
         roas_threshold: results.roasThreshold,
         cpa: inputs.cpa_actual,
-        max_cpa: inputs.avg_cart * 0.35,
+        max_cpa: results.maxCpa,
         budget: inputs.daily_budget,
         score: moduleScore,
         ...(meta
@@ -332,8 +357,8 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
   };
 
   const moduleReady: Record<ScoredModuleId, boolean> = {
-    andromeda: inputs.roas_actual > 0 && inputs.cpa_actual > 0 && inputs.daily_budget > 0,
-    oracle: inputs.avg_cart > 0 && inputs.purchase_freq > 0 && inputs.retention > 0,
+    andromeda: inputs.roas_actual > 0 && inputs.cpa_actual > 0 && inputs.daily_budget > 0 && inputs.gross_margin > 0,
+    oracle: inputs.avg_cart > 0 && inputs.purchase_freq > 0 && inputs.gross_margin > 0 && inputs.cpa_actual > 0,
     mercury: inputs.add_to_cart_rate > 0 && inputs.abandon_rate > 0 && inputs.page_speed > 0,
     atlas: inputs.stock_coverage_days > 0 && inputs.supplier_count > 0,
   };
@@ -367,11 +392,14 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
   };
 
   const setSector = (s: Sector) => setInputs(mergeMeta({ ...DEFAULTS[s] }, metaRef.current));
-  const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) =>
+  const upd = <K extends keyof AuditInputs>(k: K, v: AuditInputs[K]) => {
+    setEdited(true);
     setInputs((prev) => ({ ...prev, [k]: v }));
+  };
 
   const applyMetaMetrics = (m: MetaImportedMetrics) => {
     setMeta(m);
+    setEdited(true);
     metaRef.current = m;
     setInputs((prev) => mergeMeta(prev, m));
     const filled: string[] = [];
@@ -489,13 +517,18 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
                   <NumField label="ROAS actuel" value={inputs.roas_actual} unit="×" step={0.1} decimals={2} onChange={(v) => upd("roas_actual", v)} />
                   <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
                   <NumField label="Budget journalier" value={inputs.daily_budget} unit="€" step={10} onChange={(v) => upd("daily_budget", v)} />
+                  <NumField label="Marge brute avant pub" value={inputs.gross_margin} unit="%" step={1} onChange={(v) => upd("gross_margin", v)} />
+                  <p className="text-[11px] text-muted-foreground leading-snug -mt-2">
+                    Prix de vente − coût produit − livraison − frais de paiement − remboursements. C&apos;est elle qui fixe votre seuil de rentabilité.
+                  </p>
                 </>
               )}
               {active === "oracle" && (
                 <>
                   <NumField label="Panier moyen" value={inputs.avg_cart} unit="€" step={1} onChange={(v) => upd("avg_cart", v)} />
-                  <NumField label="Fréquence achat / an" value={inputs.purchase_freq} unit="×" step={0.1} decimals={1} onChange={(v) => upd("purchase_freq", v)} />
-                  <NumField label="Taux de rétention" value={inputs.retention} unit="%" step={1} onChange={(v) => upd("retention", v)} />
+                  <NumField label="Marge brute avant pub" value={inputs.gross_margin} unit="%" step={1} onChange={(v) => upd("gross_margin", v)} />
+                  <NumField label="CPA actuel" value={inputs.cpa_actual} unit="€" step={1} onChange={(v) => upd("cpa_actual", v)} />
+                  <NumField label="Commandes par client / 12 mois" value={inputs.purchase_freq} unit="×" step={0.1} decimals={1} onChange={(v) => upd("purchase_freq", v)} />
                 </>
               )}
               {active === "mercury" && (
@@ -533,7 +566,7 @@ export function AuditsTab({ plan = "free", onCreditUsed }: { plan?: PlanId; onCr
 
             <div className="lg:col-span-3 space-y-5">
               {active === "andromeda" && <AndromedaPanel inputs={inputs} r={results} />}
-              {active === "oracle" && <OraclePanel r={results} />}
+              {active === "oracle" && <OraclePanel r={results} inputs={inputs} />}
               {active === "mercury" && <MercuryPanel inputs={inputs} r={results} />}
               {active === "atlas" && <AtlasPanel inputs={inputs} r={results} />}
               {activeScored && (
@@ -660,7 +693,11 @@ function AndromedaPanel({ inputs, r }: { inputs: AuditInputs; r: ReturnType<type
     <>
       <ScoreCard label="Score Andromeda" score={r.andromedaScore} />
       <MetricBar label="ROAS vs seuil rentabilité" value={inputs.roas_actual} target={r.roasThreshold * 1.3} unit="×" decimals={2} />
-      <MetricBar label="CPA front-end" value={inputs.cpa_actual} target={inputs.cpa_actual * 0.8} unit="€" inverse />
+      <div className="grid grid-cols-2 gap-4">
+        <MiniStat label="ROAS de rentabilité" value={`${r.roasThreshold.toFixed(2)}×`} tone="primary" />
+        <MiniStat label="CPA maximum" value={`${r.maxCpa.toFixed(0)} €`} tone="success" />
+      </div>
+      <MetricBar label="CPA vs maximum rentable" value={inputs.cpa_actual} target={r.maxCpa} unit="€" inverse />
       <Reco
         items={[
           r.andromedaScore < 50 && "ROAS sous le seuil critique. Coupez les sets non rentables avant scaling.",
@@ -671,15 +708,21 @@ function AndromedaPanel({ inputs, r }: { inputs: AuditInputs; r: ReturnType<type
   );
 }
 
-function OraclePanel({ r }: { r: Record<string, number> }) {
+function OraclePanel({ r, inputs }: { r: Record<string, number>; inputs: AuditInputs }) {
   return (
     <>
       <ScoreCard label="Score Oracle LTV" score={r.oracleScore} />
       <div className="grid grid-cols-2 gap-4">
-        <MiniStat label="LTV 12 mois" value={`${r.ltv12.toFixed(0)} €`} tone="success" />
-        <MiniStat label="Trésorerie latente" value={`${r.latentCashFlow.toFixed(0)} €`} tone="primary" />
+        <MiniStat label="CA par client / 12 mois" value={`${r.ltv12.toFixed(0)} €`} tone="success" />
+        <MiniStat label="Marge par client / 12 mois" value={`${r.ltv12Margin.toFixed(0)} €`} tone="primary" />
       </div>
-      <MetricBar label="Rétention 12 mois" value={r.oracleScore} target={70} unit="/100" />
+      <MetricBar
+        label="Ratio marge LTV / CPA (cible 3:1)"
+        value={inputs.cpa_actual > 0 ? r.ltv12Margin / inputs.cpa_actual : 0}
+        target={3}
+        unit=":1"
+        decimals={1}
+      />
       <Reco items={[r.oracleScore < 50 && "Activez un programme de relance email pour exploiter la trésorerie latente."]} />
     </>
   );
@@ -1128,10 +1171,10 @@ export function buildAndDownloadPdf(args: {
 
   const metrics: AuditPdfMetric[] = [
     { label: "ROAS actuel", value: `${inputs.roas_actual.toFixed(2)}×`, bar: metricBar(inputs.roas_actual, results.roasThreshold * 1.3) },
-    { label: "CPA actuel", value: `${inputs.cpa_actual.toFixed(0)} €`, bar: metricBar(inputs.cpa_actual, inputs.avg_cart * 0.35, true) },
+    { label: "CPA actuel", value: `${inputs.cpa_actual.toFixed(0)} €`, bar: metricBar(inputs.cpa_actual, results.maxCpa, true) },
     { label: "Budget journalier", value: `${inputs.daily_budget.toFixed(0)} €` },
     { label: "Panier moyen", value: `${inputs.avg_cart.toFixed(0)} €` },
-    { label: "Rétention", value: `${inputs.retention.toFixed(0)} %`, bar: metricBar(inputs.retention, 60) },
+    { label: "Marge brute avant pub", value: `${inputs.gross_margin.toFixed(0)} %`, bar: metricBar(inputs.gross_margin, 40) },
     { label: "LTV 12 mois", value: `${results.ltv12.toFixed(0)} €` },
     { label: "Taux ajout panier", value: `${inputs.add_to_cart_rate.toFixed(1)} %`, bar: metricBar(inputs.add_to_cart_rate, 8) },
     { label: "Taux d'abandon", value: `${inputs.abandon_rate.toFixed(0)} %`, bar: metricBar(inputs.abandon_rate, 40, true) },

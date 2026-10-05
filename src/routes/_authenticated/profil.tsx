@@ -12,6 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { deleteAccount } from "@/lib/account.functions";
+import { usePlan, PLAN_LABEL } from "@/hooks/usePlan";
 import { emitAudit } from "@/components/dashboard/auditHistoryBus";
 
 export const Route = createFileRoute("/_authenticated/profil")({
@@ -470,32 +471,39 @@ function ActivitySection({
 }
 
 /* ============ ABONNEMENT ============ */
-function SubscriptionSection({ profile }: { profile: ProfileRow }) {
-  const pro = profile.has_andromeda_access;
+function SubscriptionSection(_props: { profile: ProfileRow }) {
+  const { plan, used, limit, loading } = usePlan();
+  const paid = plan !== "free";
+  const prioritySupport = plan === "pro";
   return (
     <Section icon={<CreditCard className="h-5 w-5 text-primary" />} title="Mon abonnement" subtitle="Plan et accès">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card-cockpit p-5">
           <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Plan actuel</div>
           <div className="mt-2 flex items-center gap-2">
-            <div className="font-display font-bold text-xl">{pro ? "Pro" : "Free"}</div>
-            {pro && <span className="chip-tag" style={{ color: "var(--color-success)", borderColor: "var(--color-success)" }}>ACTIF</span>}
+            <div className="font-display font-bold text-xl">{loading ? "…" : PLAN_LABEL[plan]}</div>
+            {paid && <span className="chip-tag" style={{ color: "var(--color-success)", borderColor: "var(--color-success)" }}>ACTIF</span>}
           </div>
         </div>
         <div className="card-cockpit p-5">
-          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Accompagnement</div>
-          <div className="mt-2 flex items-center gap-2">
-            {pro ? (
-              <><CheckCircle2 className="h-4 w-4 text-success" /> <span className="font-display font-bold">Prioritaire</span></>
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Diagnostics IA ce mois-ci</div>
+          <div className="mt-2 font-display font-bold text-xl">
+            {used} / {limit === null ? "∞" : limit}
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+            {prioritySupport ? (
+              <><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Accompagnement prioritaire</>
             ) : (
-              <><XCircle className="h-4 w-4 text-muted-foreground" /> <span className="font-display font-bold text-muted-foreground">Non inclus</span></>
+              <><XCircle className="h-3.5 w-3.5" /> Accompagnement prioritaire : plan Pro</>
             )}
           </div>
         </div>
         <div className="card-cockpit p-5">
-          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Renouvellement</div>
-          <div className="mt-2 font-display font-bold text-sm text-muted-foreground">
-            {pro ? "Géré par votre admin" : "—"}
+          <div className="text-[10px] uppercase tracking-widest font-mono text-muted-foreground">Facturation</div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            {paid
+              ? "Votre plan est géré manuellement par l'équipe AdsPilot. Le paiement en ligne arrive bientôt."
+              : "Le paiement en ligne arrive bientôt : nous vous préviendrons par e-mail."}
           </div>
         </div>
       </div>

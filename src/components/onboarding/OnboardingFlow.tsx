@@ -19,6 +19,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { analyzeAudit, type AuditDiagnostic } from "@/lib/audit-ai.functions";
+import { breakevenCpa, breakevenRoas, profitabilityScore } from "@/lib/profit-engine";
 
 type SectorChoice = "ecommerce" | "infoproduit" | "service" | "agency";
 type BudgetChoice = "lt1k" | "1k_5k" | "5k_20k" | "gt20k";
@@ -62,7 +63,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
   const analyze = useServerFn(analyzeAudit);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [answers, setAnswers] = useState<OnboardingAnswers>({});
-  const [metrics, setMetrics] = useState({ roas: "", cpa: "", budget: "" });
+  const [metrics, setMetrics] = useState({ roas: "", cpa: "", budget: "", margin: "", cart: "" });
   const [analyzing, setAnalyzing] = useState(false);
   const [diagnostic, setDiagnostic] = useState<AuditDiagnostic | null>(null);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
@@ -117,23 +118,26 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
     const roas = parseFloat(metrics.roas.replace(",", "."));
     const cpa = parseFloat(metrics.cpa.replace(",", "."));
     const budget = parseFloat(metrics.budget.replace(",", "."));
-    if (!Number.isFinite(roas) || !Number.isFinite(cpa) || !Number.isFinite(budget)) {
-      toast.error("Renseignez les 3 métriques pour lancer l'analyse");
+    const margin = parseFloat(metrics.margin.replace(",", "."));
+    const cart = parseFloat(metrics.cart.replace(",", "."));
+    if (![roas, cpa, budget, margin, cart].every(Number.isFinite) || margin <= 0 || margin > 100) {
+      toast.error("Renseignez les 5 champs (marge entre 1 et 100 %) pour lancer l'analyse");
       return;
     }
     setAnalyzing(true);
     setDiagnostic(null);
     try {
       const sector = answers.sector ? SECTOR_LABEL[answers.sector] : "E-commerce";
-      const roasThreshold = 1 / (1 - 0.35);
-      const score = Math.round(Math.max(0, Math.min(1, roas / (roasThreshold * 1.5))) * 100);
+      const roasThreshold = breakevenRoas(margin);
+      const score = Math.round(profitabilityScore(roas, margin));
       const diag = await analyze({
         data: {
+          module: "onboarding" as const,
           sector,
           roas,
           roas_threshold: roasThreshold,
           cpa,
-          max_cpa: cpa * 0.8,
+          max_cpa: breakevenCpa(cart, margin),
           budget,
           score,
         },
@@ -335,8 +339,8 @@ function Step3({
   loadingMessage,
   onRun,
 }: {
-  metrics: { roas: string; cpa: string; budget: string };
-  setMetrics: (m: { roas: string; cpa: string; budget: string }) => void;
+  metrics: { roas: string; cpa: string; budget: string; margin: string; cart: string };
+  setMetrics: (m: { roas: string; cpa: string; budget: string; margin: string; cart: string }) => void;
   analyzing: boolean;
   loadingMessage: string;
   onRun: () => void;
@@ -376,6 +380,22 @@ function Step3({
             placeholder="ex: 150"
             value={metrics.budget}
             onChange={(v) => setMetrics({ ...metrics, budget: v })}
+            disabled={analyzing}
+          />
+          <MetricInput
+            label="Panier moyen"
+            unit="€"
+            placeholder="ex: 65"
+            value={metrics.cart}
+            onChange={(v) => setMetrics({ ...metrics, cart: v })}
+            disabled={analyzing}
+          />
+          <MetricInput
+            label="Marge brute avant pub (produit, livraison, frais déduits)"
+            unit="%"
+            placeholder="ex: 40"
+            value={metrics.margin}
+            onChange={(v) => setMetrics({ ...metrics, margin: v })}
             disabled={analyzing}
           />
         </div>
