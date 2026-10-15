@@ -14,6 +14,9 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Accédez à votre cockpit AdsPilot Pro." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { plan?: "starter" | "pro" } => ({
+    plan: search.plan === "starter" || search.plan === "pro" ? search.plan : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -28,11 +31,22 @@ const signUpSchema = signInSchema.extend({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { plan: planIntent } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
   const [adminMode, setAdminMode] = useState(false);
   const [adminCreds, setAdminCreds] = useState({ email: "", code: "" });
+
+  // Mémorise le plan choisi sur la page tarifs : il survit à l'inscription / au retour OAuth.
+  useEffect(() => {
+    if (!planIntent) return;
+    try {
+      localStorage.setItem("adspilot_plan_intent", planIntent);
+    } catch {
+      /* stockage indisponible : l'intention est simplement perdue */
+    }
+  }, [planIntent]);
 
   useEffect(() => {
     // Une session peut arriver juste après le retour OAuth : on écoute aussi les changements.

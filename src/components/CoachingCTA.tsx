@@ -1,6 +1,10 @@
 import { ArrowRight, Calendar } from "lucide-react";
 
-const CALENDLY_URL = "#";
+// Lien de prise de rendez-vous : définir VITE_BOOKING_URL (Calendly, Cal.com…) dans l'environnement.
+// À défaut, la demande part par e-mail plutôt que vers un lien mort.
+const BOOKING_URL =
+  (import.meta.env.VITE_BOOKING_URL as string | undefined) ||
+  "mailto:contact@adspilotpro.com?subject=Demande%20d%27accompagnement";
 
 export function CoachingCTA() {
   return (
@@ -44,7 +48,7 @@ export function CoachingCTA() {
           </ul>
         </div>
         <a
-          href={CALENDLY_URL}
+          href={BOOKING_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-display font-bold uppercase tracking-widest text-success-foreground transition hover:opacity-90"
