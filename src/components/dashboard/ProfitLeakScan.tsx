@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, ArrowRight, Loader2, Lock, ScanSearch, TrendingDown, TrendingUp } from "lucide-react";
@@ -33,38 +33,42 @@ export function ProfitLeakScan() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ProfitScanResponse | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const [st, d] = await Promise.all([status({}), defaults({})]);
-        if (!alive) return;
-        setConnected(st.connected && !st.expired);
-        if (d.marginPct) {
-          setMargin(String(d.marginPct));
-          setMarginKnown(true);
-        } else {
-          const sector = (d.sector ?? "ecommerce") as keyof typeof DEFAULT_MARGIN_PCT;
-          setMargin(String(DEFAULT_MARGIN_PCT[sector] ?? DEFAULT_MARGIN_PCT.ecommerce));
-        }
-      } catch {
-        if (alive) setConnected(false);
+  const autoTried = useRef(false);
+
+  const loadState = useCallback(async () => {
+    try {
+      const [st, d] = await Promise.all([status({}), defaults({})]);
+      const isConnected = st.connected && !st.expired;
+      setConnected(isConnected);
+      if (d.marginPct) {
+        setMargin(String(d.marginPct));
+        setMarginKnown(true);
+      } else {
+        const sector = (d.sector ?? "ecommerce") as keyof typeof DEFAULT_MARGIN_PCT;
+        setMargin((m) => m || String(DEFAULT_MARGIN_PCT[sector] ?? DEFAULT_MARGIN_PCT.ecommerce));
       }
-    })();
-    return () => {
-      alive = false;
-    };
+      // Premier scan automatique : Meta connecté + marge déjà confirmée + jamais scanné.
+      if (isConnected && d.marginPct && !d.lastScan && !autoTried.current) {
+        autoTried.current = true;
+        void runWith(d.marginPct, 30);
+      }
+    } catch {
+      setConnected(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, defaults]);
 
-  const run = useCallback(async () => {
-    const m = parseFloat(margin.replace(",", "."));
-    if (!Number.isFinite(m) || m <= 0 || m > 100) {
-      toast.error("Indiquez votre marge brute entre 1 et 100 %.");
-      return;
-    }
+  useEffect(() => {
+    void loadState();
+    const onConnected = () => void loadState();
+    window.addEventListener("adspilot:meta-connected", onConnected);
+    return () => window.removeEventListener("adspilot:meta-connected", onConnected);
+  }, [loadState]);
+
+  const runWith = async (m: number, days: Period) => {
     setLoading(true);
     try {
-      const res = await scan({ data: { periodDays: period, marginPct: m } });
+      const res = await scan({ data: { periodDays: days, marginPct: m } });
       setResult(res);
       setMarginKnown(true);
     } catch (e) {
@@ -72,7 +76,16 @@ export function ProfitLeakScan() {
     } finally {
       setLoading(false);
     }
-  }, [margin, period, scan]);
+  };
+
+  const run = () => {
+    const m = parseFloat(margin.replace(",", "."));
+    if (!Number.isFinite(m) || m <= 0 || m > 100) {
+      toast.error("Indiquez votre marge brute entre 1 et 100 %.");
+      return;
+    }
+    void runWith(m, period);
+  };
 
   return (
     <section className="card-cockpit p-6 space-y-5">
@@ -135,7 +148,7 @@ export function ProfitLeakScan() {
             </div>
           </div>
           <button
-            onClick={() => void run()}
+            onClick={run}
             disabled={loading}
             className="btn-hero inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-display font-bold uppercase tracking-widest disabled:opacity-60"
           >

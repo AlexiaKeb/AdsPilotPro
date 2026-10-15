@@ -89,6 +89,7 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
     onboarding_completed?: boolean;
     onboarding_answers?: OnboardingAnswers;
     sector?: string;
+    gross_margin_pct?: number;
   }) => {
     const { error } = await supabase
       .from("profiles")
@@ -124,6 +125,8 @@ export function OnboardingFlow({ userId, onComplete }: OnboardingFlowProps) {
       toast.error("Renseignez les 5 champs (marge entre 1 et 100 %) pour lancer l'analyse");
       return;
     }
+    // La marge confirmée ici pré-remplit le Profit Leak Scan : il se lancera seul dès que Meta est connecté.
+    void persist({ gross_margin_pct: margin });
     setAnalyzing(true);
     setDiagnostic(null);
     try {
@@ -401,7 +404,8 @@ function Step3({
         </div>
 
         <p className="text-xs text-muted-foreground">
-          💡 Ces données restent privées et ne sont jamais partagées.
+          💡 Ces données restent privées et ne sont jamais partagées. Votre marge est mémorisée : une fois Meta
+          connecté sur le dashboard, le Profit Leak Scan se lance tout seul.
         </p>
 
         {analyzing ? (

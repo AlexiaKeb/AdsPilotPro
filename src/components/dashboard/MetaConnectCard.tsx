@@ -151,6 +151,7 @@ export function MetaConnectCard({ onImport }: { onImport: (m: MetaImportedMetric
       sessionStorage.removeItem("meta_oauth_state");
       await connect({ data: { code, redirectUri } });
       toast.success("Compte Meta connecté.");
+      window.dispatchEvent(new Event("adspilot:meta-connected"));
       void refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Connexion Meta indisponible.");
