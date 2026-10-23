@@ -7,17 +7,19 @@ import { useRouteStore } from '../store/routeStore';
 import { RoutePanel } from './RoutePanel';
 import { HistoryPanel } from './HistoryPanel';
 import { MapView } from './MapView';
+import { DriverMode } from './DriverMode';
 
 export default function AppLayout() {
   const { user, loading, signOut } = useAuthStore();
-  const result = useRouteStore((s) => s.result);
+  const mapSignal = useRouteStore((s) => s.mapSignal);
+  const driver = useRouteStore((s) => s.driver);
   const [tab, setTab] = useState<'new' | 'history'>('new');
   const [mobileView, setMobileView] = useState<'panel' | 'map'>('panel');
 
-  // Sur mobile, afficher la carte dès qu'un itinéraire est calculé
+  // Sur mobile, afficher la carte après un calcul demandé explicitement (pas après un glisser-déposer)
   useEffect(() => {
-    if (result) setMobileView('map');
-  }, [result]);
+    if (mapSignal > 0) setMobileView('map');
+  }, [mapSignal]);
 
   if (loading) return <div className="flex h-full items-center justify-center text-gray-500">Chargement…</div>;
   if (!user) return <Navigate to="/" replace />;
@@ -61,6 +63,7 @@ export default function AppLayout() {
           <MapView visible={mobileView === 'map'} />
         </main>
       </div>
+      {driver && <DriverMode />}
     </div>
   );
 }

@@ -9,9 +9,14 @@ export interface Place {
   lon?: number;
 }
 
-export interface Waypoint extends Place {
+/** Une ligne de la liste d'arrêts : la première est le départ, la dernière l'arrivée. */
+export interface StopRow extends Place {
   id: string;
+  status: 'idle' | 'checking' | 'ok' | 'error';
+  error?: string;
 }
+
+export type Visit = 'done' | 'failed';
 
 export interface SavedRoute {
   id: string;
@@ -25,6 +30,8 @@ export interface SavedRoute {
   duration: number;
   created_at: string;
 }
+
+export { MAX_POINTS };
 
 /** Points intermédiaires maximum : MAX_POINTS moins le départ et l'arrivée. */
 export const MAX_WAYPOINTS = MAX_POINTS - 2;

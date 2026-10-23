@@ -19,7 +19,8 @@ export interface Leg {
 }
 
 export interface RouteResult {
-  stops: Stop[]; // dans l'ordre optimisé
+  order: number[]; // indices d'origine (dans la requête) des arrêts, dans l'ordre de passage
+  stops: Stop[]; // dans l'ordre de passage
   legs: Leg[];
   distance: number;
   duration: number;
@@ -30,6 +31,8 @@ export interface OptimizeRequest {
   points: Point[]; // [départ, ...intermédiaires, arrivée]
   mode: Mode;
   optimization: Optimization;
+  /** false : conserver l'ordre fourni et calculer uniquement le tracé (défaut : true). */
+  optimize?: boolean;
 }
 
 /** Nombre maximal de points (départ + arrivée inclus) : limite des serveurs OSRM par défaut. */

@@ -34,3 +34,12 @@ Base de données : appliquer `supabase/migrations/001_routes.sql`. Désactiver l
 ## Avant la mise en production
 
 Pages légales, vrais témoignages, serveurs de routage dédiés.
+
+## Écran principal
+
+Une seule liste d'arrêts (glisser-déposer, tactile compris) : le premier est le départ, le dernier l'arrivée (fixes lors de
+l'optimisation). Chaque adresse affiche son statut (reconnue / introuvable), l'import CSV est vérifié immédiatement.
+Après un calcul, la liste prend l'ordre de passage et affiche heure d'arrivée, distance et durée de chaque étape
+(heure de départ et durée d'arrêt réglables). Réordonner à la main recalcule le tracé dans votre ordre, sans ré-optimiser.
+Le **mode chauffeur** présente un arrêt à la fois (navigation Waze/Google Maps, livré / échec) ; la progression est
+conservée 24 h dans le navigateur.

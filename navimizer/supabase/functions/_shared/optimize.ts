@@ -45,7 +45,7 @@ export function validateRequest(body: unknown): OptimizeRequest {
     if (!ok) throw new OptimizeError('invalid', 'Coordonnées invalides');
     return { label: String(q.label ?? '').slice(0, 300), lat: q.lat!, lon: q.lon! };
   });
-  return { points, mode: b.mode as Mode, optimization: b.optimization };
+  return { points, mode: b.mode as Mode, optimization: b.optimization, optimize: b.optimize !== false };
 }
 
 const coordPath = (pts: Point[]) => pts.map((p) => `${p.lon.toFixed(6)},${p.lat.toFixed(6)}`).join(';');
@@ -85,12 +85,12 @@ export async function optimizeRoute(
   servers: Servers = PUBLIC_SERVERS,
   signal?: AbortSignal,
 ): Promise<RouteResult> {
-  const { points, mode, optimization } = validateRequest(req);
+  const { points, mode, optimization, optimize } = validateRequest(req);
   const base = servers[mode];
   const n = points.length;
 
   let order = Array.from({ length: n }, (_, i) => i);
-  if (n > 2) {
+  if (n > 2 && optimize !== false) {
     const table = await getJson<{ durations: (number | null)[][]; distances: (number | null)[][] }>(
       `${base}/table/v1/${PROFILE}/${coordPath(points)}?annotations=duration,distance`,
       signal,
@@ -112,6 +112,7 @@ export async function optimizeRoute(
   const stops: Stop[] = ordered.map((p, i) => ({ ...p, kind: i === 0 ? 'start' : i === n - 1 ? 'end' : 'via' }));
   const legs: Leg[] = r.legs.map((l) => ({ distance: l.distance, duration: l.duration }));
   return {
+    order,
     stops,
     legs,
     distance: r.distance,

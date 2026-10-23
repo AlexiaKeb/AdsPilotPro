@@ -10,9 +10,10 @@ interface Props {
   placeholder: string;
   leading?: React.ReactNode;
   trailing?: React.ReactNode;
+  invalid?: boolean;
 }
 
-export function AddressInput({ value, onChange, placeholder, leading, trailing }: Props) {
+export function AddressInput({ value, onChange, placeholder, leading, trailing, invalid }: Props) {
   const [suggestions, setSuggestions] = useState<Place[]>([]);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -65,7 +66,7 @@ export function AddressInput({ value, onChange, placeholder, leading, trailing }
 
   return (
     <div ref={box} className="relative">
-      <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600">
+      <div className={`flex items-center gap-2 rounded-lg border bg-white px-3 focus-within:ring-1 ${invalid ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' : 'border-gray-300 focus-within:border-blue-600 focus-within:ring-blue-600'}`}>
         {leading}
         <input
           value={value.label}

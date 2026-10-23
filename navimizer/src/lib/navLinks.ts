@@ -16,3 +16,11 @@ export function wazeUrl(stops: Stop[]): string {
   const last = stops[stops.length - 1];
   return `https://waze.com/ul?ll=${last.lat},${last.lon}&navigate=yes`;
 }
+
+/** Navigation vers un seul arrêt (mode chauffeur). */
+export function googleMapsToStop(stop: Stop, mode: Mode): string {
+  const travel = { car: 'driving', bike: 'bicycling', walk: 'walking' }[mode];
+  return `https://www.google.com/maps/dir/?${new URLSearchParams({ api: '1', destination: pt(stop), travelmode: travel })}`;
+}
+
+export const wazeToStop = (stop: Stop) => wazeUrl([stop]);

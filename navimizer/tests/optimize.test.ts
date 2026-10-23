@@ -8,6 +8,7 @@ import type { Point } from '../supabase/functions/_shared/types.ts';
 let server: http.Server;
 let base: string;
 let failRoute = false;
+let tableCalls = 0;
 
 const parse = (path: string): [number, number][] =>
   path.split('/')[4].split('?')[0].split(';').map((c) => c.split(',').map(Number) as [number, number]);
@@ -22,6 +23,7 @@ beforeAll(async () => {
       res.end(JSON.stringify(body));
     };
     if (url.includes('/table/')) {
+      tableCalls++;
       const distances = pts.map((a) => pts.map((b) => dist(a, b)));
       return send(200, { code: 'Ok', distances, durations: distances.map((r) => r.map((d) => d / 10)) });
     }
@@ -55,6 +57,16 @@ describe('optimizeRoute', () => {
     expect(res.legs).toHaveLength(4);
     expect(res.distance).toBeCloseTo(0.4 * 100_000, 0);
     expect(res.geometry[0]).toEqual([0, 0]);
+    expect(res.order).toEqual([0, 2, 3, 1, 4]); // indices d'origine dans l'ordre de passage
+  });
+
+  it("conserve l'ordre fourni avec optimize: false (sans appel à /table)", async () => {
+    tableCalls = 0;
+    const points = [P(0, 'dep'), P(0.3, 'c'), P(0.1, 'a'), P(0.4, 'arr')];
+    const res = await optimizeRoute({ points, mode: 'car', optimization: 'time', optimize: false }, servers());
+    expect(res.order).toEqual([0, 1, 2, 3]);
+    expect(res.stops.map((s) => s.label)).toEqual(['dep', 'c', 'a', 'arr']);
+    expect(tableCalls).toBe(0);
   });
 
   it('gère 100 points', async () => {
