@@ -1,5 +1,7 @@
-export type Mode = 'car' | 'bike' | 'walk';
-export type Optimization = 'time' | 'distance';
+import { MAX_POINTS } from '../supabase/functions/_shared/types.ts';
+import type { Mode } from '../supabase/functions/_shared/types.ts';
+
+export type { Leg, Mode, OptimizeRequest, Optimization, Point, RouteResult, Stop } from '../supabase/functions/_shared/types.ts';
 
 export interface Place {
   label: string;
@@ -9,26 +11,6 @@ export interface Place {
 
 export interface Waypoint extends Place {
   id: string;
-}
-
-export interface Stop {
-  label: string;
-  lat: number;
-  lon: number;
-  kind: 'start' | 'via' | 'end';
-}
-
-export interface Leg {
-  distance: number; // m
-  duration: number; // s
-}
-
-export interface RouteResult {
-  stops: Stop[];
-  legs: Leg[];
-  distance: number;
-  duration: number;
-  geometry: [number, number][]; // [lat, lon]
 }
 
 export interface SavedRoute {
@@ -44,4 +26,5 @@ export interface SavedRoute {
   created_at: string;
 }
 
-export const MAX_WAYPOINTS = 23;
+/** Points intermédiaires maximum : MAX_POINTS moins le départ et l'arrivée. */
+export const MAX_WAYPOINTS = MAX_POINTS - 2;

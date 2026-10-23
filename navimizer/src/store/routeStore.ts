@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { MAX_WAYPOINTS, type Mode, type Optimization, type Place, type RouteResult, type Waypoint } from '../types';
 import { ensureCoords, GeocodeError } from '../lib/geocode';
-import { computeRoute, RoutingError } from '../lib/osrm';
+import { OptimizeError, requestRoute } from '../lib/routing';
 import { clearForm, loadForm, saveForm } from '../lib/formStorage';
 
 interface RouteState {
@@ -103,11 +103,15 @@ export const useRouteStore = create<RouteState>((set, get) => {
       set({ loading: true });
       try {
         const filled = waypoints.filter((w) => w.label.trim());
-        const o = await ensureCoords(origin);
-        const w = [];
-        for (const wp of filled) w.push(await ensureCoords(wp));
-        const d = await ensureCoords(destination);
-        const result = await computeRoute(o, w, d, mode, optimization);
+        // Géocodage en parallèle (concurrence limitée dans geocode.ts)
+        const [o, ...rest] = await Promise.all([origin, ...filled, destination].map(ensureCoords));
+        const d = rest.pop()!;
+        const toPoint = (p: Required<Place>) => ({ label: p.label, lat: p.lat, lon: p.lon });
+        const result = await requestRoute({
+          points: [o, ...rest, d].map(toPoint),
+          mode,
+          optimization,
+        });
         if (id !== requestId) return;
         set({ result, loading: false });
         toast.success('Itinéraire optimisé');
@@ -117,10 +121,10 @@ export const useRouteStore = create<RouteState>((set, get) => {
         if (e instanceof GeocodeError) {
           toast.error(
             e.kind === 'notfound'
-              ? "Une ou plusieurs adresses n'ont pas été trouvées. Vérifiez leur saisie."
-              : 'La recherche d\'adresses est temporairement indisponible. Réessayez dans quelques instants.',
+              ? `Adresse introuvable : « ${e.label} ». Vérifiez sa saisie.`
+              : "La recherche d'adresses est temporairement indisponible. Réessayez dans quelques instants.",
           );
-        } else if (e instanceof RoutingError && e.message === 'NoRoute') {
+        } else if (e instanceof OptimizeError && e.code === 'no_route') {
           toast.error("Aucun itinéraire n'a été trouvé entre ces points.");
         } else {
           toast.error("Une erreur est survenue lors du calcul de l'itinéraire. Réessayez dans quelques instants.");
