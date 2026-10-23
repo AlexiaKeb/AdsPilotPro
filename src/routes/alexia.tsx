@@ -67,9 +67,9 @@ const offers = [
   },
   {
     icon: Megaphone,
-    name: "Formation Social Ads",
-    price: "Facebook · Instagram · TikTok",
-    text: "Apprends à créer des publicités rentables, étape par étape, même sans expérience, pour vendre produits et services.",
+    name: "Meta Ads à l'ère de l'IA",
+    price: "Formation · Facebook & Instagram",
+    text: "La méthode pub Meta éprouvée sur 1 800 entrepreneurs, remise à jour avec l'IA : créas, ciblage, analyse et scaling plus rapides.",
     cta: "Découvrir la formation",
   },
   {
@@ -142,9 +142,9 @@ function AlexiaSite() {
               </span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/65">
-              J'aide les entrepreneurs en ligne à maîtriser la publicité Facebook et Instagram depuis 2017.
-              Aujourd'hui, je construis mes propres produits SaaS avec l'IA — et je t'apprends à faire
-              pareil pour vendre plus, plus vite, avec moins de friction.
+              J'aide les e-commerçants, infopreneurs et entrepreneurs du web à vendre plus avec la pub
+              Facebook et Instagram depuis 2017. Aujourd'hui, j'y ajoute l'IA : je construis mes propres
+              produits SaaS et je t'apprends à automatiser ton business, sans équipe tech.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <a
@@ -170,7 +170,7 @@ function AlexiaSite() {
             {[
               ["1 800", "Entrepreneurs suivis"],
               ["200 h", "De calls Zoom d'accompagnement"],
-              ["+50 M", "De revenus générés par la pub"],
+              ["+50 M€", "De revenus générés par la pub"],
               ["+200 000", "Produits vendus dans mes boutiques"],
             ].map(([k, v]) => (
               <div key={v} className="bg-[#0A0B14] p-5">
