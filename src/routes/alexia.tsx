@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { AKLogo } from "@/components/brand/AKLogo";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -52,7 +53,7 @@ const pillars = [
     icon: Code2,
     tag: "03 · Je construis",
     title: "SaaS & vibe coding",
-    text: "De l'idée à l'app en ligne en quelques jours, sans équipe tech. Je construis en public, tu vois tout, y compris les ratés.",
+    text: "J'ai toujours voulu créer des SaaS. Avec l'IA, je passe de l'idée à l'app en ligne en quelques jours, sans équipe tech. Je construis en public, tu vois tout.",
   },
 ];
 
@@ -108,10 +109,14 @@ function AlexiaSite() {
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0A0B14]/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <a href="#top" className="font-display text-lg font-bold tracking-tight">
-            Alexia<span className="text-[#6C63FF]">.</span>Kebir
+          <a href="#top" className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
+            <AKLogo className="h-8 w-auto" />
+            <span className="hidden sm:inline">
+              ALEXIA <span className="font-normal text-white/50">KEBIR</span>
+            </span>
           </a>
           <nav className="hidden items-center gap-7 text-sm text-white/60 md:flex">
+            <a href="#apropos" className="hover:text-white">À propos</a>
             <a href="#expertise" className="hover:text-white">Expertise</a>
             <a href="#produit" className="hover:text-white">Mon SaaS</a>
             <a href="#offres" className="hover:text-white">Offres</a>
@@ -178,6 +183,57 @@ function AlexiaSite() {
                 <div className="mt-1 text-xs text-white/50">{v}</div>
               </div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* À propos */}
+      <section id="apropos" className="mx-auto max-w-6xl px-5 py-20">
+        <div className="grid gap-12 md:grid-cols-[320px_1fr] md:items-start">
+          <motion.div {...fadeUp} className="md:sticky md:top-28">
+            {/* TODO: remplacer par ta photo (portrait noir & blanc) */}
+            <div className="flex aspect-[4/5] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br from-[#12142A] to-[#0A0B14]">
+              <AKLogo className="h-28 w-auto opacity-80" />
+            </div>
+            <p className="mt-4 font-display text-sm italic text-white/45">
+              « Never stop learning because life never stops teaching. »
+            </p>
+          </motion.div>
+
+          <motion.div {...fadeUp}>
+            <p className="font-mono text-xs uppercase tracking-widest text-[#6C63FF]">À propos</p>
+            <h2 className="mt-3 font-display text-3xl font-bold md:text-5xl">
+              Je décompose les stratégies compliquées en étapes concrètes.
+            </h2>
+            <div className="mt-8 space-y-5 leading-relaxed text-white/65">
+              <p>
+                <strong className="text-white">2012.</strong> Je lance ma conciergerie d'entreprises et je dois trouver
+                des clients. Je me forme, je teste, je plonge dans les réseaux sociaux et Google Ads, et je réalise{" "}
+                <strong className="text-white">la puissance du Net</strong>.
+              </p>
+              <p>
+                Je change d'activité : je me lance dans l'<strong className="text-white">e-commerce</strong>, avec la
+                fibre du commerce et des études liées à ce domaine. Marier mon côté geek et le travail 100 % sur
+                Internet, ça a été une évidence.
+              </p>
+              <p>
+                Je partage mes connaissances dans un groupe Facebook, et la demande explose. Je crée mes premières{" "}
+                <strong className="text-white">formations</strong>, un tunnel publicitaire à fort taux de conversion,
+                et j'accompagne <strong className="text-white">1 800 entrepreneurs</strong> du web à générer des ventes
+                rentables.
+              </p>
+              <p>
+                <strong className="text-white">Aujourd'hui.</strong> Depuis l'arrivée de ChatGPT, j'ai trouvé le
+                levier qui me manquait : j'ai toujours voulu créer des SaaS, et l'IA rend enfin ça possible pour une
+                entrepreneuse sans équipe tech. Je construis mes outils, je les teste sur mes propres campagnes, et je
+                te montre comment faire pareil.
+              </p>
+            </div>
+            <p className="mt-8 rounded-2xl border border-dashed border-[#6C63FF]/40 bg-[#6C63FF]/5 p-5 text-sm leading-relaxed text-white/60">
+              <strong className="text-white">Pourquoi je te tutoie ?</strong> Parce que je travaille d'égale à égale
+              avec mes clients, dont certains sont devenus amis et associés. Le tutoiement fait tomber les barrières :
+              les échanges sont plus directs, plus francs, et les résultats sont meilleurs.
+            </p>
           </motion.div>
         </div>
       </section>

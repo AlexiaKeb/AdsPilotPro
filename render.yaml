@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: alexiakebir
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && NITRO_PRESET=node-server npm run build
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /alexia
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NITRO_PRESET
+        value: node-server
