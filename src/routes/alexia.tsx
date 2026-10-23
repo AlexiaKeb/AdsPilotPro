@@ -58,25 +58,32 @@ const pillars = [
 
 const offers = [
   {
-    icon: Target,
-    name: "Audit Meta Ads",
-    price: "Sur devis",
-    text: "Je passe ton compte au crible et tu repars avec un plan d'action priorisé : budget, audiences, créas, tracking.",
-    cta: "Demander un audit",
+    icon: Compass,
+    name: "Mentoring",
+    price: "Marketing digital · 1-to-1",
+    text: "Un accompagnement personnalisé pour faire grandir ton entreprise : stratégie, pub, offre et systèmes, avec l'IA comme levier.",
+    cta: "Candidater",
+    featured: true,
   },
   {
-    icon: Compass,
-    name: "Accompagnement 1-to-1",
-    price: "Mensuel",
-    text: "Stratégie ads + business en ligne, avec une approche augmentée par l'IA. Pour e-commerçants et infopreneurs qui veulent scaler.",
-    cta: "Postuler",
-    featured: true,
+    icon: Megaphone,
+    name: "Formation Social Ads",
+    price: "Facebook · Instagram · TikTok",
+    text: "Apprends à créer des publicités rentables, étape par étape, même sans expérience, pour vendre produits et services.",
+    cta: "Découvrir la formation",
+  },
+  {
+    icon: Target,
+    name: "Workshop en présentiel",
+    price: "1 à 2 jours",
+    text: "Une immersion pour poser ta stratégie publicitaire, lancer tes campagnes et repartir avec un plan d'action concret.",
+    cta: "Voir les dates",
   },
   {
     icon: Wrench,
     name: "Sprint Vibe Coding",
-    price: "Atelier",
-    text: "On lance ton premier outil / micro-SaaS ensemble en quelques sessions. Tu repars avec un produit en ligne, pas un PDF.",
+    price: "Nouveau",
+    text: "On lance ton premier outil ou micro-SaaS ensemble avec l'IA. Tu repars avec un produit en ligne, pas un PDF.",
     cta: "Réserver ma place",
   },
 ];
@@ -135,7 +142,7 @@ function AlexiaSite() {
               </span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/65">
-              Je forme et accompagne des entrepreneurs sur Facebook &amp; Instagram Ads depuis 2017.
+              J'aide les entrepreneurs en ligne à maîtriser la publicité Facebook et Instagram depuis 2017.
               Aujourd'hui, je construis mes propres produits SaaS avec l'IA — et je t'apprends à faire
               pareil pour vendre plus, plus vite, avec moins de friction.
             </p>
@@ -155,16 +162,16 @@ function AlexiaSite() {
             </div>
           </motion.div>
 
-          {/* Bandeau crédibilité — chiffres à renseigner par toi, rien d'inventé */}
+          {/* Bandeau crédibilité — chiffres issus de l'ancien site (unités à confirmer) */}
           <motion.div
             {...fadeUp}
             className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-4"
           >
             {[
-              ["2017", "Début en Facebook Ads"],
-              ["[XX]", "Entrepreneurs formés"],
-              ["[X M€]", "Budget pub géré"],
-              ["2026", "AdsPilot Pro en ligne"],
+              ["1 800", "Entrepreneurs suivis"],
+              ["200 h", "De calls Zoom d'accompagnement"],
+              ["+50 M", "De revenus générés par la pub"],
+              ["+200 000", "Produits vendus dans mes boutiques"],
             ].map(([k, v]) => (
               <div key={v} className="bg-[#0A0B14] p-5">
                 <div className="font-display text-2xl font-bold text-[#00E5A0] md:text-3xl">{k}</div>
@@ -245,7 +252,7 @@ function AlexiaSite() {
           <p className="font-mono text-xs uppercase tracking-widest text-[#6C63FF]">Travailler avec moi</p>
           <h2 className="mt-3 font-display text-3xl font-bold md:text-5xl">Choisis ton niveau d'accélération.</h2>
         </motion.div>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
+        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {offers.map((o) => (
             <motion.div
               key={o.name}
@@ -284,6 +291,30 @@ function AlexiaSite() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Lead magnet (à brancher sur Systeme.io) */}
+      <section className="mx-auto max-w-4xl px-5 py-16">
+        <motion.div {...fadeUp} className="rounded-3xl border border-white/10 bg-[#12142A] p-8 md:p-12">
+          <p className="font-mono text-xs uppercase tracking-widest text-[#00E5A0]">Gratuit</p>
+          <h2 className="mt-3 font-display text-2xl font-bold md:text-4xl">
+            Obtiens des prospects de haute qualité avec une stratégie publicitaire simple.
+          </h2>
+          <form className="mt-7 flex flex-col gap-3 md:flex-row" onSubmit={(e) => e.preventDefault()}>
+            <input
+              placeholder="Prénom"
+              className="flex-1 rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm outline-none placeholder:text-white/35 focus:border-[#6C63FF]"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              className="flex-1 rounded-full border border-white/15 bg-transparent px-5 py-3 text-sm outline-none placeholder:text-white/35 focus:border-[#6C63FF]"
+            />
+            <button className="rounded-full bg-[#6C63FF] px-6 py-3 text-sm font-medium transition hover:bg-[#5b52f0]">
+              Je le veux
+            </button>
+          </form>
+        </motion.div>
       </section>
 
       {/* Contact */}
