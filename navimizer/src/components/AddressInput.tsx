@@ -49,7 +49,8 @@ export function AddressInput({ value, onChange, placeholder, leading, trailing }
       try {
         const res = await searchAddresses(text, ctrl.signal);
         setSuggestions(res);
-        setOpen(true);
+        // Ne rouvrir la liste que si l'utilisateur est toujours dans ce champ
+        setOpen(Boolean(box.current?.contains(document.activeElement)));
         setFailed(false);
       } catch (e) {
         if ((e as Error).name === 'AbortError') return;

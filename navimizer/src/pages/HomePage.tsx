@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bike, Briefcase, CalendarCheck, Compass, MapPinned, Navigation, Plane, Route, Star, Truck, Zap } from 'lucide-react';
+import { ArrowRight, Bike, Briefcase, CalendarCheck, Heart, Map as MapIcon, MapPinned, Navigation, Plane, Star, Truck } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { AuthModal } from '../components/AuthModal';
 
 const FEATURES = [
-  { Icon: Zap, title: 'Optimisation automatique', text: "Jusqu'à 23 arrêts réordonnés pour le trajet le plus court en temps ou en distance." },
-  { Icon: Navigation, title: 'Navigation en un clic', text: 'Ouvrez votre itinéraire complet dans Google Maps ou Waze.' },
-  { Icon: Star, title: 'Adresses favorites', text: 'Domicile, travail, clients : retrouvez vos adresses en un tap.' },
-  { Icon: Compass, title: 'Simplicité', text: 'Saisissez, importez un CSV, optimisez. Aucune installation.' },
+  { Icon: Navigation, color: 'text-blue-600', title: 'Optimisation intelligente', text: "Évitez les détours : jusqu'à 23 arrêts réordonnés pour le trajet le plus court en temps ou en distance." },
+  { Icon: MapIcon, color: 'text-green-600', title: 'Navigation intégrée', text: 'Passez facilement à Google Maps ou Waze avec votre itinéraire complet.' },
+  { Icon: Star, color: 'text-yellow-500', title: 'Adresses favorites', text: 'Enregistrez vos lieux les plus fréquents : domicile, travail, clients.' },
+  { Icon: Heart, color: 'text-red-600', title: 'Interface simple', text: 'Aucune installation requise : saisissez, importez un CSV, optimisez.' },
 ];
 
 const AUDIENCES = [
@@ -39,25 +39,28 @@ export default function HomePage() {
     <div className="min-h-full bg-white text-gray-900">
       <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2 text-lg font-bold text-blue-600"><Route className="h-6 w-6" /> Navimizer</div>
-          <button onClick={start} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Accéder à l'application</button>
+          <div className="flex items-center gap-2 text-xl font-bold text-gray-900"><Navigation className="h-7 w-7 fill-blue-600 text-blue-600" /><span>Navi<span className="text-blue-600">mizer</span></span></div>
+          <button onClick={start} className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Accéder à l'application <ArrowRight className="h-4 w-4" /></button>
         </div>
       </header>
 
-      <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 text-white">
+      <section
+        className="relative bg-gray-50 bg-cover bg-center"
+        style={{ backgroundImage: "linear-gradient(rgba(249,250,251,.85), rgba(249,250,251,.85)), url(/hero-map.jpg), radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px)", backgroundSize: 'cover, cover, 22px 22px' }}
+      >
         <div className="mx-auto max-w-6xl px-4 py-20 text-center md:py-28">
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight md:text-5xl">L'optimisation de trajets, simple et efficace</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-100">Évitez les détours inutiles, optimisez chaque itinéraire</p>
-          <button onClick={start} className="mt-8 rounded-lg bg-white px-6 py-3 font-semibold text-blue-700 shadow-lg hover:bg-blue-50">Commencer maintenant</button>
+          <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight text-gray-900 md:text-5xl">L'optimisation de trajets, simple et efficace <span aria-hidden>🚀</span></h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-600">Évitez les détours inutiles, optimisez chaque itinéraire.<br />Que vous soyez livreur, commercial ou simple voyageur.</p>
+          <button onClick={start} className="mt-8 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-7 py-3.5 font-semibold text-white shadow-lg hover:bg-blue-700">Commencer maintenant <ArrowRight className="h-5 w-5" /></button>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="mb-10 text-center text-2xl font-bold">Tout pour optimiser vos trajets</h2>
+        <h2 className="mb-10 text-center text-2xl font-bold">Pourquoi choisir Navimizer ?</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(({ Icon, title, text }) => (
+          {FEATURES.map(({ Icon, color, title, text }) => (
             <div key={title} className="rounded-lg border border-gray-200 p-5 shadow-lg shadow-gray-100">
-              <Icon className="mb-3 h-8 w-8 text-blue-600" />
+              <Icon className={`mb-3 h-9 w-9 ${color}`} />
               <h3 className="font-semibold">{title}</h3>
               <p className="mt-1 text-sm text-gray-600">{text}</p>
             </div>
@@ -100,12 +103,12 @@ export default function HomePage() {
 
       <section className="bg-blue-600 py-16 text-center text-white">
         <h2 className="text-2xl font-bold">Prêt à gagner du temps sur chaque trajet ?</h2>
-        <button onClick={start} className="mt-6 rounded-lg bg-white px-6 py-3 font-semibold text-blue-700 shadow-lg hover:bg-blue-50">Commencer maintenant</button>
+        <button onClick={start} className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-blue-700 shadow-lg hover:bg-blue-50">Commencer maintenant <ArrowRight className="h-5 w-5" /></button>
       </section>
 
       <footer className="bg-gray-900 text-gray-300">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
-          <div><div className="flex items-center gap-2 font-bold text-white"><Route className="h-5 w-5" /> Navimizer</div><p className="mt-2 text-sm">Optimisation d'itinéraires multi-arrêts.</p></div>
+          <div><div className="flex items-center gap-2 font-bold text-white"><Navigation className="h-5 w-5 fill-blue-500 text-blue-500" /> Navimizer</div><p className="mt-2 text-sm">Optimisation d'itinéraires multi-arrêts.</p></div>
           <div className="text-sm"><div className="mb-2 font-semibold text-white">Contact</div>
             <p>contact@navimizer.fr</p><p>01 23 45 67 89</p><p className="flex items-center gap-1"><MapPinned className="h-4 w-4" /> Paris, France</p></div>
           <div className="text-sm"><div className="mb-2 font-semibold text-white">Légal</div>

@@ -17,26 +17,25 @@ const icon = (text: string, color: string) =>
     iconAnchor: [14, 14],
   });
 
-function FitRoute() {
+function FitRoute({ visible }: { visible: boolean }) {
   const map = useMap();
   const geometry = useRouteStore((s) => s.result?.geometry);
   useEffect(() => {
-    if (geometry?.length) map.fitBounds(L.latLngBounds(geometry), { padding: [50, 50] });
-  }, [geometry, map]);
+    if (!geometry?.length || !visible) return;
+    // La carte peut être masquée (mobile) : recalculer sa taille avant de cadrer
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(geometry), { padding: [50, 50] });
+  }, [geometry, visible, map]);
   return null;
 }
 
 type Target = { pos: [number, number]; zoom: number; id: number };
 
-function MapController({ target, visible }: { target: Target | null; visible: boolean }) {
+function MapController({ target }: { target: Target | null }) {
   const map = useMap();
   useEffect(() => {
     if (target) map.setView(target.pos, target.zoom);
   }, [target, map]);
-  // Leaflet doit recalculer sa taille quand la carte redevient visible (mobile)
-  useEffect(() => {
-    if (visible) setTimeout(() => map.invalidateSize(), 50);
-  }, [visible, map]);
   return null;
 }
 
@@ -78,8 +77,8 @@ export function MapView({ visible }: { visible: boolean }) {
     <div className="relative h-full w-full">
       <MapContainer center={PARIS} zoom={13} className="h-full w-full" zoomControl={false}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <FitRoute />
-        <MapController target={follow} visible={visible} />
+        <FitRoute visible={visible} />
+        <MapController target={follow} />
         {result && <Polyline positions={result.geometry} pathOptions={{ color: '#2563eb', weight: 5 }} />}
         {result?.stops.map((s, i) => (
           <Marker key={i} position={[s.lat, s.lon]}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { History, LogOut, Map as MapIcon, Menu, Route } from 'lucide-react';
+import { History, LogOut, Map as MapIcon, Menu, Navigation, Route } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 import { useRouteStore } from '../store/routeStore';
@@ -32,7 +32,7 @@ export default function AppLayout() {
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2.5">
         <div className="flex items-center gap-2">
           <button className="md:hidden" onClick={() => setMobileView('panel')} aria-label="Menu"><Menu className="h-5 w-5" /></button>
-          <Link to="/" className="flex items-center gap-2 font-semibold text-blue-600"><Route className="h-5 w-5" /> Navimizer</Link>
+          <Link to="/" className="flex items-center gap-2 text-lg font-bold text-gray-900"><Navigation className="h-6 w-6 fill-blue-600 text-blue-600" /><span>Navi<span className="text-blue-600">mizer</span></span></Link>
         </div>
         <div className="flex items-center gap-3">
           <button className="md:hidden" onClick={() => setMobileView('map')} aria-label="Carte"><MapIcon className="h-5 w-5" /></button>
